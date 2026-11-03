@@ -13,6 +13,13 @@ class TestProcessorErrors extends BaseProcessorErrors {
   };
 }
 
+const catalogCopy = {
+  category: 'INVALID_DATA',
+  description: 'Descrição fictícia do achado.',
+  guidance: 'Orientação fictícia ao integrador.',
+  title: 'Achado fictício',
+} as const;
+
 describe('validateRuleSubjectOrThrow', () => {
   const schema = z.object({ type: z.literal('Organic') });
   const errors = new TestProcessorErrors();
@@ -20,8 +27,11 @@ describe('validateRuleSubjectOrThrow', () => {
     'test-rule',
     { ERROR: errors.ERROR_MESSAGE },
     {
-      'ERROR.FAILED_BY_ERROR': { defaultOwner: 'CARROT' },
-      'ERROR.INVALID_RULE_SUBJECT': { defaultOwner: 'INTEGRATOR' },
+      'ERROR.FAILED_BY_ERROR': { ...catalogCopy, defaultOwner: 'CARROT' },
+      'ERROR.INVALID_RULE_SUBJECT': {
+        ...catalogCopy,
+        defaultOwner: 'INTEGRATOR',
+      },
     },
   );
   const validationFinding = TEST_FINDINGS.render('ERROR.INVALID_RULE_SUBJECT');

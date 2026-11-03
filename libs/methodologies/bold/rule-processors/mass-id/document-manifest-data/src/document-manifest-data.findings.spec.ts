@@ -1,4 +1,10 @@
 import {
+  BoldAttributeName,
+  BoldReportType,
+} from '@carrot-fndn/shared/methodologies/bold/types';
+import { buildFindingCatalog } from '@carrot-fndn/shared/rule/result';
+
+import {
   DOCUMENT_MANIFEST_DATA_FINDINGS,
   toCrossValidationFinding,
 } from './document-manifest-data.findings';
@@ -83,5 +89,78 @@ describe('toCrossValidationFinding', () => {
     expect(() =>
       toCrossValidationFinding({ code: 'UNLISTED', description: 'Unlisted' }),
     ).toThrow('Unknown cross-validation reason code "UNLISTED"');
+  });
+});
+
+describe('DOCUMENT_MANIFEST_DATA_FINDINGS catalog', () => {
+  const catalog = buildFindingCatalog({
+    rules: [
+      {
+        documentKind: BoldReportType.MTR,
+        findings: [DOCUMENT_MANIFEST_DATA_FINDINGS],
+        methodology: 'bold-carbon',
+        ruleSlug: 'transport-manifest-data',
+        scope: 'mass-id',
+      },
+      {
+        documentKind: BoldReportType.CDF,
+        findings: [DOCUMENT_MANIFEST_DATA_FINDINGS],
+        methodology: 'bold-carbon',
+        ruleSlug: 'recycling-manifest-data',
+        scope: 'mass-id',
+      },
+    ],
+    sourceCommit: 'abc1234',
+  });
+  const documentKindsOf = (key: string) =>
+    catalog.entries
+      .find(({ code }) => code === `document-manifest-data.${key}`)
+      ?.contexts.map(({ documentKind }) => documentKind);
+
+  it.each([
+    {
+      expected: [BoldReportType.MTR],
+      key: 'CROSS_VALIDATION.VEHICLE_PLATE_MISMATCH',
+    },
+    {
+      expected: [BoldReportType.MTR],
+      key: 'CROSS_VALIDATION.WASTE_TYPE_MISMATCH',
+    },
+    {
+      expected: [BoldReportType.CDF],
+      key: 'CROSS_VALIDATION.MTR_NUMBER_NOT_IN_CDF',
+    },
+    {
+      expected: [BoldReportType.CDF],
+      key: 'CROSS_VALIDATION.RECYCLING_MANIFEST_WASTE_TYPE_MISMATCH',
+    },
+    { expected: [BoldReportType.CDF], key: 'RESULT.ADDRESS_MISMATCH' },
+    {
+      expected: [BoldReportType.CDF, BoldReportType.MTR],
+      key: 'CROSS_VALIDATION.DOCUMENT_NUMBER_MISMATCH',
+    },
+    {
+      expected: [BoldReportType.CDF, BoldReportType.MTR],
+      key: 'RESULT.MISSING_ISSUE_DATE',
+    },
+  ])(
+    'should list $key under the $expected document kinds',
+    ({ expected, key }) => {
+      expect(documentKindsOf(key)).toEqual(expected);
+    },
+  );
+
+  it('should cover every declared finding code', () => {
+    expect(new Set(catalog.entries.map(({ code }) => code))).toEqual(
+      DOCUMENT_MANIFEST_DATA_FINDINGS.codes,
+    );
+  });
+
+  it('should flag the missing issue date as waivable by an exception the execution does not record', () => {
+    expect(catalog.diagnostics).toContainEqual({
+      attributes: [BoldAttributeName.ISSUE_DATE],
+      code: 'document-manifest-data.RESULT.MISSING_ISSUE_DATE',
+      kind: 'APPROVED_EXCEPTION_NOT_IN_EVIDENCE',
+    });
   });
 });

@@ -2,13 +2,14 @@
 
 /**
  * Generates the unified methodology-rules-manifest.json — the single cross-repo
- * contract between methodology-rules, carrot-docs, and other consumers.
+ * contract between methodology-rules, carrot-docs, and other consumers — and the
+ * PT-BR finding catalog derived from each rule's finding declarations.
  *
  * Replaces both generate-application-rules-manifest.ts and
  * generate-methodology-framework-rules-manifest.ts.
  *
  * Usage: pnpm generate:manifest
- * Output: dist/methodology-rules-manifest.json
+ * Output: dist/methodology-rules-manifest.json, dist/methodology-rules-finding-catalog.json
  */
 
 import type { BaseMethodologyFrameworkRule } from '@carrot-fndn/shared/rule/types';
@@ -19,6 +20,12 @@ import * as path from 'node:path';
 import { register } from 'tsconfig-paths';
 import { z } from 'zod';
 
+import {
+  buildFindingCatalog,
+  type FindingCatalogRuleInput,
+  type FindingCatalogSource,
+} from '../libs/shared/rule/result/src/finding-catalog';
+import { SHARED_FINDINGS } from '../libs/shared/rule/result/src/rule-findings';
 import { METHODOLOGY_FRAMEWORK_RULE_TYPES } from '../libs/shared/rule/types/src/methodology-framework-rule.types';
 import { dirExists, fileExists } from './shared/fs-utils';
 
@@ -64,6 +71,12 @@ const SLUG_TO_LIB: Record<string, string> = {
     'no-conflicting-certificate-or-credit',
   'recycling-manifest-data': 'document-manifest-data',
   'transport-manifest-data': 'document-manifest-data',
+};
+
+// Rules sharing the document-manifest-data findings, told apart by the manifest they audit
+const DOCUMENT_KIND_BY_SLUG: Record<string, 'CDF' | 'MTR'> = {
+  'recycling-manifest-data': 'CDF',
+  'transport-manifest-data': 'MTR',
 };
 
 // ---------------------------------------------------------------------------
@@ -222,11 +235,7 @@ function getRulesConfigPath(methodology: string): string | undefined {
   );
   if (fileExists(libPath)) return libPath;
 
-  const appPath = path.join(
-    APPS_METHODOLOGIES,
-    methodology,
-    'rules.config.ts',
-  );
+  const appPath = path.join(APPS_METHODOLOGIES, methodology, 'rules.config.ts');
   if (fileExists(appPath)) return appPath;
 
   return undefined;
@@ -262,8 +271,6 @@ function loadRulesConfig(
 
   return rulesConfig;
 }
-
-
 
 function readFileIfExists(filePath: string): string | undefined {
   if (!fileExists(filePath)) return undefined;
@@ -321,9 +328,7 @@ function enumKeyToValueMap(enumObj: StringEnum): Record<string, string> {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const BoldTypes = require(
-  '@carrot-fndn/shared/methodologies/bold/types',
-) as {
+const BoldTypes = require('@carrot-fndn/shared/methodologies/bold/types') as {
   BoldDocumentCategory: StringEnum;
   BoldAttributeName: StringEnum;
   BoldBusinessSizeDeclarationValue: StringEnum;
@@ -370,9 +375,7 @@ function extractActorLabelsFromProcessor(processorPath: string): string[] {
     const inner = match[1] ?? '';
     for (const token of inner.split(',')) {
       const trimmed = token.trim();
-      const qualifiedMatch = trimmed.match(
-        /BoldDocumentEventLabel\.([A-Z_]+)/,
-      );
+      const qualifiedMatch = trimmed.match(/BoldDocumentEventLabel\.([A-Z_]+)/);
       if (qualifiedMatch?.[1]) {
         labels.add(qualifiedMatch[1]);
       } else if (trimmed && /^[A-Z_]+$/.test(trimmed)) {
@@ -389,15 +392,10 @@ function extractActorLabelsFromProcessor(processorPath: string): string[] {
     }
   }
 
-  return [...labels]
-    .sort()
-    .map((key) => BoldDocumentEventLabel[key] ?? key);
+  return [...labels].sort().map((key) => BoldDocumentEventLabel[key] ?? key);
 }
 
-function enrichActorEvents(
-  events: string[],
-  actorLabels: string[],
-): string[] {
+function enrichActorEvents(events: string[], actorLabels: string[]): string[] {
   if (actorLabels.length === 0) return events;
 
   const actorValue = BoldDocumentEventName['ACTOR'] ?? 'ACTOR';
@@ -435,9 +433,7 @@ function extractRuleDefinition(
   const content = fs.readFileSync(path.join(srcPath, ruleDefFile), 'utf8');
 
   const nameMatch = content.match(/name:\s*['"`]([^'"`]+)['"`]/);
-  const descMatch = content.match(
-    /description:\s*\n?\s*['"`]([^'"`]+)['"`]/s,
-  );
+  const descMatch = content.match(/description:\s*\n?\s*['"`]([^'"`]+)['"`]/s);
   const slugMatch = content.match(/slug:\s*['"`]([^'"`]+)['"`]/);
   const versionMatch = content.match(/version:\s*['"`]([^'"`]+)['"`]/);
 
@@ -596,10 +592,7 @@ function extractResultComments(
   if (!constantsFile)
     return { failed: [], failedByKey: {}, passed: [], passedByKey: {} };
 
-  const content = fs.readFileSync(
-    path.join(srcPath, constantsFile),
-    'utf8',
-  );
+  const content = fs.readFileSync(path.join(srcPath, constantsFile), 'utf8');
 
   let passed = extractNestedStrings(content, 'passed');
   let failed = extractNestedStrings(content, 'failed');
@@ -641,9 +634,7 @@ function extractResultComments(
     if (resultCommentsInner) {
       const fromResult = extractFromObjectInner(resultCommentsInner);
       const passedKeys = new Set(
-        Object.keys(fromResult.byKey).filter((k) =>
-          k.startsWith('VALID_'),
-        ),
+        Object.keys(fromResult.byKey).filter((k) => k.startsWith('VALID_')),
       );
       const passedFromFlat: string[] = [];
       const failedFromFlat: string[] = [];
@@ -659,9 +650,7 @@ function extractResultComments(
         byKey: {
           ...passed.byKey,
           ...Object.fromEntries(
-            Object.entries(fromResult.byKey).filter(([k]) =>
-              passedKeys.has(k),
-            ),
+            Object.entries(fromResult.byKey).filter(([k]) => passedKeys.has(k)),
           ),
         },
       };
@@ -764,10 +753,7 @@ function extractNestedStrings(
   const values: string[] = [];
   const byKey: Record<string, string> = {};
 
-  const sectionRe = new RegExp(
-    `${section}:\\s*\\{([\\s\\S]*?)\\n\\s*\\}`,
-    'm',
-  );
+  const sectionRe = new RegExp(`${section}:\\s*\\{([\\s\\S]*?)\\n\\s*\\}`, 'm');
   const sectionMatch = content.match(sectionRe);
   if (!sectionMatch?.[1]) return { byKey, values };
 
@@ -1236,29 +1222,89 @@ function isValidAttributeName(name: string): boolean {
 
 // --- Value sanitizers ---
 
-const LATIN_SUFFIXES = ['us', 'um', 'ae', 'is', 'io', 'ia', 'or', 'it', 'am', 'em', 'as', 'os', 'ibus'];
+const LATIN_SUFFIXES = [
+  'us',
+  'um',
+  'ae',
+  'is',
+  'io',
+  'ia',
+  'or',
+  'it',
+  'am',
+  'em',
+  'as',
+  'os',
+  'ibus',
+];
 const COMMON_ENGLISH_WORDS = new Set([
-  'the', 'and', 'for', 'are', 'but', 'not', 'you', 'all', 'can',
-  'was', 'her', 'one', 'our', 'out', 'has', 'had', 'from', 'with',
-  'this', 'that', 'have', 'been', 'will', 'they', 'each', 'which',
-  'more', 'than', 'were', 'what', 'when', 'your', 'into', 'some',
-  'document', 'event', 'value', 'type', 'scale', 'weight', 'waste',
-  'vehicle', 'driver', 'date', 'number', 'description', 'address',
+  'the',
+  'and',
+  'for',
+  'are',
+  'but',
+  'not',
+  'you',
+  'all',
+  'can',
+  'was',
+  'her',
+  'one',
+  'our',
+  'out',
+  'has',
+  'had',
+  'from',
+  'with',
+  'this',
+  'that',
+  'have',
+  'been',
+  'will',
+  'they',
+  'each',
+  'which',
+  'more',
+  'than',
+  'were',
+  'what',
+  'when',
+  'your',
+  'into',
+  'some',
+  'document',
+  'event',
+  'value',
+  'type',
+  'scale',
+  'weight',
+  'waste',
+  'vehicle',
+  'driver',
+  'date',
+  'number',
+  'description',
+  'address',
 ]);
 
 function isFakerGibberish(value: string): boolean {
   if (typeof value !== 'string' || value.length < 10) return false;
 
-  const words = value.replace(/[.,;:!?]/g, '').split(/\s+/).filter(Boolean);
+  const words = value
+    .replace(/[.,;:!?]/g, '')
+    .split(/\s+/)
+    .filter(Boolean);
   if (words.length < 2) return false;
 
   const lowerWords = words.map((w) => w.toLowerCase());
 
-  const knownEnglishCount = lowerWords.filter((w) => COMMON_ENGLISH_WORDS.has(w)).length;
+  const knownEnglishCount = lowerWords.filter((w) =>
+    COMMON_ENGLISH_WORDS.has(w),
+  ).length;
   if (knownEnglishCount > 0) return false;
 
-  const latinLikeCount = lowerWords.filter((w) =>
-    w.length >= 4 && LATIN_SUFFIXES.some((suffix) => w.endsWith(suffix)),
+  const latinLikeCount = lowerWords.filter(
+    (w) => w.length >= 4 && LATIN_SUFFIXES.some((suffix) => w.endsWith(suffix)),
   ).length;
 
   return latinLikeCount / words.length >= 0.4;
@@ -1426,7 +1472,8 @@ function normalizeDocument(
 
   if (doc['type']) result['type'] = doc['type'];
   if (doc['subtype']) result['subtype'] = doc['subtype'];
-  if (doc['measurementUnit']) result['measurementUnit'] = doc['measurementUnit'];
+  if (doc['measurementUnit'])
+    result['measurementUnit'] = doc['measurementUnit'];
 
   if (
     fieldsOverride?.includeCurrentValue === true &&
@@ -1439,9 +1486,7 @@ function normalizeDocument(
   const ruleHasNoEvents = ruleEvents?.length === 0;
 
   if (events?.length && !ruleHasNoEvents) {
-    let normalizedEvents = events.map((e) =>
-      normalizeValue(e, fieldsOverride),
-    );
+    let normalizedEvents = events.map((e) => normalizeValue(e, fieldsOverride));
 
     if (ruleEvents && ruleEvents.length > 0) {
       normalizedEvents = filterEventsForRule(
@@ -1629,6 +1674,84 @@ function buildApplicationRule(
 }
 
 // ---------------------------------------------------------------------------
+// Finding catalog
+// ---------------------------------------------------------------------------
+
+function isFindingCatalogSource(value: unknown): value is FindingCatalogSource {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'codes' in value &&
+    value.codes instanceof Set &&
+    'declarations' in value &&
+    Array.isArray(value.declarations)
+  );
+}
+
+function loadRuleFindings(
+  methodology: string,
+  scope: string,
+  slug: string,
+): FindingCatalogRuleInput {
+  const libSrcPath = getLibSrcPath(scope, slug);
+  const findingsFile = fs
+    .readdirSync(libSrcPath)
+    .find((f) => f.endsWith('.findings.ts'));
+
+  if (!findingsFile) {
+    throw new Error(
+      `No finding declarations found for ${methodology}/${scope}/${slug} in ${libSrcPath}`,
+    );
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const mod = require(path.join(libSrcPath, findingsFile)) as Record<
+    string,
+    unknown
+  >;
+  const findings = Object.values(mod).filter(isFindingCatalogSource);
+
+  if (findings.length === 0) {
+    throw new Error(
+      `${findingsFile} exports no finding declarations (${methodology}/${scope}/${slug})`,
+    );
+  }
+
+  const documentKind = DOCUMENT_KIND_BY_SLUG[slug];
+
+  return {
+    findings: [...findings, SHARED_FINDINGS],
+    methodology,
+    ruleSlug: slug,
+    scope,
+    ...(documentKind && { documentKind }),
+  };
+}
+
+function generateFindingCatalog(
+  rules: Array<{ methodology: string; scope: string; slug: string }>,
+  sourceCommit: string,
+): void {
+  // Finding modules load the document loader, whose module scope reads the bucket name; nothing is fetched
+  process.env['DOCUMENT_BUCKET_NAME'] ??= 'unused-by-finding-catalog';
+
+  const catalog = buildFindingCatalog({
+    rules: rules.map(({ methodology, scope, slug }) =>
+      loadRuleFindings(methodology, scope, slug),
+    ),
+    sourceCommit,
+  });
+  const outputPath = path.join(DIST, 'methodology-rules-finding-catalog.json');
+
+  fs.writeFileSync(outputPath, JSON.stringify(catalog, null, 2) + '\n', 'utf8');
+
+  console.log('Generated methodology-rules-finding-catalog.json');
+  console.log(`  Catalog schema version: ${catalog.schemaVersion}`);
+  console.log(`  Entries: ${catalog.entries.length}`);
+  console.log(`  Diagnostics: ${catalog.diagnostics.length}`);
+}
+
+// ---------------------------------------------------------------------------
 // Manifest types
 // ---------------------------------------------------------------------------
 
@@ -1682,6 +1805,11 @@ function generate(): void {
 
   let totalApplicationRules = 0;
   const warnings: string[] = [];
+  const catalogRules: Array<{
+    methodology: string;
+    scope: string;
+    slug: string;
+  }> = [];
 
   for (const methodology of methodologies) {
     const config = loadMethodologyApplicationConfig(methodology);
@@ -1724,6 +1852,7 @@ function generate(): void {
               frameworkSlugs,
             );
             scopeRules.push(rule);
+            catalogRules.push({ methodology, scope, slug });
             totalApplicationRules++;
 
             if (rule.errors.length === 0) {
@@ -1732,9 +1861,7 @@ function generate(): void {
               );
             }
             if (rule.examples.length === 0) {
-              warnings.push(
-                `${methodology}/${scope}/${slug}: no examples`,
-              );
+              warnings.push(`${methodology}/${scope}/${slug}: no examples`);
             }
           } catch (error) {
             console.error(
@@ -1768,7 +1895,11 @@ function generate(): void {
   }
 
   const outputPath = path.join(DIST, 'methodology-rules-manifest.json');
-  fs.writeFileSync(outputPath, JSON.stringify(manifest, null, 2) + '\n', 'utf8');
+  fs.writeFileSync(
+    outputPath,
+    JSON.stringify(manifest, null, 2) + '\n',
+    'utf8',
+  );
 
   // Summary
   console.log('Generated methodology-rules-manifest.json');
@@ -1777,17 +1908,13 @@ function generate(): void {
   console.log(`  Frameworks: ${Object.keys(manifest.frameworks).length}`);
   for (const [fw, block] of Object.entries(manifest.frameworks)) {
     console.log(
-      `    ${fw}: ${block.rules.length} framework rules, ${
-        Object.values(block.applications).reduce(
-          (sum, app) =>
-            sum +
-            Object.values(app.rules).reduce(
-              (s, arr) => s + arr.length,
-              0,
-            ),
-          0,
-        )
-      } application rules`,
+      `    ${fw}: ${block.rules.length} framework rules, ${Object.values(
+        block.applications,
+      ).reduce(
+        (sum, app) =>
+          sum + Object.values(app.rules).reduce((s, arr) => s + arr.length, 0),
+        0,
+      )} application rules`,
     );
   }
   console.log(`  Total application rules: ${totalApplicationRules}`);
@@ -1798,6 +1925,8 @@ function generate(): void {
       console.log(`    - ${warning}`);
     }
   }
+
+  generateFindingCatalog(catalogRules, manifest.sourceCommit);
 }
 
 generate();

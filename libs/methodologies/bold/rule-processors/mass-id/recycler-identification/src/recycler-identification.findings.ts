@@ -12,8 +12,30 @@ export const RECYCLER_IDENTIFICATION_FINDINGS = defineRuleFindings(
     REVIEW_REQUIRED: RESULT_COMMENTS.reviewRequired,
   },
   {
-    'ERROR.FAILED_BY_ERROR': { defaultOwner: 'CARROT' },
-    'FAILED.MULTIPLE_EVENTS': { defaultOwner: 'INTEGRATOR' },
-    'FAILED.NOT_FOUND': { defaultOwner: 'INTEGRATOR' },
+    'ERROR.FAILED_BY_ERROR': {
+      category: 'PROCESSING_ERROR',
+      defaultOwner: 'CARROT',
+      description:
+        'A validação de a identificação do reciclador foi interrompida por um erro inesperado.',
+      guidance:
+        'Nenhuma ação do integrador é necessária: a Carrot investiga a falha e reexecuta a auditoria.',
+      title: 'Falha ao validar a identificação do reciclador',
+    },
+    'FAILED.MULTIPLE_EVENTS': {
+      category: 'INVALID_DATA',
+      defaultOwner: 'INTEGRATOR',
+      description:
+        'A MassID tem mais de um evento de ator "Recycler"; apenas um é permitido.',
+      guidance: 'Envie um único evento de ator "Recycler".',
+      title: 'Mais de um reciclador informado',
+    },
+    'FAILED.NOT_FOUND': {
+      category: 'MISSING_EVENT',
+      defaultOwner: 'INTEGRATOR',
+      description: 'A MassID não tem evento de ator "Recycler".',
+      guidance:
+        'Envie o evento de ator "Recycler" com o participante responsável.',
+      title: 'Reciclador não identificado',
+    },
   },
 );

@@ -12,8 +12,30 @@ export const HAULER_IDENTIFICATION_FINDINGS = defineRuleFindings(
     REVIEW_REQUIRED: RESULT_COMMENTS.reviewRequired,
   },
   {
-    'ERROR.FAILED_BY_ERROR': { defaultOwner: 'CARROT' },
-    'FAILED.HAULER_EVENT_MISSING': { defaultOwner: 'INTEGRATOR' },
-    'FAILED.PICK_UP_EVENT_MISSING': { defaultOwner: 'INTEGRATOR' },
+    'ERROR.FAILED_BY_ERROR': {
+      category: 'PROCESSING_ERROR',
+      defaultOwner: 'CARROT',
+      description:
+        'A validação de a identificação do transportador foi interrompida por um erro inesperado.',
+      guidance:
+        'Nenhuma ação do integrador é necessária: a Carrot investiga a falha e reexecuta a auditoria.',
+      title: 'Falha ao validar a identificação do transportador',
+    },
+    'FAILED.HAULER_EVENT_MISSING': {
+      category: 'MISSING_EVENT',
+      defaultOwner: 'INTEGRATOR',
+      description:
+        'O tipo de veículo do evento "Pick-up" exige um evento de ator "Hauler", que não foi enviado.',
+      guidance:
+        'Envie o evento de ator "Hauler" com o transportador responsável pela coleta.',
+      title: 'Transportador não identificado',
+    },
+    'FAILED.PICK_UP_EVENT_MISSING': {
+      category: 'MISSING_EVENT',
+      defaultOwner: 'INTEGRATOR',
+      description: 'A MassID não tem o evento "Pick-up".',
+      guidance: 'Envie o evento "Pick-up" registrando a coleta da massa.',
+      title: 'Evento de coleta ausente',
+    },
   },
 );
