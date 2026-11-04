@@ -1,14 +1,39 @@
 #!/bin/sh
 set -eu
+# Husky prepends dependency bins; bootstrap must resolve its host tools first.
+setup_path=
+setup_path_remaining="${PATH-}:"
+while [ -n "$setup_path_remaining" ]; do
+  setup_path_entry="${setup_path_remaining%%:*}"
+  setup_path_remaining="${setup_path_remaining#*:}"
+  setup_path_match="$setup_path_entry"
+  while :; do
+    case "$setup_path_match" in
+      */) setup_path_match="${setup_path_match%/}" ;;
+      */.) setup_path_match="${setup_path_match%/.}" ;;
+      *) break ;;
+    esac
+  done
+  case "$setup_path_match" in
+    node_modules/.bin|*/node_modules/.bin) ;;
+    *) setup_path="$setup_path:$setup_path_entry" ;;
+  esac
+done
+if [ -z "$setup_path" ]; then
+  echo "worktree setup requires host paths outside dependency bin directories" >&2
+  exit 1
+fi
+PATH="${setup_path#:}"
+export PATH
 project_root="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd -P)"
 cd "$project_root"
-if command -v crisos-project-setup >/dev/null 2>&1; then
+if managed_helper="$(command -v crisos-project-setup)"; then
   managed_status=0
-  managed_scope="$(crisos-project-setup status --worktree "$project_root" --json)" || managed_status=$?
+  managed_scope="$("$managed_helper" status --worktree "$project_root" --json)" || managed_status=$?
   if [ "$managed_status" -eq 0 ] && printf '%s' "$managed_scope" | python3 -c 'import json,sys; sys.exit(0 if json.load(sys.stdin).get("state") == "skipped" else 1)'; then
     : # Forks and older checkouts keep the portable setup path.
   else
-    exec crisos-project-setup start --worktree "$project_root" --wait
+    exec "$managed_helper" start --worktree "$project_root" --wait
   fi
 fi
 node_pin="$(cat .nvmrc)"
