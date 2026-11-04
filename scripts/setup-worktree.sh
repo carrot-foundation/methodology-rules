@@ -3,7 +3,13 @@ set -eu
 project_root="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd -P)"
 cd "$project_root"
 if command -v crisos-project-setup >/dev/null 2>&1; then
-  exec crisos-project-setup start --worktree "$project_root" --wait
+  managed_status=0
+  managed_scope="$(crisos-project-setup status --worktree "$project_root" --json)" || managed_status=$?
+  if [ "$managed_status" -eq 0 ] && printf '%s' "$managed_scope" | python3 -c 'import json,sys; sys.exit(0 if json.load(sys.stdin).get("state") == "skipped" else 1)'; then
+    : # Forks and older checkouts keep the portable setup path.
+  else
+    exec crisos-project-setup start --worktree "$project_root" --wait
+  fi
 fi
 node_pin="$(cat .nvmrc)"
 node_pin="${node_pin#v}"
