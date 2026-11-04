@@ -25,6 +25,11 @@ fi
 NX_DAEMON=false pnpm install --frozen-lockfile --prefer-offline
 if [ -d .husky ]; then
   pnpm exec husky
+  # Husky writes shared config; repair an existing override only in this worktree.
+  worktree_config="$(git config --bool --default false --get extensions.worktreeConfig)"
+  if [ "$worktree_config" = true ]; then
+    git config --worktree core.hooksPath .husky/_
+  fi
   if [ ! -f .husky/_/h ] || [ ! -r .husky/_/h ]; then
     echo "Husky runtime is missing or unreadable" >&2
     exit 1
