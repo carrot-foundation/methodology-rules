@@ -1,17 +1,11 @@
 name: Prepare environment to run Nx targets
 description: Runs all required steps to prepare runner to run a Nx target
 
-permissions: write-all # required for AWS credentials
-
+# The calling job needs `id-token: write` to assume the AWS role and
+# `actions: read` for nx-set-shas.
 inputs:
-  environment:
-    description: The environment to run the Nx target in
-    required: true
-  aws_account_id_production:
-    description: AWS Account ID for production environment
-    required: true
-  aws_account_id_development:
-    description: AWS Account ID for development environment
+  aws_account_id:
+    description: AWS account ID whose GitHubActions-methodology-rules role the job assumes
     required: true
   nx_key:
     description: Nx Powerpack NX key
@@ -20,24 +14,29 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Set AWS Account ID
-      id: set-aws-account
+    - name: Check AWS account ID
+      shell: bash
+      env:
+        AWS_ACCOUNT_ID: ${{ inputs.aws_account_id }}
+      run: |
+        if ! [[ "$AWS_ACCOUNT_ID" =~ ^[0-9]{12}$ ]]; then
+          echo "::error::aws_account_id is empty or not a 12-digit AWS account ID; check the AWS_ACCOUNT_ID_* secret the calling job passes"
+          exit 1
+        fi
+
+    - name: Set AWS region and Nx key
       shell: bash
       env:
         AWS_REGION: us-east-1
+        NX_KEY: ${{ inputs.nx_key }}
       run: |
-        if [[ "${{ inputs.environment }}" == "production" ]]; then
-            echo "AWS_ACCOUNT_ID=${{ inputs.aws_account_id_production }}" >> $GITHUB_ENV
-          else
-            echo "AWS_ACCOUNT_ID=${{ inputs.aws_account_id_development }}" >> $GITHUB_ENV
-          fi
-        echo "AWS_REGION=$AWS_REGION" >> $GITHUB_ENV
-        echo "NX_KEY=${{ inputs.nx_key }}" >> $GITHUB_ENV
+        echo "AWS_REGION=$AWS_REGION" >> "$GITHUB_ENV"
+        echo "NX_KEY=$NX_KEY" >> "$GITHUB_ENV"
 
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502 # v4.0.2
       with:
-        role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/GitHubActions-methodology-rules
+        role-to-assume: arn:aws:iam::${{ inputs.aws_account_id }}:role/GitHubActions-methodology-rules
         aws-region: ${{ env.AWS_REGION }}
 
     - name: Derive appropriate SHAs for base and head for `nx affected` commands

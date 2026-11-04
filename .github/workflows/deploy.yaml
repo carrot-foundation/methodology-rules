@@ -1,17 +1,20 @@
 name: Deploy
 
-permissions: write-all
+permissions:
+  contents: read
 
 on:
   workflow_call:
     secrets:
+      # Not required so it can move into the production environment: an
+      # environment secret replaces the value passed by the caller.
       AWS_ACCOUNT_ID_PRODUCTION:
-        required: true
+        required: false
       AWS_ACCOUNT_ID_DEVELOPMENT:
         required: true
       SLACK_WEBHOOK_URL:
         required: true
-      nx_key:
+      NX_KEY:
         required: true
 
 jobs:
@@ -19,6 +22,15 @@ jobs:
     name: Upload Lambda to S3
     runs-on: ubuntu-latest
     continue-on-error: true
+    # The production role trusts this environment's OIDC subject, so the
+    # environment must exist with a deployment branch policy that allows only
+    # main. GitHub creates a missing environment without any protection.
+    environment: ${{ matrix.environment }}
+
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
 
     env:
       AWS_REGION: us-east-1
@@ -31,12 +43,12 @@ jobs:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           fetch-depth: 0 # required for Nx affected
+          persist-credentials: false
 
       - uses: ./.github/actions/prepare-to-run-nx
         with:
-          environment: ${{ matrix.environment }}
-          aws_account_id_production: ${{ secrets.AWS_ACCOUNT_ID_PRODUCTION }}
-          aws_account_id_development: ${{ secrets.AWS_ACCOUNT_ID_DEVELOPMENT }}
+          # No fallback between accounts: a missing id must fail, not deploy elsewhere.
+          aws_account_id: ${{ matrix.environment == 'production' && secrets.AWS_ACCOUNT_ID_PRODUCTION || matrix.environment == 'development' && secrets.AWS_ACCOUNT_ID_DEVELOPMENT || '' }}
           nx_key: ${{ secrets.NX_KEY }}
 
       - run: pnpm upload-lambdas-and-metadata ${{ matrix.environment }}

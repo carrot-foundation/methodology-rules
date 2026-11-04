@@ -16,7 +16,10 @@ fi
 
 echo '{"rulesMetadata":[]}' > "$FILE_PATH"
 
-pnpm nx affected --target=upload-lambda --configuration=production --environment=$ENVIRONMENT --parallel=10
+# Deploys always build from source. The S3 Nx cache is shared with branch CI,
+# which can write build-lambda and package-lambda entries, so reading it here
+# would let a branch-built artifact reach a deployed Lambda.
+pnpm nx affected --target=upload-lambda --configuration=production --environment="$ENVIRONMENT" --parallel=10 --skip-nx-cache
 
 FILE_CHECKSUM=$(md5sum "$FILE_PATH" | cut -f1 -d" ")
 FILE_NAME=$(basename "$FILE_PATH" .json)
