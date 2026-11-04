@@ -56,7 +56,7 @@ methodology-rules/
 ### Prerequisites
 
 - [Node.js](https://nodejs.org/) v24.14.1 (see `.nvmrc`)
-- [pnpm](https://pnpm.io/) v10.18.3 (see `packageManager` in `package.json`)
+- [pnpm](https://pnpm.io/) (version pinned by `packageManager` in `package.json`)
 
 ### Installation
 
