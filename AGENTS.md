@@ -346,7 +346,7 @@ pnpm pkgJsonLint                       # npmPkgJsonLint .
 
 ## Important Notes
 
-- **Package Manager**: pnpm ONLY (`packageManager` pins the version; `engine-strict` with `engines.pnpm` rejects older pnpm)
+- **Package Manager**: use pnpm only. `packageManager` pins the version and `engine-strict` with `engines.pnpm` rejects a pnpm older than 10; npm and Yarn are not blocked by tooling
 - **Node Version**: 24.14.1 (check `.nvmrc`)
 - **Husky Hooks**: Git hooks for pre-commit linting via lint-staged
 - **Cacheable Operations**: `build-lambda`, `test`, `lint`, `ts`, `package-lambda`

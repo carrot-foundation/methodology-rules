@@ -14,6 +14,16 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Check AWS account ID
+      shell: bash
+      env:
+        AWS_ACCOUNT_ID: ${{ inputs.aws_account_id }}
+      run: |
+        if ! [[ "$AWS_ACCOUNT_ID" =~ ^[0-9]{12}$ ]]; then
+          echo "::error::aws_account_id is empty or not a 12-digit AWS account ID; check the AWS_ACCOUNT_ID_* secret the calling job passes"
+          exit 1
+        fi
+
     - name: Set AWS region and Nx key
       shell: bash
       env:

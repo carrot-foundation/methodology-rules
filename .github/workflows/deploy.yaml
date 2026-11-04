@@ -6,12 +6,12 @@ permissions:
 on:
   workflow_call:
     secrets:
-      # Not required here so each can later move into its GitHub environment;
-      # an environment secret replaces the value passed by the caller.
+      # Not required so it can move into the production environment: an
+      # environment secret replaces the value passed by the caller.
       AWS_ACCOUNT_ID_PRODUCTION:
         required: false
       AWS_ACCOUNT_ID_DEVELOPMENT:
-        required: false
+        required: true
       SLACK_WEBHOOK_URL:
         required: true
       NX_KEY:
@@ -22,8 +22,9 @@ jobs:
     name: Upload Lambda to S3
     runs-on: ubuntu-latest
     continue-on-error: true
-    # The environment's deployment branch policy limits this job to main, and
-    # the production role trusts this environment's OIDC subject.
+    # The production role trusts this environment's OIDC subject, so the
+    # environment must exist with a deployment branch policy that allows only
+    # main. GitHub creates a missing environment without any protection.
     environment: ${{ matrix.environment }}
 
     permissions:
@@ -46,7 +47,8 @@ jobs:
 
       - uses: ./.github/actions/prepare-to-run-nx
         with:
-          aws_account_id: ${{ matrix.environment == 'production' && secrets.AWS_ACCOUNT_ID_PRODUCTION || secrets.AWS_ACCOUNT_ID_DEVELOPMENT }}
+          # No fallback between accounts: a missing id must fail, not deploy elsewhere.
+          aws_account_id: ${{ matrix.environment == 'production' && secrets.AWS_ACCOUNT_ID_PRODUCTION || matrix.environment == 'development' && secrets.AWS_ACCOUNT_ID_DEVELOPMENT || '' }}
           nx_key: ${{ secrets.NX_KEY }}
 
       - run: pnpm upload-lambdas-and-metadata ${{ matrix.environment }}
