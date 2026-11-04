@@ -1,0 +1,13 @@
+nodeVersion: 24.14.1
+engineStrict: true
+saveExact: true
+verifyDepsBeforeRun: error
+patchedDependencies:
+  nx@22.6.1: patches/nx@22.6.1.patch
+allowBuilds:
+  nx: true
+  less: false
+  '@parcel/watcher': false
+  '@swc/core': true
+  esbuild: true
+  unrs-resolver: false
