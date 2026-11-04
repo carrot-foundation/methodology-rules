@@ -1,6 +1,7 @@
 name: Check and Deploy
 
-permissions: write-all # required for AWS credentials
+permissions:
+  contents: read
 
 on:
   push:
@@ -18,6 +19,11 @@ jobs:
     name: Get affected
     runs-on: ubuntu-latest
 
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
+
     outputs:
       backend: ${{ steps.affected.outputs.backend }}
       upload-lambda: ${{ steps.affected.outputs.upload-lambda }}
@@ -26,12 +32,11 @@ jobs:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           fetch-depth: 0 # required for Nx affected
+          persist-credentials: false
 
       - uses: ./.github/actions/prepare-to-run-nx
         with:
-          environment: development
-          aws_account_id_production: ${{ secrets.AWS_ACCOUNT_ID_PRODUCTION }}
-          aws_account_id_development: ${{ secrets.AWS_ACCOUNT_ID_DEVELOPMENT }}
+          aws_account_id: ${{ secrets.AWS_ACCOUNT_ID_DEVELOPMENT }}
           nx_key: ${{ secrets.NX_KEY }}
 
       - id: affected
@@ -42,8 +47,18 @@ jobs:
   backend-check:
     name: Backend Check
     needs: affected
+    # A reusable workflow gets at most the permissions its calling job grants.
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
     uses: ./.github/workflows/backend-check.yaml
-    secrets: inherit
+    secrets:
+      AWS_ACCOUNT_ID_DEVELOPMENT: ${{ secrets.AWS_ACCOUNT_ID_DEVELOPMENT }}
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
+      NX_KEY: ${{ secrets.NX_KEY }}
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
     with:
       skip: ${{ needs.affected.outputs.backend != 'true' }}
 
@@ -51,9 +66,13 @@ jobs:
     name: Deploy
     needs: [affected, backend-check]
     if: ${{ github.ref_name == 'main' && needs.affected.outputs.upload-lambda == 'true' && (needs.backend-check.result == 'success' || needs.backend-check.result == 'skipped') }}
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
     uses: ./.github/workflows/deploy.yaml
     secrets:
       AWS_ACCOUNT_ID_PRODUCTION: ${{ secrets.AWS_ACCOUNT_ID_PRODUCTION }}
       AWS_ACCOUNT_ID_DEVELOPMENT: ${{ secrets.AWS_ACCOUNT_ID_DEVELOPMENT }}
-      nx_key: ${{ secrets.NX_KEY }}
+      NX_KEY: ${{ secrets.NX_KEY }}
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

@@ -1,14 +1,12 @@
 name: Install node dependencies
 description: Install node dependencies with cache
 
-permissions: write-all # required for AWS credentials
-
 runs:
   using: composite
 
   steps:
     - name: Setup pnpm
-      uses: pnpm/action-setup@v4
+      uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4.3.0
 
     - name: Set Node version
       uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2

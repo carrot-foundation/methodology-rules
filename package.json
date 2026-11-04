@@ -24,7 +24,6 @@
     "lint:affected": "nx affected --target lint --fix",
     "lint:all": "nx run-many --target lint --fix",
     "pkgJsonLint": "npmPkgJsonLint .",
-    "preinstall": "npx only-allow pnpm",
     "prepare": "husky",
     "run-rule": "nx run rule-runner-cli:run --",
     "test": "nx test",
@@ -40,7 +39,8 @@
   "private": true,
   "packageManager": "pnpm@10.18.3",
   "engines": {
-    "node": "24.14.1"
+    "node": "24.14.1",
+    "pnpm": ">=10"
   },
   "config": {
     "commitizen": {

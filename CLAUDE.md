@@ -306,7 +306,7 @@ pnpm pkgJsonLint                       # npmPkgJsonLint .
 
 ## Important Notes
 
-- **Package Manager**: pnpm ONLY (enforced by `preinstall` script)
+- **Package Manager**: pnpm ONLY (`packageManager` pins the version; `engine-strict` with `engines.pnpm` rejects older pnpm)
 - **Node Version**: 24.14.1 (check `.nvmrc`)
 - **Husky Hooks**: Git hooks for pre-commit linting via lint-staged
 - **Cacheable Operations**: `build-lambda`, `test`, `lint`, `ts`, `package-lambda`

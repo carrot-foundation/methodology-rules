@@ -1,6 +1,7 @@
 name: Backend Check
 
-permissions: write-all # required for AWS credentials
+permissions:
+  contents: read
 
 on:
   workflow_call:
@@ -10,15 +11,13 @@ on:
         required: false
         type: boolean
     secrets:
-      AWS_ACCOUNT_ID_PRODUCTION:
-        required: true
       AWS_ACCOUNT_ID_DEVELOPMENT:
         required: true
       SLACK_WEBHOOK_URL:
         required: true
       DOPPLER_TOKEN:
         required: false
-      nx_key:
+      NX_KEY:
         required: true
       CODECOV_TOKEN:
         required: false
@@ -28,15 +27,18 @@ jobs:
     name: ESLint
     runs-on: ubuntu-latest
     if: ${{ !github.event.inputs.skip }}
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           fetch-depth: 0 # required for Nx affected
+          persist-credentials: false
       - uses: ./.github/actions/prepare-to-run-nx
         with:
-          environment: development
-          aws_account_id_production: ${{ secrets.AWS_ACCOUNT_ID_PRODUCTION }}
-          aws_account_id_development: ${{ secrets.AWS_ACCOUNT_ID_DEVELOPMENT }}
+          aws_account_id: ${{ secrets.AWS_ACCOUNT_ID_DEVELOPMENT }}
           nx_key: ${{ secrets.NX_KEY }}
 
       - run: pnpm nx affected --target=lint
@@ -51,15 +53,18 @@ jobs:
     name: TypeScript
     runs-on: ubuntu-latest
     if: ${{ !github.event.inputs.skip }}
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           fetch-depth: 0 # required for Nx affected
+          persist-credentials: false
       - uses: ./.github/actions/prepare-to-run-nx
         with:
-          environment: development
-          aws_account_id_production: ${{ secrets.AWS_ACCOUNT_ID_PRODUCTION }}
-          aws_account_id_development: ${{ secrets.AWS_ACCOUNT_ID_DEVELOPMENT }}
+          aws_account_id: ${{ secrets.AWS_ACCOUNT_ID_DEVELOPMENT }}
           nx_key: ${{ secrets.NX_KEY }}
 
       - run: pnpm nx affected --target=ts
@@ -74,16 +79,19 @@ jobs:
     name: Tests
     runs-on: ubuntu-latest
     if: ${{ !github.event.inputs.skip }}
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           fetch-depth: 0 # required for Nx affected
+          persist-credentials: false
 
       - uses: ./.github/actions/prepare-to-run-nx
         with:
-          environment: development
-          aws_account_id_production: ${{ secrets.AWS_ACCOUNT_ID_PRODUCTION }}
-          aws_account_id_development: ${{ secrets.AWS_ACCOUNT_ID_DEVELOPMENT }}
+          aws_account_id: ${{ secrets.AWS_ACCOUNT_ID_DEVELOPMENT }}
           nx_key: ${{ secrets.NX_KEY }}
 
       - id: run-tests
@@ -110,7 +118,7 @@ jobs:
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
-      - name: "Notice: tests failed, coverage upload will not run"
+      - name: 'Notice: tests failed, coverage upload will not run'
         if: ${{ !cancelled() && steps.run-tests.outcome == 'failure' && steps.codecov-check.outputs.available == 'true' }}
         run: echo "::notice::Tests failed -- coverage upload will not run"
 
@@ -257,7 +265,7 @@ jobs:
           directory: ./coverage
           token: ${{ secrets.CODECOV_TOKEN }}
           report_type: test_results
-          files: "**/junit.xml"
+          files: '**/junit.xml'
           fail_ci_if_error: true
 
       - name: Warn if test results upload failed
@@ -274,6 +282,10 @@ jobs:
     name: Tests (E2E)
     runs-on: ubuntu-latest
     if: ${{ !github.event.inputs.skip }}
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
@@ -281,9 +293,7 @@ jobs:
           persist-credentials: false # job runs pnpm install; don't leave GITHUB_TOKEN in .git/config
       - uses: ./.github/actions/prepare-to-run-nx
         with:
-          environment: development
-          aws_account_id_production: ${{ secrets.AWS_ACCOUNT_ID_PRODUCTION }}
-          aws_account_id_development: ${{ secrets.AWS_ACCOUNT_ID_DEVELOPMENT }}
+          aws_account_id: ${{ secrets.AWS_ACCOUNT_ID_DEVELOPMENT }}
           nx_key: ${{ secrets.NX_KEY }}
 
       - run: pnpm nx affected --target=test-e2e --parallel=1

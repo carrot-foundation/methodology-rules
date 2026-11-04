@@ -35,6 +35,7 @@ jobs:
         with:
           fetch-depth: 0 # fetch full history for git contributor extraction
           # No PAT here — this job runs untrusted branch code and must not have write credentials
+          persist-credentials: false
 
       - uses: ./.github/actions/install-node-dependencies
 
