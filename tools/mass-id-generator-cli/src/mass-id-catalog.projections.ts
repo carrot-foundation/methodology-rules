@@ -6,7 +6,12 @@ import {
 import {
   BoldDocumentEventName,
   type MassIDActorType,
+  MassIDOrganicSubtype,
 } from '@carrot-fndn/shared/methodologies/bold/types';
+import {
+  SUBTYPE_TO_CDM_CODE_MAP,
+  WASTE_CLASSIFICATION_CODES,
+} from '@carrot-fndn/shared/methodologies/bold/utils';
 
 import type {
   AttributeDictionary,
@@ -19,11 +24,13 @@ import type {
   EventPayload,
   EventsManifest,
   MassIDCatalog,
+  WasteClassification,
 } from './mass-id-catalog.types';
 
 const CREATE_MASS_ID_NAME = 'Create MassID document';
 const CREATE_MASS_ID_SLUG = 'create-mass-id';
 const MANIFEST_FILE_NAME = 'events-manifest.json';
+const WASTE_CLASSIFICATION_FILE_NAME = 'waste-classification.json';
 
 interface EventPayloadFields {
   addressId: string;
@@ -188,6 +195,26 @@ export const toEventsManifest = ({
   schemaVersion: 1,
 });
 
+export const toWasteClassification = (
+  subtypeToCdmCode: ReadonlyMap<
+    string,
+    string | undefined
+  > = SUBTYPE_TO_CDM_CODE_MAP,
+): WasteClassification => ({
+  localWasteClassifications: Object.entries(WASTE_CLASSIFICATION_CODES.BR).map(
+    ([id, { CDM_CODE, description }]) => ({
+      cdmCode: CDM_CODE,
+      description,
+      id,
+    }),
+  ),
+  schemaVersion: 1,
+  subtypes: Object.values(MassIDOrganicSubtype).map((subtype) => ({
+    cdmCode: subtypeToCdmCode.get(subtype) ?? null,
+    subtype,
+  })),
+});
+
 export const toMethodologyFiles = (
   catalog: MassIDCatalog,
 ): Map<string, EmittedArtifact> =>
@@ -206,4 +233,5 @@ export const toMethodologyFiles = (
       attributesPath(event.slug),
       toAttributeDictionary(event),
     ]),
+    [WASTE_CLASSIFICATION_FILE_NAME, toWasteClassification()],
   ]);

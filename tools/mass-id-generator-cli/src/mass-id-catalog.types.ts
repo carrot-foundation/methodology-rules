@@ -4,6 +4,7 @@ import type {
   BoldAttributeName,
   BoldDocumentEventName,
   MassIDActorType,
+  MassIDOrganicSubtype,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import type { DocumentEventAttributeFormat } from '@carrot-fndn/shared/types';
 
@@ -77,7 +78,8 @@ export type EmittedArtifact =
   | AttributeDictionary
   | CatalogDocument
   | EventPayload
-  | EventsManifest;
+  | EventsManifest
+  | WasteClassification;
 
 export interface EventPayload {
   addressId: string;
@@ -97,6 +99,12 @@ export interface EventsManifest {
   schemaVersion: 1;
 }
 
+export interface LocalWasteClassification {
+  cdmCode: string;
+  description: string;
+  id: string;
+}
+
 export interface ManifestEvent {
   artifacts: { attributes?: string; payload: string };
   name: string;
@@ -108,6 +116,17 @@ export interface MassIDCatalog {
   actors: readonly CatalogActor[];
   document: CatalogDocument;
   events: readonly CatalogEvent[];
+}
+
+export interface WasteClassification {
+  localWasteClassifications: LocalWasteClassification[];
+  schemaVersion: 1;
+  subtypes: WasteSubtype[];
+}
+
+export interface WasteSubtype {
+  cdmCode: null | string;
+  subtype: MassIDOrganicSubtype;
 }
 
 type AttributeRequirement =

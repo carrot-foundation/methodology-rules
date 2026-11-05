@@ -1,7 +1,12 @@
 import {
   BoldDocumentEventName,
   MassIDActorType,
+  MassIDOrganicSubtype,
 } from '@carrot-fndn/shared/methodologies/bold/types';
+import {
+  SUBTYPE_TO_CDM_CODE_MAP,
+  WASTE_CLASSIFICATION_CODES,
+} from '@carrot-fndn/shared/methodologies/bold/utils';
 
 import type { CatalogActor, CatalogEvent } from './mass-id-catalog.types';
 
@@ -12,6 +17,7 @@ import {
   toEventPayload,
   toEventsManifest,
   toMethodologyFiles,
+  toWasteClassification,
 } from './mass-id-catalog.projections';
 
 const { PICK_UP, RECYCLING_MANIFEST, SORTING, TRANSPORT_MANIFEST, WEIGHING } =
@@ -299,15 +305,64 @@ describe('mass-id-catalog projections', () => {
     });
   });
 
+  describe('toWasteClassification', () => {
+    it('should list every accepted subtype in enum order with the CDM code the rule expects', () => {
+      expect(toWasteClassification().subtypes).toStrictEqual(
+        Object.values(MassIDOrganicSubtype).map((subtype) => ({
+          cdmCode: SUBTYPE_TO_CDM_CODE_MAP.get(subtype) ?? null,
+          subtype,
+        })),
+      );
+      expect(toWasteClassification().subtypes).toContainEqual({
+        cdmCode: '8.3',
+        subtype: MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
+      });
+    });
+
+    it('should emit a null CDM code for a subtype the map leaves out', () => {
+      const { subtypes } = toWasteClassification(
+        new Map([[MassIDOrganicSubtype.DOMESTIC_SLUDGE, '8.7C']]),
+      );
+
+      expect(subtypes).toHaveLength(Object.values(MassIDOrganicSubtype).length);
+      expect(subtypes).toContainEqual({
+        cdmCode: null,
+        subtype: MassIDOrganicSubtype.WOOD_AND_WOOD_PRODUCTS,
+      });
+    });
+
+    it('should list every Ibama code with its description and CDM code, in source order', () => {
+      expect(toWasteClassification().localWasteClassifications).toStrictEqual(
+        Object.entries(WASTE_CLASSIFICATION_CODES.BR).map(
+          ([id, { CDM_CODE, description }]) => ({
+            cdmCode: CDM_CODE,
+            description,
+            id,
+          }),
+        ),
+      );
+      expect(
+        toWasteClassification().localWasteClassifications.length,
+      ).toBeGreaterThan(0);
+    });
+  });
+
   describe('toMethodologyFiles', () => {
-    it('should map the manifest, one payload per entry and one dictionary per custom event', () => {
+    it('should map the manifest, one payload per entry, one dictionary per custom event and the waste classification', () => {
       expect([...toMethodologyFiles(MASS_ID_CATALOG).keys()]).toStrictEqual([
         'events-manifest.json',
         ...MANIFEST_ROWS.map(([, slug]) => `events/${slug}/payload.json`),
         ...[...CUSTOM_EVENT_SLUGS].map(
           (slug) => `events/${slug}/attributes.json`,
         ),
+        'waste-classification.json',
       ]);
+    });
+
+    it('should emit the waste classification projection under its filename', () => {
+      expect(
+        toMethodologyFiles(MASS_ID_CATALOG).get('waste-classification.json'),
+      ).toStrictEqual(toWasteClassification());
     });
 
     it('should emit the create-mass-id body with alphabetical keys', () => {
