@@ -476,6 +476,32 @@ export const regionalWasteClassificationTestCases: RegionalWasteClassificationTe
         [`${ACTOR}-${RECYCLER}`]: brazilianRecyclerEvent,
         [PICK_UP]: stubBoldMassIDPickUpEvent({
           metadataAttributes: [
+            [LOCAL_WASTE_CLASSIFICATION_ID, '02 02 03'],
+            [
+              LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
+              WASTE_CLASSIFICATION_CODES.BR['02 02 03'].description,
+            ],
+          ],
+        }),
+      },
+      partialDocument: {
+        subtype: MassIDOrganicSubtype.TOBACCO,
+      },
+      resultComment: RESULT_COMMENTS.passed.VALID_CLASSIFICATION,
+      resultContent: {
+        description: WASTE_CLASSIFICATION_CODES.BR['02 02 03'].description,
+        id: '02 02 03',
+        recyclerCountryCode: 'BR',
+        subtype: MassIDOrganicSubtype.TOBACCO,
+      },
+      resultStatus: 'PASSED',
+      scenario: 'The Tobacco subtype matches the CDM_CODE 8.3',
+    },
+    {
+      events: {
+        [`${ACTOR}-${RECYCLER}`]: brazilianRecyclerEvent,
+        [PICK_UP]: stubBoldMassIDPickUpEvent({
+          metadataAttributes: [
             [LOCAL_WASTE_CLASSIFICATION_ID, '02 01 01'],
             [
               LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
@@ -485,18 +511,17 @@ export const regionalWasteClassificationTestCases: RegionalWasteClassificationTe
         }),
       },
       partialDocument: {
-        subtype: MassIDOrganicSubtype.TOBACCO,
+        subtype: 'Unmapped Subtype',
       },
       resultComment: RESULT_COMMENTS.failed.INVALID_SUBTYPE_MAPPING,
       resultContent: {
         description: WASTE_CLASSIFICATION_CODES.BR['02 01 01'].description,
         id: '02 01 01',
         recyclerCountryCode: 'BR',
-        subtype: MassIDOrganicSubtype.TOBACCO,
+        subtype: 'Unmapped Subtype',
       },
       resultStatus: 'FAILED',
-      scenario:
-        'The subtype does not map to a valid CDM_CODE (TOBACCO has no mapping)',
+      scenario: 'The subtype does not map to a valid CDM_CODE',
     },
     {
       events: {

@@ -20,7 +20,7 @@ The CDM codes follow this classification structure:
 | -------- | --------------------------------------------- |
 | 8.1      | Wood and Wood Products                        |
 | 8.2      | Pulp, paper and cardboard (other than sludge) |
-| 8.3      | Food, Food Waste and Beverages                |
+| 8.3      | Food, Food Waste, Beverages and Tobacco       |
 | 8.4      | Textiles                                      |
 | 8.5      | Garden, Yard and Park Waste                   |
 | 8.6      | Glass, plastic, metal, other inert waste      |
