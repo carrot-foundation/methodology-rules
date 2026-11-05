@@ -1,9 +1,9 @@
-nodeVersion: 24.14.1
+# Setup and CI select the exact packageManager pin.
+# Keep one lockfile document for GitHub dependency detection.
+pmOnFail: ignore
 engineStrict: true
 saveExact: true
 verifyDepsBeforeRun: error
-patchedDependencies:
-  nx@22.6.1: patches/nx@22.6.1.patch
 allowBuilds:
   nx: true
   less: false

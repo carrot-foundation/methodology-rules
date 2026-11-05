@@ -15,15 +15,23 @@ packages: {}
 snapshots: {}
 `;
 
-for (const [name, content] of [
-  ['one project document', project],
-  [
-    'boot and project documents',
-    `---\nlockfileVersion: '9.0'\nimporters: {}\npackages: {}\nsnapshots: {}\n---\n${project}`,
-  ],
-]) {
-  test(`reads the application graph from ${name}`, () => {
-    const parsed = parseAndNormalizePnpmLockfile(content);
-    assert.ok(parsed.importers['.'].devDependencies.nx);
-  });
-}
+test('reads a single project document', () => {
+  const parsed = parseAndNormalizePnpmLockfile(project);
+  assert.ok(parsed.importers['.'].devDependencies.nx);
+});
+
+test('reads the repository dependency graph with the native Nx parser', () => {
+  const fs = require('node:fs');
+  const path = require('node:path');
+  const root = path.resolve(__dirname, '../..');
+  const manifest = JSON.parse(
+    fs.readFileSync(path.join(root, 'package.json'), 'utf8'),
+  );
+  const parsed = parseAndNormalizePnpmLockfile(
+    fs.readFileSync(path.join(root, 'pnpm-lock.yaml'), 'utf8'),
+  );
+  assert.equal(
+    parsed.importers['.'].specifiers.nx,
+    manifest.devDependencies.nx,
+  );
+});

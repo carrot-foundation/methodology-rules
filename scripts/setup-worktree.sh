@@ -1,6 +1,6 @@
 #!/bin/sh
 set -eu
-# Husky prepends dependency bins; bootstrap must resolve its host tools first.
+# Resolve host tools before entering the checkout or running dependency hooks.
 setup_path=
 setup_path_remaining="${PATH-}:"
 while [ -n "$setup_path_remaining" ]; do
@@ -16,7 +16,7 @@ while [ -n "$setup_path_remaining" ]; do
   done
   case "$setup_path_match" in
     node_modules/.bin|*/node_modules/.bin) ;;
-    *) setup_path="$setup_path:$setup_path_entry" ;;
+    /*) setup_path="$setup_path:$setup_path_entry" ;;
   esac
 done
 if [ -z "$setup_path" ]; then
@@ -46,6 +46,38 @@ pnpm_pin="$(node -p "JSON.parse(require('fs').readFileSync('package.json', 'utf8
 if [ "$(pnpm --version)" != "$pnpm_pin" ]; then
   echo "worktree setup requires pnpm $pnpm_pin from packageManager" >&2
   exit 1
+fi
+declares_husky=true
+if [ ! -d .husky ]; then
+  declares_husky="$(node --eval "const m = JSON.parse(require('fs').readFileSync('package.json', 'utf8')); process.stdout.write(String(Boolean(m.devDependencies?.husky || m.dependencies?.husky)))")"
+fi
+if [ "$declares_husky" = true ]; then
+  common_git="$(git rev-parse --path-format=absolute --git-common-dir)"
+  shared_husky="$project_root/.husky/_"
+  case "$common_git" in
+    */.git) shared_husky="${common_git%/.git}/.husky/_" ;;
+  esac
+  for hook_scope in --local effective; do
+    hook_status=0
+    if [ "$hook_scope" = effective ]; then
+      configured_hooks="$(git config --get core.hooksPath && printf .)" || hook_status=$?
+    else
+      configured_hooks="$(git config --local --get core.hooksPath && printf .)" || hook_status=$?
+    fi
+    if [ "$hook_status" -ne 0 ] && [ "$hook_status" -ne 1 ]; then
+      exit "$hook_status"
+    fi
+    if [ "$hook_status" -eq 1 ]; then
+      continue
+    fi
+    # Preserve value whitespace; remove the sentinel and Git's one record newline.
+    configured_hooks="${configured_hooks%.}"
+    configured_hooks="${configured_hooks%?}"
+    case "$configured_hooks" in
+      .husky/_|"$project_root/.husky/_"|"$shared_husky") ;;
+      *) echo "worktree setup preserves custom core.hooksPath; configure project Husky explicitly before setup" >&2; exit 1 ;;
+    esac
+  done
 fi
 NX_DAEMON=false pnpm install --frozen-lockfile --prefer-offline
 if [ -d .husky ]; then
