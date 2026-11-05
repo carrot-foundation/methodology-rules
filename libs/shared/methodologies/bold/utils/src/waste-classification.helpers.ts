@@ -30,7 +30,7 @@ export const WASTE_SUBTYPE_CLASSIFICATION_EVIDENCE_FIELDS = [
   'expectedSubtype',
 ] as const satisfies ReadonlyArray<keyof WasteSubtypeClassificationEvidence>;
 
-export const EXPECTED_SUBTYPE_GUIDANCE = `Envie o subtipo indicado em "expectedSubtype", que corresponde ao código CDM ("cdmCode") do "Local Waste Classification ID" informado, ou corrija esse código se for ele o errado. Se "expectedSubtype" for "${NO_ELIGIBLE_SUBTYPE}", o código não tem subtipo elegível na metodologia; se estiver vazio, o "Local Waste Classification ID" do evento "Pick-up" está ausente ou não é aceito: confira o código de classificação do resíduo.`;
+export const EXPECTED_SUBTYPE_GUIDANCE = `Envie o subtipo indicado em "expectedSubtype" (um deles, quando vierem separados por "|"), que corresponde ao código CDM ("cdmCode") do "Local Waste Classification ID" informado, ou corrija esse código se for ele o errado. Se "expectedSubtype" for "${NO_ELIGIBLE_SUBTYPE}", o código não tem subtipo elegível na metodologia; se estiver vazio, o "Local Waste Classification ID" do evento "Pick-up" está ausente ou não é aceito: confira o código de classificação do resíduo.`;
 
 const BR_WASTE_CLASSIFICATION_IDS = Object.keys(
   WASTE_CLASSIFICATION_CODES.BR,
@@ -53,8 +53,14 @@ export const findBrWasteClassification = (
     : { ...WASTE_CLASSIFICATION_CODES.BR[id], id };
 };
 
-export const getSubtypeByCdmCode = (cdmCode: string): string | undefined =>
-  [...SUBTYPE_TO_CDM_CODE_MAP].find(([, code]) => code === cdmCode)?.[0];
+export const getSubtypesByCdmCode = (cdmCode: string): string[] =>
+  [...SUBTYPE_TO_CDM_CODE_MAP]
+    .filter(([, code]) => code === cdmCode)
+    .map(([subtype]) => subtype);
+
+// Subtype names contain commas, so the report's comma join of an array would be ambiguous
+const joinExpectedSubtypes = (subtypes: string[]): string =>
+  subtypes.length === 0 ? NO_ELIGIBLE_SUBTYPE : subtypes.join(' | ');
 
 export const getWasteSubtypeClassificationEvidence = ({
   localWasteClassificationId,
@@ -72,8 +78,9 @@ export const getWasteSubtypeClassificationEvidence = ({
     }),
     ...(classification && {
       cdmCode: classification.CDM_CODE,
-      expectedSubtype:
-        getSubtypeByCdmCode(classification.CDM_CODE) ?? NO_ELIGIBLE_SUBTYPE,
+      expectedSubtype: joinExpectedSubtypes(
+        getSubtypesByCdmCode(classification.CDM_CODE),
+      ),
       localWasteClassificationId: classification.id,
     }),
   };

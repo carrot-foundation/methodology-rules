@@ -2,7 +2,7 @@ import { MassIDOrganicSubtype } from '@carrot-fndn/shared/methodologies/bold/typ
 
 import {
   findBrWasteClassification,
-  getSubtypeByCdmCode,
+  getSubtypesByCdmCode,
   getWasteSubtypeClassificationEvidence,
   NO_ELIGIBLE_SUBTYPE,
 } from './waste-classification.helpers';
@@ -26,15 +26,16 @@ describe('findBrWasteClassification', () => {
   );
 });
 
-describe('getSubtypeByCdmCode', () => {
-  it('should return the subtype mapped to the CDM code', () => {
-    expect(getSubtypeByCdmCode('8.3')).toBe(
+describe('getSubtypesByCdmCode', () => {
+  it('should return every subtype mapped to the CDM code', () => {
+    expect(getSubtypesByCdmCode('8.3')).toEqual([
       MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
-    );
+      MassIDOrganicSubtype.TOBACCO,
+    ]);
   });
 
-  it('should return undefined when no subtype maps to the CDM code', () => {
-    expect(getSubtypeByCdmCode('8.2')).toBeUndefined();
+  it('should return no subtype when none maps to the CDM code', () => {
+    expect(getSubtypesByCdmCode('8.2')).toEqual([]);
   });
 });
 
@@ -47,7 +48,7 @@ describe('getWasteSubtypeClassificationEvidence', () => {
       }),
     ).toEqual({
       cdmCode: '8.3',
-      expectedSubtype: MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
+      expectedSubtype: `${MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES} | ${MassIDOrganicSubtype.TOBACCO}`,
       localWasteClassificationId: '02 01 03',
       subtype: MassIDOrganicSubtype.WOOD_AND_WOOD_PRODUCTS,
     });

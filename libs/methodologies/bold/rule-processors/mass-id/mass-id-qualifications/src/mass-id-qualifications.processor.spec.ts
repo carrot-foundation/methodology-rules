@@ -90,7 +90,7 @@ describe('MassIDQualificationsProcessor', () => {
   it.each([
     {
       cdmCode: '8.3',
-      expectedSubtype: MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
+      expectedSubtype: `${MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES} | ${MassIDOrganicSubtype.TOBACCO}`,
       localWasteClassificationId: '02 01 03',
       scenario: 'the subtype the classification code expects',
     },
