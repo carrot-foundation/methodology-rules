@@ -1,5 +1,9 @@
 import { MassIDActorType } from '@carrot-fndn/shared/methodologies/bold/types';
-import { defineRuleFindings } from '@carrot-fndn/shared/rule/result';
+import {
+  defineRuleFindings,
+  MASS_ID_DOCUMENT_NOT_FOUND_META,
+  MISSING_RECYCLER_ACCREDITATION_DOCUMENT_META,
+} from '@carrot-fndn/shared/rule/result';
 
 import {
   INVALID_RESULT_COMMENTS,
@@ -35,25 +39,9 @@ export const WEIGHING_FINDINGS = defineRuleFindings(
       guidance: 'Confira os eventos "Weighing" e seus atributos no MassID.',
       title: 'Dados de pesagem insuficientes',
     },
-    'ERROR.MASS_ID_DOCUMENT_NOT_FOUND': {
-      category: 'PROCESSING_ERROR',
-      defaultOwner: 'CARROT',
-      description:
-        'O documento do MassID não foi encontrado durante a validação.',
-      guidance:
-        'Nenhuma ação do integrador é necessária: a Carrot investiga a falha e reexecuta a auditoria.',
-      title: 'Documento do MassID não encontrado',
-    },
-    'ERROR.MISSING_RECYCLER_ACCREDITATION_DOCUMENT': {
-      category: 'ACCREDITATION',
-      defaultOwner: 'TO_CONFIRM',
-      dependsOnAccreditation: MassIDActorType.RECYCLER,
-      description:
-        'O documento de credenciamento do reciclador não foi encontrado.',
-      guidance:
-        'Confirme que o reciclador da massa está credenciado e referenciado corretamente. A Carrot confirma a origem da pendência.',
-      title: 'Credenciamento do reciclador não encontrado',
-    },
+    'ERROR.MASS_ID_DOCUMENT_NOT_FOUND': MASS_ID_DOCUMENT_NOT_FOUND_META,
+    'ERROR.MISSING_RECYCLER_ACCREDITATION_DOCUMENT':
+      MISSING_RECYCLER_ACCREDITATION_DOCUMENT_META,
     'INVALID.CONTAINER_CAPACITY_FORMAT': {
       category: 'INVALID_DATA',
       defaultOwner: 'INTEGRATOR',

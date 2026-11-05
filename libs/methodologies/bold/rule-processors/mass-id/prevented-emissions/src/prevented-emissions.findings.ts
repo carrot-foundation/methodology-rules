@@ -1,5 +1,10 @@
 import { MassIDActorType } from '@carrot-fndn/shared/methodologies/bold/types';
-import { defineRuleFindings } from '@carrot-fndn/shared/rule/result';
+import {
+  defineRuleFindings,
+  INVALID_LOCAL_WASTE_CLASSIFICATION_ID_META,
+  MASS_ID_DOCUMENT_NOT_FOUND_META,
+  MISSING_RECYCLER_ACCREDITATION_DOCUMENT_META,
+} from '@carrot-fndn/shared/rule/result';
 
 import { RESULT_COMMENTS } from './prevented-emissions.constants';
 import { PreventedEmissionsProcessorErrors } from './prevented-emissions.errors';
@@ -31,15 +36,8 @@ export const PREVENTED_EMISSIONS_FINDINGS = defineRuleFindings(
         'Oriente o reciclador a atualizar as linhas de base no credenciamento.',
       title: 'Linhas de base inválidas no credenciamento',
     },
-    'ERROR.INVALID_CLASSIFICATION_ID': {
-      category: 'INVALID_DATA',
-      defaultOwner: 'INTEGRATOR',
-      description:
-        'O "Local Waste Classification ID" não corresponde a um código aceito pela metodologia.',
-      guidance:
-        'Envie o código de classificação local do resíduo aceito pela metodologia.',
-      title: 'Código de classificação do resíduo não aceito',
-    },
+    'ERROR.INVALID_CLASSIFICATION_ID':
+      INVALID_LOCAL_WASTE_CLASSIFICATION_ID_META,
     'ERROR.INVALID_MASS_ID_DOCUMENT_SUBTYPE': {
       category: 'INVALID_DATA',
       defaultOwner: 'INTEGRATOR',
@@ -67,25 +65,9 @@ export const PREVENTED_EMISSIONS_FINDINGS = defineRuleFindings(
         'Oriente o reciclador a atualizar o credenciamento com o tipo de gás de efeito estufa.',
       title: 'Tipo de gás de efeito estufa ausente',
     },
-    'ERROR.MISSING_MASS_ID_DOCUMENT': {
-      category: 'PROCESSING_ERROR',
-      defaultOwner: 'CARROT',
-      description:
-        'O documento do MassID não foi encontrado durante a validação.',
-      guidance:
-        'Nenhuma ação do integrador é necessária: a Carrot investiga a falha e reexecuta a auditoria.',
-      title: 'Documento do MassID não encontrado',
-    },
-    'ERROR.MISSING_RECYCLER_ACCREDITATION_DOCUMENT': {
-      category: 'ACCREDITATION',
-      defaultOwner: 'TO_CONFIRM',
-      dependsOnAccreditation: MassIDActorType.RECYCLER,
-      description:
-        'O documento de credenciamento do reciclador não foi encontrado.',
-      guidance:
-        'Confirme que o reciclador da massa está credenciado e referenciado corretamente. A Carrot confirma a origem da pendência.',
-      title: 'Credenciamento do reciclador não encontrado',
-    },
+    'ERROR.MISSING_MASS_ID_DOCUMENT': MASS_ID_DOCUMENT_NOT_FOUND_META,
+    'ERROR.MISSING_RECYCLER_ACCREDITATION_DOCUMENT':
+      MISSING_RECYCLER_ACCREDITATION_DOCUMENT_META,
     'ERROR.SUBTYPE_CDM_CODE_MISMATCH': {
       category: 'INVALID_DATA',
       defaultOwner: 'INTEGRATOR',

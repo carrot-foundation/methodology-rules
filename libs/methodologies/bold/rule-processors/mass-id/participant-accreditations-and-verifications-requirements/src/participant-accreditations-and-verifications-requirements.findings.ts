@@ -1,5 +1,9 @@
 import { MassIDActorType } from '@carrot-fndn/shared/methodologies/bold/types';
-import { defineRuleFindings } from '@carrot-fndn/shared/rule/result';
+import {
+  defineRuleFindings,
+  MASS_ID_DOCUMENT_NOT_FOUND_META,
+  MASS_ID_WITHOUT_EVENTS_META,
+} from '@carrot-fndn/shared/rule/result';
 
 import { RESULT_COMMENTS } from './participant-accreditations-and-verifications-requirements.constants';
 import { ParticipantAccreditationsAndVerificationsRequirementsProcessorErrors } from './participant-accreditations-and-verifications-requirements.errors';
@@ -44,22 +48,9 @@ export const PARTICIPANT_ACCREDITATIONS_AND_VERIFICATIONS_REQUIREMENTS_FINDINGS 
           'Nenhuma ação do integrador é necessária: a Carrot investiga a falha e reexecuta a auditoria.',
         title: 'Falha ao validar os credenciamentos dos participantes',
       },
-      'ERROR.MASS_ID_DOCUMENT_DOES_NOT_CONTAIN_EVENTS': {
-        category: 'MISSING_EVENT',
-        defaultOwner: 'INTEGRATOR',
-        description: 'O MassID não tem nenhum evento.',
-        guidance: 'Envie o MassID com os eventos da cadeia de custódia.',
-        title: 'MassID sem eventos',
-      },
-      'ERROR.MASS_ID_DOCUMENT_NOT_FOUND': {
-        category: 'PROCESSING_ERROR',
-        defaultOwner: 'CARROT',
-        description:
-          'O documento do MassID não foi encontrado durante a validação.',
-        guidance:
-          'Nenhuma ação do integrador é necessária: a Carrot investiga a falha e reexecuta a auditoria.',
-        title: 'Documento do MassID não encontrado',
-      },
+      'ERROR.MASS_ID_DOCUMENT_DOES_NOT_CONTAIN_EVENTS':
+        MASS_ID_WITHOUT_EVENTS_META,
+      'ERROR.MASS_ID_DOCUMENT_NOT_FOUND': MASS_ID_DOCUMENT_NOT_FOUND_META,
       'ERROR.MISSING_PARTICIPANTS_ACCREDITATION_DOCUMENTS': {
         category: 'ACCREDITATION',
         defaultOwner: 'TO_CONFIRM',

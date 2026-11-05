@@ -1,4 +1,7 @@
-import { defineRuleFindings } from '@carrot-fndn/shared/rule/result';
+import {
+  defineRuleFindings,
+  MISSING_PICK_UP_EVENT_META,
+} from '@carrot-fndn/shared/rule/result';
 
 import { RESULT_COMMENTS } from './hauler-identification.constants';
 import { HaulerIdentificationProcessorErrors } from './hauler-identification.errors';
@@ -30,12 +33,6 @@ export const HAULER_IDENTIFICATION_FINDINGS = defineRuleFindings(
         'Envie o evento de ator "Hauler" com o transportador responsável pela coleta.',
       title: 'Transportador não identificado',
     },
-    'FAILED.PICK_UP_EVENT_MISSING': {
-      category: 'MISSING_EVENT',
-      defaultOwner: 'INTEGRATOR',
-      description: 'O MassID não tem o evento "Pick-up".',
-      guidance: 'Envie o evento "Pick-up" registrando a coleta da massa.',
-      title: 'Evento de coleta ausente',
-    },
+    'FAILED.PICK_UP_EVENT_MISSING': MISSING_PICK_UP_EVENT_META,
   },
 );

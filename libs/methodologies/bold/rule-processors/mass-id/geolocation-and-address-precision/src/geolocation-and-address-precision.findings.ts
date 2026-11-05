@@ -1,5 +1,8 @@
 import { MassIDActorType } from '@carrot-fndn/shared/methodologies/bold/types';
-import { defineRuleFindings } from '@carrot-fndn/shared/rule/result';
+import {
+  defineRuleFindings,
+  MASS_ID_DOCUMENT_NOT_FOUND_META,
+} from '@carrot-fndn/shared/rule/result';
 
 import { RESULT_COMMENTS } from './geolocation-and-address-precision.constants';
 import { GeolocationAndAddressPrecisionProcessorErrors } from './geolocation-and-address-precision.errors';
@@ -40,15 +43,7 @@ export const GEOLOCATION_AND_ADDRESS_PRECISION_FINDINGS = defineRuleFindings(
         'Envie os eventos "Pick-up" e "Drop-off" com os respectivos endereços.',
       title: 'Eventos de coleta ou recebimento ausentes',
     },
-    'ERROR.MASS_ID_DOCUMENT_NOT_FOUND': {
-      category: 'PROCESSING_ERROR',
-      defaultOwner: 'CARROT',
-      description:
-        'O documento do MassID não foi encontrado durante a validação.',
-      guidance:
-        'Nenhuma ação do integrador é necessária: a Carrot investiga a falha e reexecuta a auditoria.',
-      title: 'Documento do MassID não encontrado',
-    },
+    'ERROR.MASS_ID_DOCUMENT_NOT_FOUND': MASS_ID_DOCUMENT_NOT_FOUND_META,
     'ERROR.PARTICIPANT_ACCREDITATION_DOCUMENTS_NOT_FOUND': {
       category: 'ACCREDITATION',
       defaultOwner: 'TO_CONFIRM',

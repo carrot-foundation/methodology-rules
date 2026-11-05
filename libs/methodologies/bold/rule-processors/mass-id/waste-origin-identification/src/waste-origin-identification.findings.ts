@@ -1,4 +1,7 @@
-import { defineRuleFindings } from '@carrot-fndn/shared/rule/result';
+import {
+  defineRuleFindings,
+  MISSING_PICK_UP_EVENT_META,
+} from '@carrot-fndn/shared/rule/result';
 
 import { RESULT_COMMENTS } from './waste-origin-identification.constants';
 import { WasteOriginIdentificationProcessorErrors } from './waste-origin-identification.errors';
@@ -21,13 +24,7 @@ export const WASTE_ORIGIN_IDENTIFICATION_FINDINGS = defineRuleFindings(
         'Nenhuma ação do integrador é necessária: a Carrot investiga a falha e reexecuta a auditoria.',
       title: 'Falha ao validar a origem do resíduo',
     },
-    'FAILED.MISSING_PICK_UP_EVENT': {
-      category: 'MISSING_EVENT',
-      defaultOwner: 'INTEGRATOR',
-      description: 'O MassID não tem o evento "Pick-up".',
-      guidance: 'Envie o evento "Pick-up" registrando a coleta da massa.',
-      title: 'Evento de coleta ausente',
-    },
+    'FAILED.MISSING_PICK_UP_EVENT': MISSING_PICK_UP_EVENT_META,
     'FAILED.MISSING_WASTE_GENERATOR_EVENT': {
       category: 'MISSING_EVENT',
       defaultOwner: 'INTEGRATOR',

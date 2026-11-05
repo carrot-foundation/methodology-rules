@@ -2,6 +2,9 @@ import { MassIDActorType } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
   crossValidationEvidence,
   defineRuleFindings,
+  MASS_ID_DOCUMENT_NOT_FOUND_META,
+  MASS_ID_WITHOUT_EVENTS_META,
+  MISSING_RECYCLER_ACCREDITATION_DOCUMENT_META,
 } from '@carrot-fndn/shared/rule/result';
 
 import type {
@@ -91,32 +94,10 @@ export const MASS_ID_SORTING_FINDINGS = defineRuleFindings(
         'Confira os pesos do evento "Sorting": o peso descontado deve ser menor que o peso bruto.',
       title: 'Peso descontado maior que o peso bruto',
     },
-    'ERROR.MASS_ID_DOCUMENT_NOT_FOUND': {
-      category: 'PROCESSING_ERROR',
-      defaultOwner: 'CARROT',
-      description:
-        'O documento do MassID não foi encontrado durante a validação.',
-      guidance:
-        'Nenhuma ação do integrador é necessária: a Carrot investiga a falha e reexecuta a auditoria.',
-      title: 'Documento do MassID não encontrado',
-    },
-    'ERROR.MISSING_EXTERNAL_EVENTS': {
-      category: 'MISSING_EVENT',
-      defaultOwner: 'INTEGRATOR',
-      description: 'O MassID não tem nenhum evento.',
-      guidance: 'Envie o MassID com os eventos da cadeia de custódia.',
-      title: 'MassID sem eventos',
-    },
-    'ERROR.MISSING_RECYCLER_ACCREDITATION_DOCUMENT': {
-      category: 'ACCREDITATION',
-      defaultOwner: 'TO_CONFIRM',
-      dependsOnAccreditation: MassIDActorType.RECYCLER,
-      description:
-        'O documento de credenciamento do reciclador não foi encontrado.',
-      guidance:
-        'Confirme que o reciclador da massa está credenciado e referenciado corretamente. A Carrot confirma a origem da pendência.',
-      title: 'Credenciamento do reciclador não encontrado',
-    },
+    'ERROR.MASS_ID_DOCUMENT_NOT_FOUND': MASS_ID_DOCUMENT_NOT_FOUND_META,
+    'ERROR.MISSING_EXTERNAL_EVENTS': MASS_ID_WITHOUT_EVENTS_META,
+    'ERROR.MISSING_RECYCLER_ACCREDITATION_DOCUMENT':
+      MISSING_RECYCLER_ACCREDITATION_DOCUMENT_META,
     'ERROR.MISSING_SORTING_EVENT': {
       category: 'MISSING_EVENT',
       defaultOwner: 'INTEGRATOR',

@@ -1,4 +1,7 @@
-import { defineRuleFindings } from '@carrot-fndn/shared/rule/result';
+import {
+  defineRuleFindings,
+  MISSING_PICK_UP_EVENT_META,
+} from '@carrot-fndn/shared/rule/result';
 
 import { RESULT_COMMENTS } from './vehicle-identification.constants';
 import { VehicleIdentificationProcessorErrors } from './vehicle-identification.errors';
@@ -47,13 +50,7 @@ export const VEHICLE_IDENTIFICATION_FINDINGS = defineRuleFindings(
         'Verifique se a placa foi registrada na coleta e informe-a no evento "Pick-up". A Carrot confirma a origem da pendência.',
       title: 'Placa do veículo ausente',
     },
-    'FAILED.PICK_UP_EVENT_MISSING': {
-      category: 'MISSING_EVENT',
-      defaultOwner: 'INTEGRATOR',
-      description: 'O MassID não tem o evento "Pick-up".',
-      guidance: 'Envie o evento "Pick-up" registrando a coleta da massa.',
-      title: 'Evento de coleta ausente',
-    },
+    'FAILED.PICK_UP_EVENT_MISSING': MISSING_PICK_UP_EVENT_META,
     'FAILED.VEHICLE_DESCRIPTION_MISSING': {
       category: 'MISSING_DATA',
       defaultOwner: 'INTEGRATOR',

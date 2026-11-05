@@ -6,6 +6,7 @@ import {
 import {
   crossValidationEvidence,
   defineRuleFindings,
+  INVALID_LOCAL_WASTE_CLASSIFICATION_ID_META,
 } from '@carrot-fndn/shared/rule/result';
 
 import type { ClassificationDescriptionEvidence } from './regional-waste-classification.types';
@@ -69,15 +70,8 @@ export const REGIONAL_WASTE_CLASSIFICATION_FINDINGS = defineRuleFindings(
         'Envie no evento "Pick-up" a descrição indicada em "expectedDescription", que é a descrição oficial do código informado.',
       title: 'Descrição da classificação do resíduo não confere',
     },
-    'FAILED.INVALID_CLASSIFICATION_ID': {
-      category: 'INVALID_DATA',
-      defaultOwner: 'INTEGRATOR',
-      description:
-        'O "Local Waste Classification ID" não corresponde a um código aceito pela metodologia.',
-      guidance:
-        'Envie o código de classificação local do resíduo aceito pela metodologia.',
-      title: 'Código de classificação do resíduo não aceito',
-    },
+    'FAILED.INVALID_CLASSIFICATION_ID':
+      INVALID_LOCAL_WASTE_CLASSIFICATION_ID_META,
     'FAILED.INVALID_SUBTYPE_CDM_CODE_MISMATCH': {
       category: 'INVALID_DATA',
       defaultOwner: 'INTEGRATOR',

@@ -1,4 +1,7 @@
-import { defineRuleFindings } from '@carrot-fndn/shared/rule/result';
+import {
+  defineRuleFindings,
+  MASS_ID_DOCUMENT_NOT_FOUND_META,
+} from '@carrot-fndn/shared/rule/result';
 
 import { RESULT_COMMENTS } from './waste-mass-is-unique.constants';
 import { WasteMassIsUniqueProcessorErrors } from './waste-mass-is-unique.errors';
@@ -21,15 +24,7 @@ export const WASTE_MASS_IS_UNIQUE_FINDINGS = defineRuleFindings(
         'Nenhuma ação do integrador é necessária: a Carrot investiga a falha e reexecuta a auditoria.',
       title: 'Falha ao validar a unicidade da massa',
     },
-    'ERROR.MASS_ID_DOCUMENT_NOT_FOUND': {
-      category: 'PROCESSING_ERROR',
-      defaultOwner: 'CARROT',
-      description:
-        'O documento do MassID não foi encontrado durante a validação.',
-      guidance:
-        'Nenhuma ação do integrador é necessária: a Carrot investiga a falha e reexecuta a auditoria.',
-      title: 'Documento do MassID não encontrado',
-    },
+    'ERROR.MASS_ID_DOCUMENT_NOT_FOUND': MASS_ID_DOCUMENT_NOT_FOUND_META,
     'ERROR.MISSING_DROP_OFF_EVENT': {
       category: 'MISSING_EVENT',
       defaultOwner: 'INTEGRATOR',
