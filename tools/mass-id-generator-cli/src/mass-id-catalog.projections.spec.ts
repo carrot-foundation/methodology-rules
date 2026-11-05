@@ -359,6 +359,12 @@ describe('mass-id-catalog projections', () => {
       ]);
     });
 
+    it('should emit the waste classification projection under its filename', () => {
+      expect(
+        toMethodologyFiles(MASS_ID_CATALOG).get('waste-classification.json'),
+      ).toStrictEqual(toWasteClassification());
+    });
+
     it('should emit the create-mass-id body with alphabetical keys', () => {
       const body = toMethodologyFiles(MASS_ID_CATALOG).get(
         'events/create-mass-id/payload.json',
