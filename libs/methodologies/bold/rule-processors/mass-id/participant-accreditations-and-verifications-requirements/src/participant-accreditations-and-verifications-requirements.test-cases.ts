@@ -2,6 +2,7 @@ import type { RuleTestCase } from '@carrot-fndn/shared/rule/types';
 
 import {
   BoldStubsBuilder,
+  stubAddress,
   stubBoldAccreditationResultEvent,
   stubDocument,
   stubDocumentEvent,
@@ -12,6 +13,7 @@ import {
   BoldAttributeName,
   type BoldDocument,
   BoldDocumentCategory,
+  type BoldDocumentEvent,
   BoldDocumentEventName,
   BoldDocumentType,
   MassIDActorType,
@@ -24,7 +26,7 @@ import { ParticipantAccreditationsAndVerificationsRequirementsProcessorErrors } 
 
 const { HAULER, INTEGRATOR, PROCESSOR, RECYCLER, WASTE_GENERATOR } =
   MassIDActorType;
-const { ACCREDITATION_CONTEXT, ACCREDITATION_RESULT, LINK } =
+const { ACCREDITATION_CONTEXT, ACCREDITATION_RESULT, ACTOR, LINK } =
   BoldDocumentEventName;
 const { ACCREDITATION_STATUS, EFFECTIVE_DATE, EXPIRATION_DATE } =
   BoldAttributeName;
@@ -112,6 +114,29 @@ const createMassIDAuditWithLinkEvent = (
   ],
 });
 
+const createSecondValidAccreditation = (
+  originalAccreditation: BoldDocument,
+  actorType: MassIDActorType,
+) =>
+  stubDocument(
+    {
+      category: BoldDocumentCategory.METHODOLOGY,
+      externalEvents: [
+        stubBoldAccreditationResultEvent({
+          metadataAttributes: [
+            [EFFECTIVE_DATE, subDays(new Date(), 5).toISOString()],
+            [EXPIRATION_DATE, addDays(new Date(), 5).toISOString()],
+            [ACCREDITATION_STATUS, BoldAccreditationStatus.APPROVED],
+          ],
+        }),
+      ],
+      primaryParticipant: originalAccreditation.primaryParticipant,
+      subtype: actorType,
+      type: BoldDocumentType.PARTICIPANT_ACCREDITATION,
+    },
+    false, // stubExternalEvents = false to avoid random events
+  );
+
 const createMultipleValidAccreditationsTestData = (
   actorType: MassIDActorType,
 ) => {
@@ -136,23 +161,9 @@ const createMultipleValidAccreditationsTestData = (
   const originalAccreditation =
     massIDWithMultipleValid.participantsAccreditationDocuments.get(actorType)!;
 
-  const secondAccreditation = stubDocument(
-    {
-      category: BoldDocumentCategory.METHODOLOGY,
-      externalEvents: [
-        stubBoldAccreditationResultEvent({
-          metadataAttributes: [
-            [EFFECTIVE_DATE, subDays(new Date(), 5).toISOString()],
-            [EXPIRATION_DATE, addDays(new Date(), 5).toISOString()],
-            [ACCREDITATION_STATUS, BoldAccreditationStatus.APPROVED],
-          ],
-        }),
-      ],
-      primaryParticipant: originalAccreditation.primaryParticipant,
-      subtype: actorType,
-      type: BoldDocumentType.PARTICIPANT_ACCREDITATION,
-    },
-    false, // stubExternalEvents = false to avoid random events
+  const secondAccreditation = createSecondValidAccreditation(
+    originalAccreditation,
+    actorType,
   );
 
   return {
@@ -207,6 +218,53 @@ const {
   originalAccreditation: processorOriginalAccreditation,
   secondAccreditation: processorSecondAccreditation,
 } = createMultipleValidAccreditationsTestData(PROCESSOR);
+
+const {
+  massIDWithMultipleValid: massIDWithIntegratorMultipleValid,
+  originalAccreditation: integratorOriginalAccreditation,
+  secondAccreditation: integratorSecondAccreditation,
+} = createMultipleValidAccreditationsTestData(INTEGRATOR);
+
+const integratorActorEvent =
+  massIDWithIntegratorMultipleValid.massIDDocument.externalEvents!.find(
+    (event) => event.name === ACTOR && event.label === INTEGRATOR,
+  )!;
+
+const massIDWithDuplicateIntegratorActorEvent: BoldDocument = {
+  ...massIDWithIntegratorMultipleValid.massIDDocument,
+  externalEvents: [
+    ...massIDWithIntegratorMultipleValid.massIDDocument.externalEvents!,
+    stubDocumentEvent({
+      address: stubAddress(),
+      label: INTEGRATOR,
+      name: ACTOR,
+      participant: integratorActorEvent.participant,
+    }),
+  ],
+};
+
+const processorSecondAccreditationBesideIntegrator =
+  createSecondValidAccreditation(
+    massIDWithIntegratorMultipleValid.participantsAccreditationDocuments.get(
+      PROCESSOR,
+    )!,
+    PROCESSOR,
+  );
+
+const isIntegratorEvent = (event: BoldDocumentEvent) =>
+  event.label === INTEGRATOR;
+
+const massIDWithProcessorBeforeDuplicateIntegrator: BoldDocument = {
+  ...massIDWithDuplicateIntegratorActorEvent,
+  externalEvents: [
+    ...massIDWithDuplicateIntegratorActorEvent.externalEvents!.filter(
+      (event) => !isIntegratorEvent(event),
+    ),
+    ...massIDWithDuplicateIntegratorActorEvent.externalEvents!.filter((event) =>
+      isIntegratorEvent(event),
+    ),
+  ],
+};
 
 // Create a participant that has both PROCESSOR and RECYCLER roles
 const sharedParticipant = stubParticipant({ type: PROCESSOR });
@@ -559,5 +617,64 @@ export const participantAccreditationsAndVerificationsRequirementsTestCases: Par
       resultStatus: 'FAILED',
       scenario:
         'The MassID document has a PROCESSOR with multiple valid accreditations (should fail)',
+    },
+    {
+      documents: [
+        massIDWithIntegratorMultipleValid.massIDDocument,
+        ...massIDWithIntegratorMultipleValid.participantsAccreditationDocuments.values(),
+        integratorSecondAccreditation,
+      ],
+      massIDAuditDocument: createMassIDAuditWithLinkEvent(
+        massIDWithIntegratorMultipleValid.massIDAuditDocument,
+        integratorSecondAccreditation,
+      ),
+      resultComment:
+        processorError.ERROR_MESSAGE.MULTIPLE_VALID_ACCREDITATIONS_FOR_PARTICIPANT(
+          integratorOriginalAccreditation.primaryParticipant.id,
+          INTEGRATOR,
+        ),
+      resultStatus: 'FAILED',
+      scenario:
+        'The MassID document has one INTEGRATOR ACTOR event and multiple valid Integrator accreditations (should fail)',
+    },
+    {
+      documents: [
+        massIDWithDuplicateIntegratorActorEvent,
+        ...massIDWithIntegratorMultipleValid.participantsAccreditationDocuments.values(),
+        integratorSecondAccreditation,
+      ],
+      massIDAuditDocument: createMassIDAuditWithLinkEvent(
+        massIDWithIntegratorMultipleValid.massIDAuditDocument,
+        integratorSecondAccreditation,
+      ),
+      resultComment:
+        processorError.ERROR_MESSAGE.DUPLICATE_INTEGRATOR_ACTOR_EVENT(
+          integratorActorEvent.participant.id,
+        ),
+      resultStatus: 'FAILED',
+      scenario:
+        'The MassID document has a second INTEGRATOR ACTOR event linking another Integrator accreditation (should fail)',
+    },
+    {
+      documents: [
+        massIDWithProcessorBeforeDuplicateIntegrator,
+        ...massIDWithIntegratorMultipleValid.participantsAccreditationDocuments.values(),
+        integratorSecondAccreditation,
+        processorSecondAccreditationBesideIntegrator,
+      ],
+      massIDAuditDocument: createMassIDAuditWithLinkEvent(
+        createMassIDAuditWithLinkEvent(
+          massIDWithIntegratorMultipleValid.massIDAuditDocument,
+          integratorSecondAccreditation,
+        ),
+        processorSecondAccreditationBesideIntegrator,
+      ),
+      resultComment:
+        processorError.ERROR_MESSAGE.DUPLICATE_INTEGRATOR_ACTOR_EVENT(
+          integratorActorEvent.participant.id,
+        ),
+      resultStatus: 'FAILED',
+      scenario:
+        'A PROCESSOR with multiple valid accreditations precedes an INTEGRATOR with a duplicate ACTOR event (should fail on the INTEGRATOR)',
     },
   ];

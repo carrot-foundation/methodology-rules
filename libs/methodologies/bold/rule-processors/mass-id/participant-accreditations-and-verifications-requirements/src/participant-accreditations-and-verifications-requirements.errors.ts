@@ -3,6 +3,8 @@ import { BaseProcessorErrors } from '@carrot-fndn/shared/methodologies/bold/proc
 export class ParticipantAccreditationsAndVerificationsRequirementsProcessorErrors extends BaseProcessorErrors {
   override readonly ERROR_MESSAGE = {
     ACCREDITATION_DOCUMENTS_NOT_FOUND: 'Accreditation documents were not found',
+    DUPLICATE_INTEGRATOR_ACTOR_EVENT: (participantId: string) =>
+      `The MassID has more than one "Integrator" ACTOR event for participant ${participantId}, each linking its own Integrator accreditation`,
     FAILED_BY_ERROR:
       'Unable to check participant accreditations-and-verifications requirements',
     MASS_ID_DOCUMENT_DOES_NOT_CONTAIN_EVENTS: (documentId: string) =>

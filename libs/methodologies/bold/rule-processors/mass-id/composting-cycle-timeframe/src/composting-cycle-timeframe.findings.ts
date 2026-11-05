@@ -25,7 +25,7 @@ export const COMPOSTING_CYCLE_TIMEFRAME_FINDINGS = defineRuleFindings(
       category: 'MISSING_EVENT',
       defaultOwner: 'INTEGRATOR',
       description:
-        'O ciclo de compostagem não pôde ser verificado porque a MassID não tem o evento "Drop-off".',
+        'O ciclo de compostagem não pôde ser verificado porque o MassID não tem o evento "Drop-off".',
       guidance:
         'Envie o evento "Drop-off" com a data de recebimento da massa no reciclador.',
       title: 'Evento de recebimento ausente',
@@ -34,7 +34,7 @@ export const COMPOSTING_CYCLE_TIMEFRAME_FINDINGS = defineRuleFindings(
       category: 'MISSING_EVENT',
       defaultOwner: 'INTEGRATOR',
       description:
-        'O ciclo de compostagem não pôde ser verificado porque a MassID não tem o evento "Recycled".',
+        'O ciclo de compostagem não pôde ser verificado porque o MassID não tem o evento "Recycled".',
       guidance:
         'Envie o evento "Recycled" com a data de conclusão da reciclagem.',
       title: 'Evento de reciclagem ausente',

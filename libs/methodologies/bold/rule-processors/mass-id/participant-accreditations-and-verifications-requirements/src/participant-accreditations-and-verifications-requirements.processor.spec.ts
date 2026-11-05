@@ -3,6 +3,7 @@ import {
   BoldStubsBuilder,
   expectRuleFindings,
   findTestCase,
+  listAccreditationDependencies,
   stubDocument,
   stubDocumentEventWithMetadataAttributes,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
@@ -240,6 +241,42 @@ describe('ParticipantAccreditationsAndVerificationsRequirementsProcessor', () =>
           defaultOwner: 'INTEGRATOR',
         },
       ],
+    });
+  });
+
+  it('should report a duplicate Integrator ACTOR event as an integrator finding', async () => {
+    const { documents, massIDAuditDocument } = findTestCase(
+      participantAccreditationsAndVerificationsRequirementsTestCases,
+      'A PROCESSOR with multiple valid accreditations precedes an INTEGRATOR with a duplicate ACTOR event (should fail on the INTEGRATOR)',
+    );
+
+    spyOnDocumentQueryServiceLoad(stubDocument(), [
+      massIDAuditDocument,
+      ...documents,
+    ]);
+
+    const ruleOutput = await ruleDataProcessor.process(
+      stubRuleInput({ documentId: massIDAuditDocument.id }),
+    );
+
+    expect(ruleOutput.resultContent).toStrictEqual({
+      findings: [
+        {
+          code: 'participant-accreditations-and-verifications-requirements.ERROR.DUPLICATE_INTEGRATOR_ACTOR_EVENT',
+          defaultOwner: 'INTEGRATOR',
+        },
+      ],
+    });
+  });
+
+  it('should declare an accreditation dependency only where the TEST synthetic accreditation fabricates or omits the value', () => {
+    expect(
+      listAccreditationDependencies(
+        PARTICIPANT_ACCREDITATIONS_AND_VERIFICATIONS_REQUIREMENTS_FINDINGS,
+      ),
+    ).toEqual({
+      'participant-accreditations-and-verifications-requirements.ERROR.ACCREDITATION_DOCUMENTS_NOT_FOUND':
+        'Recycler',
     });
   });
 });

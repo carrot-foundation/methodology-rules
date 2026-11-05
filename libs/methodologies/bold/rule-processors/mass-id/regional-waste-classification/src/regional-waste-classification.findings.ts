@@ -1,8 +1,22 @@
-import { defineRuleFindings } from '@carrot-fndn/shared/rule/result';
+import {
+  EXPECTED_SUBTYPE_GUIDANCE,
+  WASTE_SUBTYPE_CLASSIFICATION_EVIDENCE_FIELDS,
+  type WasteSubtypeClassificationEvidence,
+} from '@carrot-fndn/shared/methodologies/bold/utils';
+import {
+  crossValidationEvidence,
+  defineRuleFindings,
+} from '@carrot-fndn/shared/rule/result';
+
+import type { ClassificationDescriptionEvidence } from './regional-waste-classification.types';
 
 import { RESULT_COMMENTS } from './regional-waste-classification.constants';
 import { RegionalWasteClassificationProcessorErrors } from './regional-waste-classification.errors';
 import { ruleDefinition } from './regional-waste-classification.rule-definition';
+
+const subtypeEvidence = WASTE_SUBTYPE_CLASSIFICATION_EVIDENCE_FIELDS.map(
+  (field) => crossValidationEvidence<WasteSubtypeClassificationEvidence>(field),
+);
 
 export const REGIONAL_WASTE_CLASSIFICATION_FINDINGS = defineRuleFindings(
   ruleDefinition.slug,
@@ -43,8 +57,16 @@ export const REGIONAL_WASTE_CLASSIFICATION_FINDINGS = defineRuleFindings(
       defaultOwner: 'INTEGRATOR',
       description:
         'O "Local Waste Classification Description" não corresponde à descrição do código informado.',
+      evidence: [
+        crossValidationEvidence<ClassificationDescriptionEvidence>(
+          'localWasteClassificationId',
+        ),
+        crossValidationEvidence<ClassificationDescriptionEvidence>(
+          'expectedDescription',
+        ),
+      ],
       guidance:
-        'Envie a descrição exatamente como consta na classificação oficial do código informado.',
+        'Envie no evento "Pick-up" a descrição indicada em "expectedDescription", que é a descrição oficial do código informado.',
       title: 'Descrição da classificação do resíduo não confere',
     },
     'FAILED.INVALID_CLASSIFICATION_ID': {
@@ -60,9 +82,9 @@ export const REGIONAL_WASTE_CLASSIFICATION_FINDINGS = defineRuleFindings(
       category: 'INVALID_DATA',
       defaultOwner: 'INTEGRATOR',
       description:
-        'O subtipo da MassID não corresponde ao código CDM do "Local Waste Classification ID" informado.',
-      guidance:
-        'Confira o subtipo e o código de classificação local do resíduo enviados na MassID.',
+        'O subtipo do MassID não corresponde ao código CDM do "Local Waste Classification ID" informado.',
+      evidence: subtypeEvidence,
+      guidance: EXPECTED_SUBTYPE_GUIDANCE,
       title: 'Subtipo incompatível com a classificação do resíduo',
     },
     'FAILED.INVALID_SUBTYPE_MAPPING': {
@@ -70,7 +92,8 @@ export const REGIONAL_WASTE_CLASSIFICATION_FINDINGS = defineRuleFindings(
       defaultOwner: 'INTEGRATOR',
       description:
         'O subtipo informado não corresponde a um código CDM válido.',
-      guidance: 'Confira o subtipo do resíduo informado na MassID.',
+      evidence: subtypeEvidence,
+      guidance: EXPECTED_SUBTYPE_GUIDANCE,
       title: 'Subtipo sem código CDM correspondente',
     },
     'FAILED.UNSUPPORTED_COUNTRY': {

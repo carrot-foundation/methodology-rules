@@ -1,7 +1,10 @@
 import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
 import { isNonEmptyObject } from '@carrot-fndn/shared/helpers';
 import { BoldDocument } from '@carrot-fndn/shared/methodologies/bold/types';
-import { SHARED_FINDINGS } from '@carrot-fndn/shared/rule/result';
+import {
+  type FindingDeclaration,
+  SHARED_FINDINGS,
+} from '@carrot-fndn/shared/rule/result';
 import {
   RuleFindingSchema,
   RuleInput,
@@ -146,6 +149,19 @@ export function expectRuleOutput({
     ...(resultContent !== undefined && { resultContent }),
   });
 }
+
+export const listAccreditationDependencies = ({
+  declarations,
+}: {
+  declarations: readonly FindingDeclaration[];
+}): Record<string, string> =>
+  Object.fromEntries(
+    declarations.flatMap(({ finding: { code, dependsOnAccreditation } }) =>
+      dependsOnAccreditation === undefined
+        ? []
+        : [[code, dependsOnAccreditation]],
+    ),
+  );
 
 export function findTestCase<TestCase extends { scenario: string }>(
   testCases: readonly TestCase[],

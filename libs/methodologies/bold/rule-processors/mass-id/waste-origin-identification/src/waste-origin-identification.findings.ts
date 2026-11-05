@@ -24,7 +24,7 @@ export const WASTE_ORIGIN_IDENTIFICATION_FINDINGS = defineRuleFindings(
     'FAILED.MISSING_PICK_UP_EVENT': {
       category: 'MISSING_EVENT',
       defaultOwner: 'INTEGRATOR',
-      description: 'A MassID não tem o evento "Pick-up".',
+      description: 'O MassID não tem o evento "Pick-up".',
       guidance: 'Envie o evento "Pick-up" registrando a coleta da massa.',
       title: 'Evento de coleta ausente',
     },
@@ -32,7 +32,7 @@ export const WASTE_ORIGIN_IDENTIFICATION_FINDINGS = defineRuleFindings(
       category: 'MISSING_EVENT',
       defaultOwner: 'INTEGRATOR',
       description:
-        'A MassID não tem evento de ator "Waste Generator" e a origem do resíduo não está declarada como "Unidentified".',
+        'O MassID não tem evento de ator "Waste Generator" e a origem do resíduo não está declarada como "Unidentified".',
       guidance:
         'Envie o evento de ator "Waste Generator" ou declare a origem do resíduo como "Unidentified".',
       title: 'Gerador não identificado',
@@ -41,7 +41,7 @@ export const WASTE_ORIGIN_IDENTIFICATION_FINDINGS = defineRuleFindings(
       category: 'INVALID_DATA',
       defaultOwner: 'INTEGRATOR',
       description:
-        'A MassID tem mais de um evento de ator "Waste Generator"; apenas um é permitido.',
+        'O MassID tem mais de um evento de ator "Waste Generator"; apenas um é permitido.',
       guidance: 'Envie um único evento de ator "Waste Generator".',
       title: 'Mais de um gerador informado',
     },
@@ -49,7 +49,7 @@ export const WASTE_ORIGIN_IDENTIFICATION_FINDINGS = defineRuleFindings(
       category: 'INVALID_DATA',
       defaultOwner: 'INTEGRATOR',
       description:
-        'A MassID tem evento de ator "Waste Generator", mas a origem do resíduo está declarada como "Unidentified".',
+        'O MassID tem evento de ator "Waste Generator", mas a origem do resíduo está declarada como "Unidentified".',
       guidance:
         'Remova o gerador ou corrija a origem do resíduo, conforme o que aconteceu na coleta.',
       title: 'Gerador informado com origem não identificada',

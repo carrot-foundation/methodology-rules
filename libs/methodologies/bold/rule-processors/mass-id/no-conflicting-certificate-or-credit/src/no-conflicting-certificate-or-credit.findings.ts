@@ -26,7 +26,7 @@ export const NO_CONFLICTING_CERTIFICATE_OR_CREDIT_FINDINGS = defineRuleFindings(
       category: 'DUPLICATE_OR_CONFLICT',
       defaultOwner: 'TO_CONFIRM',
       description:
-        'A MassID já tem uma auditoria vinculada para a mesma metodologia.',
+        'O MassID já tem uma auditoria vinculada para a mesma metodologia.',
       guidance:
         'Nenhum reenvio é necessário. A Carrot confirma se a auditoria anterior é válida.',
       title: 'Massa já auditada nesta metodologia',
@@ -34,7 +34,7 @@ export const NO_CONFLICTING_CERTIFICATE_OR_CREDIT_FINDINGS = defineRuleFindings(
     'ERROR.MASS_ID_DOCUMENT_HAS_A_VALID_CERTIFICATE_DOCUMENT': {
       category: 'DUPLICATE_OR_CONFLICT',
       defaultOwner: 'TO_CONFIRM',
-      description: 'A MassID já está vinculada a um certificado válido.',
+      description: 'O MassID já está vinculado a um certificado válido.',
       guidance:
         'Nenhum reenvio é necessário. A Carrot confirma o vínculo existente.',
       title: 'Massa já vinculada a um certificado',
@@ -42,7 +42,7 @@ export const NO_CONFLICTING_CERTIFICATE_OR_CREDIT_FINDINGS = defineRuleFindings(
     'ERROR.MASS_ID_DOCUMENT_HAS_A_VALID_CREDIT_DOCUMENT': {
       category: 'DUPLICATE_OR_CONFLICT',
       defaultOwner: 'TO_CONFIRM',
-      description: 'A MassID já está vinculada a um documento "Credit Order".',
+      description: 'O MassID já está vinculado a um documento "Credit Order".',
       guidance:
         'Nenhum reenvio é necessário. A Carrot confirma o vínculo existente.',
       title: 'Massa já vinculada a um crédito',

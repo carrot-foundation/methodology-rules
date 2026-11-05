@@ -5,7 +5,6 @@ import {
   getOrDefault,
   isNameMatch,
   isNonEmptyString,
-  normalizeString,
 } from '@carrot-fndn/shared/helpers';
 import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
 import {
@@ -20,11 +19,16 @@ import {
   BoldDocumentEventLabel,
   BoldDocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { WASTE_CLASSIFICATION_CODES } from '@carrot-fndn/shared/methodologies/bold/utils';
+import {
+  findBrWasteClassification,
+  getWasteSubtypeClassificationEvidence,
+} from '@carrot-fndn/shared/methodologies/bold/utils';
 import {
   type AnyObject,
   type BoldAttributeValue,
 } from '@carrot-fndn/shared/types';
+
+import type { ClassificationDescriptionEvidence } from './regional-waste-classification.types';
 
 import { RESULT_COMMENTS } from './regional-waste-classification.constants';
 import { RegionalWasteClassificationProcessorErrors } from './regional-waste-classification.errors';
@@ -84,13 +88,9 @@ export class RegionalWasteClassificationProcessor extends ParentDocumentRuleProc
       );
     }
 
-    const validClassificationIds = Object.keys(WASTE_CLASSIFICATION_CODES.BR);
+    const classificationEntry = findBrWasteClassification(id);
 
-    const normalizedId = validClassificationIds.find(
-      (validId) => normalizeString(validId) === normalizeString(id),
-    );
-
-    if (!normalizedId) {
+    if (!classificationEntry) {
       return this.isFailed(
         REGIONAL_WASTE_CLASSIFICATION_FINDINGS.result(
           'FAILED.INVALID_CLASSIFICATION_ID',
@@ -99,6 +99,10 @@ export class RegionalWasteClassificationProcessor extends ParentDocumentRuleProc
       );
     }
 
+    const subtypeEvidence = getWasteSubtypeClassificationEvidence({
+      localWasteClassificationId: id,
+      subtype,
+    });
     const expectedCdmCode = getCdmCodeFromSubtype(subtype);
 
     if (!expectedCdmCode) {
@@ -106,21 +110,16 @@ export class RegionalWasteClassificationProcessor extends ParentDocumentRuleProc
         REGIONAL_WASTE_CLASSIFICATION_FINDINGS.result(
           'FAILED.INVALID_SUBTYPE_MAPPING',
         ),
-        subject,
+        { ...subject, crossValidation: subtypeEvidence },
       );
     }
-
-    const classificationEntry =
-      WASTE_CLASSIFICATION_CODES.BR[
-        normalizedId as keyof typeof WASTE_CLASSIFICATION_CODES.BR
-      ];
 
     if (classificationEntry.CDM_CODE !== expectedCdmCode) {
       return this.isFailed(
         REGIONAL_WASTE_CLASSIFICATION_FINDINGS.result(
           'FAILED.INVALID_SUBTYPE_CDM_CODE_MISMATCH',
         ),
-        subject,
+        { ...subject, crossValidation: subtypeEvidence },
       );
     }
 
@@ -133,11 +132,16 @@ export class RegionalWasteClassificationProcessor extends ParentDocumentRuleProc
     );
 
     if (!isMatch) {
+      const descriptionEvidence: ClassificationDescriptionEvidence = {
+        expectedDescription,
+        localWasteClassificationId: classificationEntry.id,
+      };
+
       return this.isFailed(
         REGIONAL_WASTE_CLASSIFICATION_FINDINGS.result(
           'FAILED.INVALID_CLASSIFICATION_DESCRIPTION',
         ),
-        subject,
+        { ...subject, crossValidation: descriptionEvidence },
       );
     }
 

@@ -1,3 +1,4 @@
+import { MassIDActorType } from '@carrot-fndn/shared/methodologies/bold/types';
 import { defineRuleFindings } from '@carrot-fndn/shared/rule/result';
 
 import { RESULT_COMMENTS } from './geolocation-and-address-precision.constants';
@@ -34,7 +35,7 @@ export const GEOLOCATION_AND_ADDRESS_PRECISION_FINDINGS = defineRuleFindings(
       category: 'MISSING_EVENT',
       defaultOwner: 'INTEGRATOR',
       description:
-        'A MassID não tem os eventos "Pick-up" e "Drop-off" exigidos para validar endereços.',
+        'O MassID não tem os eventos "Pick-up" e "Drop-off" exigidos para validar endereços.',
       guidance:
         'Envie os eventos "Pick-up" e "Drop-off" com os respectivos endereços.',
       title: 'Eventos de coleta ou recebimento ausentes',
@@ -43,16 +44,17 @@ export const GEOLOCATION_AND_ADDRESS_PRECISION_FINDINGS = defineRuleFindings(
       category: 'PROCESSING_ERROR',
       defaultOwner: 'CARROT',
       description:
-        'O documento da MassID não foi encontrado durante a validação.',
+        'O documento do MassID não foi encontrado durante a validação.',
       guidance:
         'Nenhuma ação do integrador é necessária: a Carrot investiga a falha e reexecuta a auditoria.',
-      title: 'Documento da MassID não encontrado',
+      title: 'Documento do MassID não encontrado',
     },
     'ERROR.PARTICIPANT_ACCREDITATION_DOCUMENTS_NOT_FOUND': {
       category: 'ACCREDITATION',
       defaultOwner: 'TO_CONFIRM',
+      dependsOnAccreditation: MassIDActorType.RECYCLER,
       description:
-        'Nenhum documento de credenciamento foi encontrado para os participantes da MassID.',
+        'Nenhum documento de credenciamento foi encontrado para os participantes do MassID.',
       guidance:
         'Confirme que os participantes da massa estão credenciados e que a massa os referencia corretamente. A Carrot confirma a origem da pendência.',
       title: 'Credenciamentos dos participantes não encontrados',
@@ -80,7 +82,7 @@ export const GEOLOCATION_AND_ADDRESS_PRECISION_FINDINGS = defineRuleFindings(
       defaultOwner: 'INTEGRATOR',
       description:
         'Não foi possível identificar o tipo de ator do evento avaliado.',
-      guidance: 'Confira o rótulo do evento de ator enviado na MassID.',
+      guidance: 'Confira o rótulo do evento de ator enviado no MassID.',
       title: 'Tipo de ator não identificado',
     },
     'FAILED.INVALID_ADDRESS_DISTANCE': {
@@ -131,6 +133,7 @@ export const GEOLOCATION_AND_ADDRESS_PRECISION_FINDINGS = defineRuleFindings(
     'FAILED.MISSING_ACCREDITATION_ADDRESS': {
       category: 'ACCREDITATION',
       defaultOwner: 'CARROT',
+      dependsOnAccreditation: MassIDActorType.RECYCLER,
       description:
         'Nenhum endereço credenciado foi encontrado para o ator avaliado.',
       guidance:
@@ -140,6 +143,7 @@ export const GEOLOCATION_AND_ADDRESS_PRECISION_FINDINGS = defineRuleFindings(
     'FAILED.MISSING_ACCREDITED_ADDRESS_COORDINATES': {
       category: 'ACCREDITATION',
       defaultOwner: 'CARROT',
+      dependsOnAccreditation: MassIDActorType.RECYCLER,
       description:
         'O endereço credenciado não tem latitude ou longitude, necessárias para validar a distância.',
       guidance:

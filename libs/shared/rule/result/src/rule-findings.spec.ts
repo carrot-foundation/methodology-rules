@@ -2,6 +2,7 @@ import { MassIDActorType } from '@carrot-fndn/shared/methodologies/bold/types';
 import { faker } from '@faker-js/faker';
 
 import {
+  crossValidationEvidence,
   defineRuleFindings,
   joinRenderedFindings,
   SHARED_FINDINGS,
@@ -236,5 +237,13 @@ describe('SHARED_FINDINGS', () => {
       },
       message: `Could not load the document with id ${documentId}`,
     });
+  });
+});
+
+describe('crossValidationEvidence', () => {
+  it('should select a field of the result content cross validation', () => {
+    expect(
+      crossValidationEvidence<{ expectedSubtype: string }>('expectedSubtype'),
+    ).toStrictEqual({ field: 'expectedSubtype', source: 'CROSS_VALIDATION' });
   });
 });

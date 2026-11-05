@@ -50,7 +50,7 @@ export const VEHICLE_IDENTIFICATION_FINDINGS = defineRuleFindings(
     'FAILED.PICK_UP_EVENT_MISSING': {
       category: 'MISSING_EVENT',
       defaultOwner: 'INTEGRATOR',
-      description: 'A MassID não tem o evento "Pick-up".',
+      description: 'O MassID não tem o evento "Pick-up".',
       guidance: 'Envie o evento "Pick-up" registrando a coleta da massa.',
       title: 'Evento de coleta ausente',
     },

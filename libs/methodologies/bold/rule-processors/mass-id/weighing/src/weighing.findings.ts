@@ -1,3 +1,4 @@
+import { MassIDActorType } from '@carrot-fndn/shared/methodologies/bold/types';
 import { defineRuleFindings } from '@carrot-fndn/shared/rule/result';
 
 import {
@@ -30,22 +31,23 @@ export const WEIGHING_FINDINGS = defineRuleFindings(
       category: 'INVALID_DATA',
       defaultOwner: 'INTEGRATOR',
       description:
-        'Os dados da MassID não atendem à estrutura exigida para validar a pesagem.',
-      guidance: 'Confira os eventos "Weighing" e seus atributos na MassID.',
+        'Os dados do MassID não atendem à estrutura exigida para validar a pesagem.',
+      guidance: 'Confira os eventos "Weighing" e seus atributos no MassID.',
       title: 'Dados de pesagem insuficientes',
     },
     'ERROR.MASS_ID_DOCUMENT_NOT_FOUND': {
       category: 'PROCESSING_ERROR',
       defaultOwner: 'CARROT',
       description:
-        'O documento da MassID não foi encontrado durante a validação.',
+        'O documento do MassID não foi encontrado durante a validação.',
       guidance:
         'Nenhuma ação do integrador é necessária: a Carrot investiga a falha e reexecuta a auditoria.',
-      title: 'Documento da MassID não encontrado',
+      title: 'Documento do MassID não encontrado',
     },
     'ERROR.MISSING_RECYCLER_ACCREDITATION_DOCUMENT': {
       category: 'ACCREDITATION',
       defaultOwner: 'TO_CONFIRM',
+      dependsOnAccreditation: MassIDActorType.RECYCLER,
       description:
         'O documento de credenciamento do reciclador não foi encontrado.',
       guidance:
@@ -139,6 +141,7 @@ export const WEIGHING_FINDINGS = defineRuleFindings(
     'INVALID.SCALE_TYPE_MISMATCH': {
       category: 'INVALID_DATA',
       defaultOwner: 'INTEGRATOR',
+      dependsOnAccreditation: MassIDActorType.RECYCLER,
       description:
         'O "Scale Type" informado não é o mesmo tipo de balança do credenciamento.',
       guidance:
@@ -218,14 +221,14 @@ export const WEIGHING_FINDINGS = defineRuleFindings(
       category: 'INVALID_DATA',
       defaultOwner: 'INTEGRATOR',
       description:
-        'A MassID tem mais de dois eventos "Weighing", o que não é suportado.',
+        'O MassID tem mais de dois eventos "Weighing", o que não é suportado.',
       guidance: 'Envie uma pesagem, ou duas no caso de pesagem em duas etapas.',
       title: 'Mais de duas pesagens',
     },
     'NOT_FOUND.NO_WEIGHING_EVENTS': {
       category: 'MISSING_EVENT',
       defaultOwner: 'INTEGRATOR',
-      description: 'A MassID não tem eventos "Weighing".',
+      description: 'O MassID não tem eventos "Weighing".',
       guidance: 'Envie o evento "Weighing" da massa.',
       title: 'Evento de pesagem ausente',
     },
@@ -239,6 +242,7 @@ export const WEIGHING_FINDINGS = defineRuleFindings(
     'WRONG_FORMAT.CONTAINER_QUANTITY': {
       category: 'INVALID_DATA',
       defaultOwner: 'INTEGRATOR',
+      dependsOnAccreditation: MassIDActorType.RECYCLER,
       description:
         'O "Container Quantity" não é um número inteiro maior que zero e o contêiner não é "Truck".',
       guidance:

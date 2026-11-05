@@ -20,10 +20,15 @@ import {
   MASS_ID,
   PARTICIPANT_ACCREDITATION_PARTIAL_MATCH,
 } from '@carrot-fndn/shared/methodologies/bold/matchers';
-import { eventLabelIsAnyOf } from '@carrot-fndn/shared/methodologies/bold/predicates';
+import {
+  and,
+  eventLabelIsAnyOf,
+  eventNameIsAnyOf,
+} from '@carrot-fndn/shared/methodologies/bold/predicates';
 import {
   type BoldDocument,
   BoldDocumentEventLabel,
+  BoldDocumentEventName,
   BoldDocumentSubtype,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { mapDocumentRelation } from '@carrot-fndn/shared/methodologies/bold/utils';
@@ -45,6 +50,23 @@ const ACTORS_REQUIRING_DATES: ReadonlySet<BoldDocumentEventLabel> = new Set([
 const ACTORS_WITH_OPTIONAL_DATES: ReadonlySet<BoldDocumentEventLabel> = new Set(
   [BoldDocumentEventLabel.INTEGRATOR],
 );
+
+const isIntegratorActorEvent = and(
+  eventNameIsAnyOf([BoldDocumentEventName.ACTOR]),
+  eventLabelIsAnyOf([BoldDocumentEventLabel.INTEGRATOR]),
+);
+
+// Palantir adds the authoring integrator's ACTOR event at document creation, so a second one comes from the integrator's payload
+const hasDuplicateIntegratorActorEvents = (
+  massIDDocument: BoldDocument,
+  participantId: string,
+  actorType: string,
+): boolean =>
+  actorType === BoldDocumentEventLabel.INTEGRATOR.toString() &&
+  massIDDocument.externalEvents!.filter(
+    (event) =>
+      isIntegratorActorEvent(event) && event.participant.id === participantId,
+  ).length > 1;
 
 interface RuleSubject {
   accreditationDocuments: Map<string, BoldDocument[]>;
@@ -105,6 +127,7 @@ export class ParticipantAccreditationsAndVerificationsRequirementsProcessor exte
     const validationError = this.validateAllActors(
       actorParticipants,
       accreditationDocuments,
+      massIDDocument,
     );
 
     if (validationError) {
@@ -232,6 +255,7 @@ export class ParticipantAccreditationsAndVerificationsRequirementsProcessor exte
   private validateAllActors(
     actorParticipants: Map<string, Set<BoldDocumentEventLabel>>,
     accreditationDocuments: Map<string, BoldDocument[]>,
+    massIDDocument: BoldDocument,
   ): Error | undefined {
     const missingParticipants: string[] = [];
     const participantsWithMultipleValid: Array<{
@@ -282,6 +306,24 @@ export class ParticipantAccreditationsAndVerificationsRequirementsProcessor exte
         actorType: string;
         participantId: string;
       };
+
+      const duplicatedIntegrator = participantsWithMultipleValid.find(
+        ({ actorType, participantId }) =>
+          hasDuplicateIntegratorActorEvents(
+            massIDDocument,
+            participantId,
+            actorType,
+          ),
+      );
+
+      if (duplicatedIntegrator) {
+        return this.errorProcessor.getKnownError(
+          PARTICIPANT_ACCREDITATIONS_AND_VERIFICATIONS_REQUIREMENTS_FINDINGS.render(
+            'ERROR.DUPLICATE_INTEGRATOR_ACTOR_EVENT',
+            duplicatedIntegrator.participantId,
+          ),
+        );
+      }
 
       return this.errorProcessor.getKnownError(
         PARTICIPANT_ACCREDITATIONS_AND_VERIFICATIONS_REQUIREMENTS_FINDINGS.render(

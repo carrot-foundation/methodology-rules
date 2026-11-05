@@ -1,7 +1,15 @@
 import type { RuleTestCase } from '@carrot-fndn/shared/rule/types';
 
+import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
+import { eventNameIsAnyOf } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import { BoldStubsBuilder } from '@carrot-fndn/shared/methodologies/bold/testing';
-import { type BoldDocument } from '@carrot-fndn/shared/methodologies/bold/types';
+import {
+  BoldAttributeName,
+  type BoldDocument,
+  BoldDocumentEventName,
+} from '@carrot-fndn/shared/methodologies/bold/types';
+import { getWasteSubtypeClassificationEvidence } from '@carrot-fndn/shared/methodologies/bold/utils';
+import { type AnyObject } from '@carrot-fndn/shared/types';
 
 import { RESULT_COMMENTS } from './mass-id-qualifications.constants';
 import { MassIDQualificationsProcessorErrors } from './mass-id-qualifications.errors';
@@ -12,8 +20,21 @@ const massIDStubs = new BoldStubsBuilder()
   .build();
 const processorErrors = new MassIDQualificationsProcessorErrors();
 
+const subtypeEvidenceContent = (subtype: string): AnyObject => ({
+  crossValidation: getWasteSubtypeClassificationEvidence({
+    localWasteClassificationId: getEventAttributeValue(
+      massIDStubs.massIDDocument.externalEvents?.find(
+        eventNameIsAnyOf([BoldDocumentEventName.PICK_UP]),
+      ),
+      BoldAttributeName.LOCAL_WASTE_CLASSIFICATION_ID,
+    ),
+    subtype,
+  }),
+});
+
 interface MassIDQualificationsTestCase extends RuleTestCase {
   massIDDocument: BoldDocument;
+  resultContent?: AnyObject;
 }
 
 export const massIDQualificationsTestCases: MassIDQualificationsTestCase[] = [
@@ -78,6 +99,7 @@ export const massIDQualificationsTestCases: MassIDQualificationsTestCase[] = [
       subtype: 'Invalid Subtype',
     },
     resultComment: RESULT_COMMENTS.failed.INVALID_SUBTYPE('Invalid Subtype'),
+    resultContent: subtypeEvidenceContent('Invalid Subtype'),
     resultStatus: 'FAILED',
     scenario: 'The subtype is defined but not in the allowed list',
   },
@@ -107,6 +129,7 @@ export const massIDQualificationsTestCases: MassIDQualificationsTestCase[] = [
       RESULT_COMMENTS.failed.INVALID_TYPE('INVALID_TYPE'),
       RESULT_COMMENTS.failed.INVALID_SUBTYPE('INVALID_SUBTYPE'),
     ].join(' '),
+    resultContent: subtypeEvidenceContent('INVALID_SUBTYPE'),
     resultStatus: 'FAILED',
     scenario: 'Multiple errors were found',
   },

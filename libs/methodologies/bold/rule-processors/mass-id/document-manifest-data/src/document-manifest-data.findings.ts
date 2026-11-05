@@ -8,7 +8,7 @@ import {
 import { BoldReportType } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
   defineRuleFindings,
-  type FindingEvidenceSelector,
+  crossValidationEvidence as selectCrossValidationEvidence,
 } from '@carrot-fndn/shared/rule/result';
 
 import type {
@@ -23,9 +23,9 @@ import {
 import { DocumentManifestDataProcessorErrors } from './document-manifest-data.errors';
 import { ruleDefinition } from './document-manifest-data.rule-definition';
 
-const crossValidationEvidence = (
-  field: keyof CdfCrossValidation | keyof MtrCrossValidation,
-): FindingEvidenceSelector => ({ field, source: 'CROSS_VALIDATION' });
+const crossValidationEvidence = selectCrossValidationEvidence<
+  CdfCrossValidation & MtrCrossValidation
+>;
 
 export const DOCUMENT_MANIFEST_DATA_FINDINGS = defineRuleFindings(
   ruleDefinition.slug,
@@ -361,7 +361,7 @@ export const DOCUMENT_MANIFEST_DATA_FINDINGS = defineRuleFindings(
       category: 'MISSING_EVENT',
       defaultOwner: 'INTEGRATOR',
       description:
-        'A MassID não tem o evento do manifesto avaliado pela regra.',
+        'O MassID não tem o evento do manifesto avaliado pela regra.',
       guidance:
         'Envie o evento do manifesto ("Transport Manifest" para o MTR, "Recycling Manifest" para o CDF).',
       title: 'Evento do manifesto ausente',
@@ -377,7 +377,7 @@ export const DOCUMENT_MANIFEST_DATA_FINDINGS = defineRuleFindings(
       category: 'MISSING_EVENT',
       defaultOwner: 'INTEGRATOR',
       description:
-        'A MassID não tem evento de ator "Recycler", necessário para validar o manifesto.',
+        'O MassID não tem evento de ator "Recycler", necessário para validar o manifesto.',
       guidance: 'Envie o evento de ator "Recycler".',
       title: 'Reciclador não identificado',
     },

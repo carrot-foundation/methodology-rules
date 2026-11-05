@@ -33,7 +33,7 @@ export const DROP_OFF_AT_RECYCLER_FINDINGS = defineRuleFindings(
     'FAILED.MISSING_DROP_OFF_EVENT': {
       category: 'MISSING_EVENT',
       defaultOwner: 'INTEGRATOR',
-      description: 'A MassID não tem o evento "Drop-off".',
+      description: 'O MassID não tem o evento "Drop-off".',
       guidance:
         'Envie o evento "Drop-off" registrando o recebimento da massa no reciclador.',
       title: 'Evento de recebimento ausente',

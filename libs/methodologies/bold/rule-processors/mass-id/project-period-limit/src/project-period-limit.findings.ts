@@ -33,7 +33,7 @@ export const PROJECT_PERIOD_LIMIT_FINDINGS = defineRuleFindings(
     'FAILED.MISSING_RECYCLED_EVENT': {
       category: 'MISSING_EVENT',
       defaultOwner: 'INTEGRATOR',
-      description: 'A MassID não tem o evento "Recycled".',
+      description: 'O MassID não tem o evento "Recycled".',
       guidance:
         'Envie o evento "Recycled" com a data de conclusão da reciclagem.',
       title: 'Evento de reciclagem ausente',

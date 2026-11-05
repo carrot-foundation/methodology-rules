@@ -7,6 +7,7 @@ import {
   expectRuleFindings,
   expectRuleOutput,
   findTestCase,
+  listAccreditationDependencies,
 } from './rule-processor.helpers';
 
 const TEST_FINDINGS = { codes: new Set(['test-rule.FAILED.MASS_MISMATCH']) };
@@ -179,5 +180,39 @@ describe('findTestCase', () => {
     expect(() => findTestCase(testCases, 'missing scenario')).toThrow(
       'Test case not found: missing scenario',
     );
+  });
+});
+
+describe('listAccreditationDependencies', () => {
+  it('should map only the findings that declare an accreditation dependency', () => {
+    const meta = {
+      category: 'INVALID_DATA',
+      defaultOwner: 'INTEGRATOR',
+      description: faker.lorem.sentence(),
+      guidance: faker.lorem.sentence(),
+      title: faker.lorem.words(),
+    } as const;
+
+    expect(
+      listAccreditationDependencies({
+        declarations: [
+          {
+            finding: {
+              code: 'test-rule.FAILED.MASS_MISMATCH',
+              defaultOwner: 'RECYCLER',
+              dependsOnAccreditation: 'Recycler',
+            },
+            meta,
+          },
+          {
+            finding: {
+              code: 'test-rule.ERROR.INVALID_SUBJECT',
+              defaultOwner: 'CARROT',
+            },
+            meta,
+          },
+        ],
+      }),
+    ).toEqual({ 'test-rule.FAILED.MASS_MISMATCH': 'Recycler' });
   });
 });

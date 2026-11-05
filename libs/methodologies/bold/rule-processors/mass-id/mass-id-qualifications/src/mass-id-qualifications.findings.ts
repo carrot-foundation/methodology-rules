@@ -1,4 +1,12 @@
-import { defineRuleFindings } from '@carrot-fndn/shared/rule/result';
+import {
+  EXPECTED_SUBTYPE_GUIDANCE,
+  WASTE_SUBTYPE_CLASSIFICATION_EVIDENCE_FIELDS,
+  type WasteSubtypeClassificationEvidence,
+} from '@carrot-fndn/shared/methodologies/bold/utils';
+import {
+  crossValidationEvidence,
+  defineRuleFindings,
+} from '@carrot-fndn/shared/rule/result';
 
 import { RESULT_COMMENTS } from './mass-id-qualifications.constants';
 import { MassIDQualificationsProcessorErrors } from './mass-id-qualifications.errors';
@@ -15,15 +23,15 @@ export const MASS_ID_QUALIFICATIONS_FINDINGS = defineRuleFindings(
     'ERROR.DOCUMENT_SUBTYPE_NOT_FOUND': {
       category: 'MISSING_DATA',
       defaultOwner: 'INTEGRATOR',
-      description: 'A MassID não informa o subtipo do resíduo.',
-      guidance: 'Informe o subtipo do resíduo na MassID.',
+      description: 'O MassID não informa o subtipo do resíduo.',
+      guidance: 'Informe o subtipo do resíduo no MassID.',
       title: 'Subtipo da massa ausente',
     },
     'ERROR.DOCUMENT_TYPE_NOT_FOUND': {
       category: 'MISSING_DATA',
       defaultOwner: 'INTEGRATOR',
-      description: 'A MassID não informa o tipo do resíduo.',
-      guidance: 'Informe o tipo do resíduo na MassID.',
+      description: 'O MassID não informa o tipo do resíduo.',
+      guidance: 'Informe o tipo do resíduo no MassID.',
       title: 'Tipo da massa ausente',
     },
     'ERROR.FAILED_BY_ERROR': {
@@ -45,7 +53,7 @@ export const MASS_ID_QUALIFICATIONS_FINDINGS = defineRuleFindings(
     'FAILED.INVALID_MEASUREMENT_UNIT': {
       category: 'INVALID_DATA',
       defaultOwner: 'INTEGRATOR',
-      description: 'A unidade de medida da MassID não é "kg".',
+      description: 'A unidade de medida do MassID não é "kg".',
       guidance: 'Envie a quantidade da massa em quilogramas ("kg").',
       title: 'Unidade de medida inválida',
     },
@@ -54,8 +62,10 @@ export const MASS_ID_QUALIFICATIONS_FINDINGS = defineRuleFindings(
       defaultOwner: 'INTEGRATOR',
       description:
         'O subtipo informado não está entre os aceitos pela metodologia.',
-      guidance:
-        'Confira o subtipo do resíduo e envie um dos valores aceitos pela metodologia.',
+      evidence: WASTE_SUBTYPE_CLASSIFICATION_EVIDENCE_FIELDS.map((field) =>
+        crossValidationEvidence<WasteSubtypeClassificationEvidence>(field),
+      ),
+      guidance: EXPECTED_SUBTYPE_GUIDANCE,
       title: 'Subtipo do resíduo não aceito',
     },
     'FAILED.INVALID_TYPE': {
@@ -63,13 +73,13 @@ export const MASS_ID_QUALIFICATIONS_FINDINGS = defineRuleFindings(
       defaultOwner: 'INTEGRATOR',
       description: 'O tipo do documento não é "Organic".',
       guidance:
-        'Envie a MassID com o tipo "Organic" se o resíduo for orgânico; outros tipos não são elegíveis.',
+        'Envie o MassID com o tipo "Organic" se o resíduo for orgânico; outros tipos não são elegíveis.',
       title: 'Tipo do resíduo não aceito',
     },
     'FAILED.INVALID_VALUE': {
       category: 'INVALID_DATA',
       defaultOwner: 'INTEGRATOR',
-      description: 'A quantidade da MassID não é maior que zero.',
+      description: 'A quantidade do MassID não é maior que zero.',
       guidance: 'Envie a quantidade da massa em kg, maior que zero.',
       title: 'Quantidade da massa inválida',
     },

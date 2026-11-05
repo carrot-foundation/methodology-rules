@@ -1,3 +1,4 @@
+import { MassIDActorType } from '@carrot-fndn/shared/methodologies/bold/types';
 import { defineRuleFindings } from '@carrot-fndn/shared/rule/result';
 
 import { RESULT_COMMENTS } from './participant-accreditations-and-verifications-requirements.constants';
@@ -18,11 +19,21 @@ export const PARTICIPANT_ACCREDITATIONS_AND_VERIFICATIONS_REQUIREMENTS_FINDINGS 
       'ERROR.ACCREDITATION_DOCUMENTS_NOT_FOUND': {
         category: 'ACCREDITATION',
         defaultOwner: 'TO_CONFIRM',
+        dependsOnAccreditation: MassIDActorType.RECYCLER,
         description:
-          'Nenhum documento de credenciamento foi encontrado para a MassID.',
+          'Nenhum documento de credenciamento foi encontrado para o MassID.',
         guidance:
           'Confirme que os participantes da massa estão credenciados e referenciados corretamente. A Carrot confirma a origem da pendência.',
         title: 'Credenciamentos não encontrados',
+      },
+      'ERROR.DUPLICATE_INTEGRATOR_ACTOR_EVENT': {
+        category: 'DUPLICATE_OR_CONFLICT',
+        defaultOwner: 'INTEGRATOR',
+        description:
+          'O MassID tem mais de um evento ACTOR "Integrator" para o mesmo participante, e cada um vincula um credenciamento do integrador.',
+        guidance:
+          'Não envie o evento ACTOR "Integrator": a plataforma o adiciona ao criar o MassID, com o endereço cadastrado do integrador.',
+        title: 'Evento ACTOR do integrador duplicado',
       },
       'ERROR.FAILED_BY_ERROR': {
         category: 'PROCESSING_ERROR',
@@ -36,24 +47,24 @@ export const PARTICIPANT_ACCREDITATIONS_AND_VERIFICATIONS_REQUIREMENTS_FINDINGS 
       'ERROR.MASS_ID_DOCUMENT_DOES_NOT_CONTAIN_EVENTS': {
         category: 'MISSING_EVENT',
         defaultOwner: 'INTEGRATOR',
-        description: 'A MassID não tem nenhum evento.',
-        guidance: 'Envie a MassID com os eventos da cadeia de custódia.',
+        description: 'O MassID não tem nenhum evento.',
+        guidance: 'Envie o MassID com os eventos da cadeia de custódia.',
         title: 'MassID sem eventos',
       },
       'ERROR.MASS_ID_DOCUMENT_NOT_FOUND': {
         category: 'PROCESSING_ERROR',
         defaultOwner: 'CARROT',
         description:
-          'O documento da MassID não foi encontrado durante a validação.',
+          'O documento do MassID não foi encontrado durante a validação.',
         guidance:
           'Nenhuma ação do integrador é necessária: a Carrot investiga a falha e reexecuta a auditoria.',
-        title: 'Documento da MassID não encontrado',
+        title: 'Documento do MassID não encontrado',
       },
       'ERROR.MISSING_PARTICIPANTS_ACCREDITATION_DOCUMENTS': {
         category: 'ACCREDITATION',
         defaultOwner: 'TO_CONFIRM',
         description:
-          'Um ou mais participantes da MassID não têm credenciamento válido.',
+          'Um ou mais participantes do MassID não têm credenciamento válido.',
         guidance:
           'Confirme que todos os participantes da massa estão credenciados. A Carrot confirma a origem da pendência.',
         title: 'Participantes sem credenciamento válido',
@@ -64,7 +75,7 @@ export const PARTICIPANT_ACCREDITATIONS_AND_VERIFICATIONS_REQUIREMENTS_FINDINGS 
         description:
           'Um participante tem mais de um credenciamento válido para o mesmo papel.',
         guidance:
-          'Confira o participante referenciado na MassID e informe à Carrot qual credenciamento se aplica.',
+          'Confira o participante referenciado no MassID e informe à Carrot qual credenciamento se aplica.',
         title: 'Participante com mais de um credenciamento válido',
       },
     },

@@ -34,6 +34,11 @@ import {
 } from '@carrot-fndn/shared/rule/types';
 import { type BoldAttributeValue } from '@carrot-fndn/shared/types';
 
+import type {
+  DeductedWeightEvidence,
+  SortingValueEvidence,
+} from './mass-id-sorting.types';
+
 import {
   RESULT_COMMENTS,
   SORTING_TOLERANCE,
@@ -54,6 +59,8 @@ import {
 } from './mass-id-sorting.helpers';
 
 const { DEDUCTED_WEIGHT, GROSS_WEIGHT } = BoldAttributeName;
+
+const toReportedWeight = (weight: number): number => Number(weight.toFixed(3));
 
 interface DocumentPair {
   massIDDocument: BoldDocument;
@@ -82,11 +89,12 @@ export class MassIDSortingProcessor extends RuleDataProcessor {
 
       const sortingData = this.extractSortingData(documents);
 
-      const { resultComment, resultFindings, resultStatus } =
+      const { resultComment, resultContent, resultFindings, resultStatus } =
         this.evaluateResult(sortingData);
 
       return mapToRuleOutput(ruleInput, resultStatus, {
         resultComment: getOrUndefined(resultComment),
+        resultContent,
         resultFindings,
       });
     } catch (error: unknown) {
@@ -125,12 +133,18 @@ export class MassIDSortingProcessor extends RuleDataProcessor {
     );
 
     if (deductedDiff > SORTING_TOLERANCE) {
+      const crossValidation: DeductedWeightEvidence = {
+        deductedWeight: sortingData.deductedWeight,
+        expectedDeductedWeight: toReportedWeight(expectedDeducted),
+      };
+
       return {
         ...MASS_ID_SORTING_FINDINGS.result(
           'FAILED.DEDUCTED_WEIGHT_MISMATCH',
-          sortingData.deductedWeight,
-          Number(expectedDeducted.toFixed(3)),
+          crossValidation.deductedWeight,
+          crossValidation.expectedDeductedWeight,
         ),
+        resultContent: { crossValidation },
         resultStatus: 'FAILED',
       };
     }
@@ -164,11 +178,19 @@ export class MassIDSortingProcessor extends RuleDataProcessor {
     }
 
     if (sortingData.sortingValueCalculationDifference > SORTING_TOLERANCE) {
+      const crossValidation: SortingValueEvidence = {
+        expectedSortingValue: toReportedWeight(
+          sortingData.calculatedSortingValue,
+        ),
+        sortingValue: sortingData.valueAfterSorting,
+      };
+
       return {
         ...MASS_ID_SORTING_FINDINGS.result(
           'FAILED.SORTING_VALUE_EXCEEDS_TOLERANCE',
           sortingData.sortingValueCalculationDifference,
         ),
+        resultContent: { crossValidation },
         resultStatus: 'FAILED',
       };
     }

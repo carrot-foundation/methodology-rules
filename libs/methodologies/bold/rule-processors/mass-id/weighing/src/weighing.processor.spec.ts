@@ -4,6 +4,7 @@ import {
   expectRuleFindings,
   expectRuleOutput,
   findTestCase,
+  listAccreditationDependencies,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   BoldAttributeName,
@@ -88,11 +89,12 @@ describe('WeighingProcessor', () => {
       },
       {
         description:
-          'a scale type mismatch followed by an unsupported scale type, with no accreditation dependency',
+          'a scale type mismatch, dependent on the Recycler accreditation, followed by an unsupported scale type',
         expectedFindings: [
           {
             code: 'weighing.INVALID.SCALE_TYPE_MISMATCH',
             defaultOwner: 'INTEGRATOR',
+            dependsOnAccreditation: 'Recycler',
           },
           {
             code: 'weighing.INVALID.SCALE_TYPE',
@@ -171,5 +173,15 @@ describe('WeighingProcessor', () => {
         });
       },
     );
+  });
+});
+
+describe('WEIGHING_FINDINGS', () => {
+  it('should declare an accreditation dependency only where the TEST synthetic accreditation fabricates or omits the value', () => {
+    expect(listAccreditationDependencies(WEIGHING_FINDINGS)).toEqual({
+      'weighing.ERROR.MISSING_RECYCLER_ACCREDITATION_DOCUMENT': 'Recycler',
+      'weighing.INVALID.SCALE_TYPE_MISMATCH': 'Recycler',
+      'weighing.WRONG_FORMAT.CONTAINER_QUANTITY': 'Recycler',
+    });
   });
 });

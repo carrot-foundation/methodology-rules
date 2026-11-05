@@ -6,6 +6,7 @@ import {
   BoldStubsBuilder,
   expectRuleOutput,
   findTestCase,
+  listAccreditationDependencies,
   stubDocumentEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import { BoldDocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
@@ -213,5 +214,20 @@ describe('GeolocationAndAddressPrecisionProcessor', () => {
         }
       },
     );
+  });
+});
+
+describe('GEOLOCATION_AND_ADDRESS_PRECISION_FINDINGS', () => {
+  it('should declare an accreditation dependency only where the TEST synthetic accreditation fabricates or omits the value', () => {
+    expect(
+      listAccreditationDependencies(GEOLOCATION_AND_ADDRESS_PRECISION_FINDINGS),
+    ).toEqual({
+      'geolocation-and-address-precision.ERROR.PARTICIPANT_ACCREDITATION_DOCUMENTS_NOT_FOUND':
+        'Recycler',
+      'geolocation-and-address-precision.FAILED.MISSING_ACCREDITATION_ADDRESS':
+        'Recycler',
+      'geolocation-and-address-precision.FAILED.MISSING_ACCREDITED_ADDRESS_COORDINATES':
+        'Recycler',
+    });
   });
 });
