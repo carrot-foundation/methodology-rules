@@ -137,8 +137,27 @@ export const OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_LOCAL_CODE: OthersIfOrganicCar
   {
     // Author-defined carbon fractions (Prof. Caio), confirmed for production.
     '02 01 06': { carbonFraction: '0.15' },
+    '02 04 04': { carbonFraction: '0.014' }, // Parsaee et al., 2019
+    '02 04 05': { carbonFraction: '0.33' }, // Inácio et al., 2018
+    '02 07 02': { carbonFraction: '0.086' }, // Inácio et al., 2018
+    '04 01 01': { carbonFraction: '0.18' }, // Sugito & Ratnawati, 2020
+    '04 01 08': { carbonFraction: '0.33' }, // Inácio et al., 2018
+    '04 02 10': { carbonFraction: '0.18' }, // Sugito & Ratnawati, 2020
+    '04 02 15': { carbonFraction: '0.18' }, // Sugito & Ratnawati, 2020
+    '10 02 15': { carbonFraction: '0.09' }, // similar to Industrial Sludge
+    '11 01 10': { carbonFraction: '0.09' }, // similar to Industrial Sludge
     '16 03 06': { carbonFraction: '0.05' }, // similar to Domestic Sludge
     '17 05 06': { carbonFraction: '0.05' }, // similar to Domestic Sludge
+    '19 02 03': { carbonFraction: '0.05' }, // similar to Domestic Sludge
     '19 02 06': { carbonFraction: '0.05' }, // similar to Domestic Sludge
+    '19 05 01': { carbonFraction: '0.15' }, // similar to Food Waste
+    '19 05 02': { carbonFraction: '0.15' }, // similar to Food Waste
+    '19 05 03': { carbonFraction: '0.05' }, // similar to Domestic Sludge
+    '19 07 03': { carbonFraction: '0.09' }, // similar to Industrial Sludge
+    '19 08 01': { carbonFraction: '0.05' }, // similar to Domestic Sludge
     '19 08 14': { carbonFraction: '0.09' }, // similar to Industrial Sludge
+    '19 09 01': { carbonFraction: '0.05' }, // similar to Domestic Sludge
+    '20 03 01': { carbonFraction: '0.05' }, // similar to Domestic Sludge
+    '20 03 03': { carbonFraction: '0.2' }, // similar to Garden, yard and park waste
+    '20 03 99': { carbonFraction: '0.05' }, // similar to Domestic Sludge
   };
