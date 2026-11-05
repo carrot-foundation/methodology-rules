@@ -260,8 +260,8 @@ const massIDWithProcessorBeforeDuplicateIntegrator: BoldDocument = {
     ...massIDWithDuplicateIntegratorActorEvent.externalEvents!.filter(
       (event) => !isIntegratorEvent(event),
     ),
-    ...massIDWithDuplicateIntegratorActorEvent.externalEvents!.filter(
-      isIntegratorEvent,
+    ...massIDWithDuplicateIntegratorActorEvent.externalEvents!.filter((event) =>
+      isIntegratorEvent(event),
     ),
   ],
 };
