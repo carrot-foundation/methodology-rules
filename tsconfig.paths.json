@@ -22,6 +22,9 @@
       "@carrot-fndn/shared/methodologies/bold/rule-processors/mass-id/prevented-emissions": [
         "libs/methodologies/bold/rule-processors/mass-id/prevented-emissions/src/index.ts"
       ],
+      "@carrot-fndn/shared/methodologies/bold/rule-processors/mass-id/prevented-emissions/constants": [
+        "libs/methodologies/bold/rule-processors/mass-id/prevented-emissions/src/prevented-emissions.constants.ts"
+      ],
       "@carrot-fndn/shared/methodologies/bold/rule-processors/mass-id/privacy-flags": [
         "libs/methodologies/bold/rule-processors/mass-id/privacy-flags/src/index.ts"
       ],

@@ -1,3 +1,4 @@
+import { OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_LOCAL_CODE } from '@carrot-fndn/shared/methodologies/bold/rule-processors/mass-id/prevented-emissions/constants';
 import {
   EVENT_PRIVACY_SPEC,
   type EventPrivacySpec,
@@ -202,11 +203,17 @@ export const toWasteClassification = (
   > = SUBTYPE_TO_CDM_CODE_MAP,
 ): WasteClassification => ({
   localWasteClassifications: Object.entries(WASTE_CLASSIFICATION_CODES.BR).map(
-    ([id, { CDM_CODE, description }]) => ({
-      cdmCode: CDM_CODE,
-      description,
-      id,
-    }),
+    ([id, { CDM_CODE, description }]) => {
+      const carbonFraction =
+        OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_LOCAL_CODE[id]?.carbonFraction;
+
+      return {
+        ...(carbonFraction !== undefined && { carbonFraction }),
+        cdmCode: CDM_CODE,
+        description,
+        id,
+      };
+    },
   ),
   schemaVersion: 1,
   subtypes: Object.values(MassIDOrganicSubtype).map((subtype) => ({
