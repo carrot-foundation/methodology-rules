@@ -247,7 +247,7 @@ describe('ParticipantAccreditationsAndVerificationsRequirementsProcessor', () =>
   it('should report a duplicate Integrator ACTOR event as an integrator finding', async () => {
     const { documents, massIDAuditDocument } = findTestCase(
       participantAccreditationsAndVerificationsRequirementsTestCases,
-      'The MassID document has a second INTEGRATOR ACTOR event linking another Integrator accreditation (should fail)',
+      'A PROCESSOR with multiple valid accreditations precedes an INTEGRATOR with a duplicate ACTOR event (should fail on the INTEGRATOR)',
     );
 
     spyOnDocumentQueryServiceLoad(stubDocument(), [

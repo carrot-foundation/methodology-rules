@@ -13,6 +13,7 @@ import {
   BoldAttributeName,
   type BoldDocument,
   BoldDocumentCategory,
+  type BoldDocumentEvent,
   BoldDocumentEventName,
   BoldDocumentType,
   MassIDActorType,
@@ -113,6 +114,29 @@ const createMassIDAuditWithLinkEvent = (
   ],
 });
 
+const createSecondValidAccreditation = (
+  originalAccreditation: BoldDocument,
+  actorType: MassIDActorType,
+) =>
+  stubDocument(
+    {
+      category: BoldDocumentCategory.METHODOLOGY,
+      externalEvents: [
+        stubBoldAccreditationResultEvent({
+          metadataAttributes: [
+            [EFFECTIVE_DATE, subDays(new Date(), 5).toISOString()],
+            [EXPIRATION_DATE, addDays(new Date(), 5).toISOString()],
+            [ACCREDITATION_STATUS, BoldAccreditationStatus.APPROVED],
+          ],
+        }),
+      ],
+      primaryParticipant: originalAccreditation.primaryParticipant,
+      subtype: actorType,
+      type: BoldDocumentType.PARTICIPANT_ACCREDITATION,
+    },
+    false, // stubExternalEvents = false to avoid random events
+  );
+
 const createMultipleValidAccreditationsTestData = (
   actorType: MassIDActorType,
 ) => {
@@ -137,23 +161,9 @@ const createMultipleValidAccreditationsTestData = (
   const originalAccreditation =
     massIDWithMultipleValid.participantsAccreditationDocuments.get(actorType)!;
 
-  const secondAccreditation = stubDocument(
-    {
-      category: BoldDocumentCategory.METHODOLOGY,
-      externalEvents: [
-        stubBoldAccreditationResultEvent({
-          metadataAttributes: [
-            [EFFECTIVE_DATE, subDays(new Date(), 5).toISOString()],
-            [EXPIRATION_DATE, addDays(new Date(), 5).toISOString()],
-            [ACCREDITATION_STATUS, BoldAccreditationStatus.APPROVED],
-          ],
-        }),
-      ],
-      primaryParticipant: originalAccreditation.primaryParticipant,
-      subtype: actorType,
-      type: BoldDocumentType.PARTICIPANT_ACCREDITATION,
-    },
-    false, // stubExternalEvents = false to avoid random events
+  const secondAccreditation = createSecondValidAccreditation(
+    originalAccreditation,
+    actorType,
   );
 
   return {
@@ -230,6 +240,29 @@ const massIDWithDuplicateIntegratorActorEvent: BoldDocument = {
       name: ACTOR,
       participant: integratorActorEvent.participant,
     }),
+  ],
+};
+
+const processorSecondAccreditationBesideIntegrator =
+  createSecondValidAccreditation(
+    massIDWithIntegratorMultipleValid.participantsAccreditationDocuments.get(
+      PROCESSOR,
+    )!,
+    PROCESSOR,
+  );
+
+const isIntegratorEvent = (event: BoldDocumentEvent) =>
+  event.label === INTEGRATOR;
+
+const massIDWithProcessorBeforeDuplicateIntegrator: BoldDocument = {
+  ...massIDWithDuplicateIntegratorActorEvent,
+  externalEvents: [
+    ...massIDWithDuplicateIntegratorActorEvent.externalEvents!.filter(
+      (event) => !isIntegratorEvent(event),
+    ),
+    ...massIDWithDuplicateIntegratorActorEvent.externalEvents!.filter(
+      isIntegratorEvent,
+    ),
   ],
 };
 
@@ -621,5 +654,27 @@ export const participantAccreditationsAndVerificationsRequirementsTestCases: Par
       resultStatus: 'FAILED',
       scenario:
         'The MassID document has a second INTEGRATOR ACTOR event linking another Integrator accreditation (should fail)',
+    },
+    {
+      documents: [
+        massIDWithProcessorBeforeDuplicateIntegrator,
+        ...massIDWithIntegratorMultipleValid.participantsAccreditationDocuments.values(),
+        integratorSecondAccreditation,
+        processorSecondAccreditationBesideIntegrator,
+      ],
+      massIDAuditDocument: createMassIDAuditWithLinkEvent(
+        createMassIDAuditWithLinkEvent(
+          massIDWithIntegratorMultipleValid.massIDAuditDocument,
+          integratorSecondAccreditation,
+        ),
+        processorSecondAccreditationBesideIntegrator,
+      ),
+      resultComment:
+        processorError.ERROR_MESSAGE.DUPLICATE_INTEGRATOR_ACTOR_EVENT(
+          integratorActorEvent.participant.id,
+        ),
+      resultStatus: 'FAILED',
+      scenario:
+        'A PROCESSOR with multiple valid accreditations precedes an INTEGRATOR with a duplicate ACTOR event (should fail on the INTEGRATOR)',
     },
   ];
