@@ -110,13 +110,13 @@ pnpm run-rule dry-run libs/methodologies/bold/rule-processors/mass-id/document-m
 
 #### MassID Event Data
 
-`tools/mass-id-generator-cli` emits the canonical MassID example the docs site publishes: an events manifest, one request payload per event and one attribute dictionary per event other than the create document and the actors, once for `bold-recycling` and once for `bold-carbon`.
+`tools/mass-id-generator-cli` emits the canonical MassID example the docs site publishes: an events manifest, one request payload per event and one attribute dictionary per event other than the create document and the actors, and a `waste-classification.json` (each accepted MassID subtype with the CDM code `regional-waste-classification` expects, `null` when none is mapped, and every Ibama code with its description and CDM code), once for `bold-recycling` and once for `bold-carbon`.
 
 ```bash
 pnpm generate:event-data             # writes dist/methodology-event-data/
 ```
 
-The example's content comes from one authored table, `tools/mass-id-generator-cli/src/mass-id-catalog.ts`. Privacy flags are read from the privacy-flags rule's own tables, so they cannot drift from the rule. Output is deterministic: the same source produces the same bytes. The emitter does not remove files a previous run left behind: delete `dist/methodology-event-data` before re-running.
+The example's content comes from one authored table, `tools/mass-id-generator-cli/src/mass-id-catalog.ts`; the waste classification comes from `SUBTYPE_TO_CDM_CODE_MAP` and `WASTE_CLASSIFICATION_CODES` in `libs/shared/methodologies/bold/utils`. Privacy flags are read from the privacy-flags rule's own tables, so they cannot drift from the rule. Output is deterministic: the same source produces the same bytes. The emitter does not remove files a previous run left behind: delete `dist/methodology-event-data` before re-running.
 
 The `test-e2e` target runs these rule lambdas against the catalog and expects `PASSED`: `composting-cycle-timeframe`, `driver-identification`, `drop-off-at-recycler`, `hauler-identification`, `mass-id-qualifications`, `privacy-flags`, `processor-identification`, `project-period-limit`, `recycler-identification`, `regional-waste-classification`, `vehicle-identification`, `waste-origin-identification`. When an intended rule change makes one fail, the published example is out of date: update the catalog. `mass-id-qualifications` also checks `measurementUnit` and `currentValue`, which the published create body does not carry; the test document supplies them. The test document also places every address in Brazil and leaves attachments out, and the suite runs on the real clock because `project-period-limit` reads it: once the Recycled event's date is before 1 January of the previous UTC year the suite fails, and the remedy is to move every date in the catalog forward by one shared interval.
 
