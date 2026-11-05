@@ -79,6 +79,7 @@ export const PREVENTED_EMISSIONS_FINDINGS = defineRuleFindings(
     'ERROR.MISSING_RECYCLER_ACCREDITATION_DOCUMENT': {
       category: 'ACCREDITATION',
       defaultOwner: 'TO_CONFIRM',
+      dependsOnAccreditation: MassIDActorType.RECYCLER,
       description:
         'O documento de credenciamento do reciclador não foi encontrado.',
       guidance:

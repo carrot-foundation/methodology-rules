@@ -1,5 +1,13 @@
 import { MassIDActorType } from '@carrot-fndn/shared/methodologies/bold/types';
-import { defineRuleFindings } from '@carrot-fndn/shared/rule/result';
+import {
+  crossValidationEvidence,
+  defineRuleFindings,
+} from '@carrot-fndn/shared/rule/result';
+
+import type {
+  DeductedWeightEvidence,
+  SortingValueEvidence,
+} from './mass-id-sorting.types';
 
 import { RESULT_COMMENTS } from './mass-id-sorting.constants';
 import { MassIDSortingProcessorErrors } from './mass-id-sorting.errors';
@@ -102,6 +110,7 @@ export const MASS_ID_SORTING_FINDINGS = defineRuleFindings(
     'ERROR.MISSING_RECYCLER_ACCREDITATION_DOCUMENT': {
       category: 'ACCREDITATION',
       defaultOwner: 'TO_CONFIRM',
+      dependsOnAccreditation: MassIDActorType.RECYCLER,
       description:
         'O documento de credenciamento do reciclador não foi encontrado.',
       guidance:
@@ -128,10 +137,17 @@ export const MASS_ID_SORTING_FINDINGS = defineRuleFindings(
     'FAILED.DEDUCTED_WEIGHT_MISMATCH': {
       category: 'METHODOLOGY_REQUIREMENT',
       defaultOwner: 'INTEGRATOR',
+      dependsOnAccreditation: MassIDActorType.RECYCLER,
       description:
         'O "Deducted Weight" difere em mais de 0,1 kg do "Gross Weight" multiplicado pelo fator de triagem credenciado.',
+      evidence: [
+        crossValidationEvidence<DeductedWeightEvidence>('deductedWeight'),
+        crossValidationEvidence<DeductedWeightEvidence>(
+          'expectedDeductedWeight',
+        ),
+      ],
       guidance:
-        'Recalcule o peso descontado do evento "Sorting" com o fator de triagem do reciclador.',
+        'Envie no evento "Sorting" o "Deducted Weight" indicado em "expectedDeductedWeight" (kg), que é o "Gross Weight" multiplicado pelo fator de triagem credenciado do reciclador, sem arredondar.',
       title: 'Peso descontado não confere com o fator de triagem',
     },
     'FAILED.DOCUMENT_VALUE_MISMATCH': {
@@ -164,8 +180,12 @@ export const MASS_ID_SORTING_FINDINGS = defineRuleFindings(
       defaultOwner: 'INTEGRATOR',
       description:
         'O valor calculado da triagem difere do valor declarado em mais de 0,1 kg.',
+      evidence: [
+        crossValidationEvidence<SortingValueEvidence>('sortingValue'),
+        crossValidationEvidence<SortingValueEvidence>('expectedSortingValue'),
+      ],
       guidance:
-        'Recalcule o valor do evento "Sorting" a partir dos pesos declarados.',
+        'Envie como valor do evento "Sorting" o indicado em "expectedSortingValue" (kg), que é o "Gross Weight" menos o "Deducted Weight" declarados, sem arredondar.',
       title: 'Valor triado fora da tolerância',
     },
   },

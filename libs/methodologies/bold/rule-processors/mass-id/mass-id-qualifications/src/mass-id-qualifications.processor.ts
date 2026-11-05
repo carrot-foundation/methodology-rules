@@ -1,13 +1,18 @@
 import type { EvaluateResultOutput } from '@carrot-fndn/shared/rule/standard-data-processor';
 
 import { isNil } from '@carrot-fndn/shared/helpers';
+import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
+import { eventNameIsAnyOf } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/bold/processors';
 import {
+  BoldAttributeName,
   type BoldDocument,
   BoldDocumentCategory,
+  BoldDocumentEventName,
   BoldDocumentType,
   MassIDOrganicSubtype,
 } from '@carrot-fndn/shared/methodologies/bold/types';
+import { getWasteSubtypeClassificationEvidence } from '@carrot-fndn/shared/methodologies/bold/utils';
 import { joinRenderedFindings } from '@carrot-fndn/shared/rule/result';
 import { MeasurementUnit } from '@carrot-fndn/shared/types';
 
@@ -81,6 +86,19 @@ export class MassIDQualificationsProcessor extends ParentDocumentRuleProcessor<B
 
     return {
       ...joinRenderedFindings(failures),
+      ...(!this.isValidSubtype(document.subtype) && {
+        resultContent: {
+          crossValidation: getWasteSubtypeClassificationEvidence({
+            localWasteClassificationId: getEventAttributeValue(
+              document.externalEvents?.find(
+                eventNameIsAnyOf([BoldDocumentEventName.PICK_UP]),
+              ),
+              BoldAttributeName.LOCAL_WASTE_CLASSIFICATION_ID,
+            ),
+            subtype: document.subtype,
+          }),
+        },
+      }),
       resultStatus: 'FAILED',
     };
   }

@@ -24,6 +24,15 @@ export const PARTICIPANT_ACCREDITATIONS_AND_VERIFICATIONS_REQUIREMENTS_FINDINGS 
           'Confirme que os participantes da massa estão credenciados e referenciados corretamente. A Carrot confirma a origem da pendência.',
         title: 'Credenciamentos não encontrados',
       },
+      'ERROR.DUPLICATE_INTEGRATOR_ACTOR_EVENT': {
+        category: 'DUPLICATE_OR_CONFLICT',
+        defaultOwner: 'INTEGRATOR',
+        description:
+          'A MassID tem mais de um evento ACTOR "Integrator" para o mesmo participante, e cada um vincula um credenciamento do integrador.',
+        guidance:
+          'Não envie o evento ACTOR "Integrator": a plataforma o adiciona ao criar a MassID, com o endereço cadastrado do integrador.',
+        title: 'Evento ACTOR do integrador duplicado',
+      },
       'ERROR.FAILED_BY_ERROR': {
         category: 'PROCESSING_ERROR',
         defaultOwner: 'CARROT',

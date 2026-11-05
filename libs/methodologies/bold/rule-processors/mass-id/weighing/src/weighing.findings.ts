@@ -1,3 +1,4 @@
+import { MassIDActorType } from '@carrot-fndn/shared/methodologies/bold/types';
 import { defineRuleFindings } from '@carrot-fndn/shared/rule/result';
 
 import {
@@ -46,6 +47,7 @@ export const WEIGHING_FINDINGS = defineRuleFindings(
     'ERROR.MISSING_RECYCLER_ACCREDITATION_DOCUMENT': {
       category: 'ACCREDITATION',
       defaultOwner: 'TO_CONFIRM',
+      dependsOnAccreditation: MassIDActorType.RECYCLER,
       description:
         'O documento de credenciamento do reciclador não foi encontrado.',
       guidance:
@@ -139,6 +141,7 @@ export const WEIGHING_FINDINGS = defineRuleFindings(
     'INVALID.SCALE_TYPE_MISMATCH': {
       category: 'INVALID_DATA',
       defaultOwner: 'INTEGRATOR',
+      dependsOnAccreditation: MassIDActorType.RECYCLER,
       description:
         'O "Scale Type" informado não é o mesmo tipo de balança do credenciamento.',
       guidance:
@@ -239,6 +242,7 @@ export const WEIGHING_FINDINGS = defineRuleFindings(
     'WRONG_FORMAT.CONTAINER_QUANTITY': {
       category: 'INVALID_DATA',
       defaultOwner: 'INTEGRATOR',
+      dependsOnAccreditation: MassIDActorType.RECYCLER,
       description:
         'O "Container Quantity" não é um número inteiro maior que zero e o contêiner não é "Truck".',
       guidance:

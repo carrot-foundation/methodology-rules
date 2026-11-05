@@ -96,6 +96,11 @@ const renderMessage = (
   return template(...messageArguments);
 };
 
+// The report reads each selected field from the rule result's `resultContent.crossValidation`
+export const crossValidationEvidence = <Evidence extends object>(
+  field: keyof Evidence & string,
+): FindingEvidenceSelector => ({ field, source: 'CROSS_VALIDATION' });
+
 export const joinRenderedFindings = (
   renderedFindings: RenderedRuleFinding[],
 ): RuleFindingsResult => ({

@@ -14,7 +14,10 @@ import {
   BoldDocumentEventName,
   MassIDOrganicSubtype,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { WASTE_CLASSIFICATION_CODES } from '@carrot-fndn/shared/methodologies/bold/utils';
+import {
+  NO_ELIGIBLE_SUBTYPE,
+  WASTE_CLASSIFICATION_CODES,
+} from '@carrot-fndn/shared/methodologies/bold/utils';
 import { type AnyObject } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 
@@ -255,6 +258,11 @@ export const regionalWasteClassificationTestCases: RegionalWasteClassificationTe
       },
       resultComment: RESULT_COMMENTS.failed.INVALID_CLASSIFICATION_DESCRIPTION,
       resultContent: {
+        crossValidation: {
+          expectedDescription:
+            WASTE_CLASSIFICATION_CODES.BR['02 01 01'].description,
+          localWasteClassificationId: '02 01 01',
+        },
         description: randomDescription,
         id: '02 01 01',
         recyclerCountryCode: 'BR',
@@ -355,6 +363,12 @@ export const regionalWasteClassificationTestCases: RegionalWasteClassificationTe
       },
       resultComment: RESULT_COMMENTS.failed.INVALID_SUBTYPE_CDM_CODE_MISMATCH,
       resultContent: {
+        crossValidation: {
+          cdmCode: '8.7B',
+          expectedSubtype: MassIDOrganicSubtype.INDUSTRIAL_SLUDGE,
+          localWasteClassificationId: '02 01 01',
+          subtype: MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
+        },
         description: WASTE_CLASSIFICATION_CODES.BR['02 01 01'].description,
         id: '02 01 01',
         recyclerCountryCode: 'BR',
@@ -363,6 +377,39 @@ export const regionalWasteClassificationTestCases: RegionalWasteClassificationTe
       resultStatus: 'FAILED',
       scenario:
         'The subtype does not match the CDM_CODE for the provided classification ID',
+    },
+    {
+      events: {
+        [`${ACTOR}-${RECYCLER}`]: brazilianRecyclerEvent,
+        [PICK_UP]: stubBoldMassIDPickUpEvent({
+          metadataAttributes: [
+            [LOCAL_WASTE_CLASSIFICATION_ID, '20 01 01'],
+            [
+              LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
+              WASTE_CLASSIFICATION_CODES.BR['20 01 01'].description,
+            ],
+          ],
+        }),
+      },
+      partialDocument: {
+        subtype: MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
+      },
+      resultComment: RESULT_COMMENTS.failed.INVALID_SUBTYPE_CDM_CODE_MISMATCH,
+      resultContent: {
+        crossValidation: {
+          cdmCode: '8.2',
+          expectedSubtype: NO_ELIGIBLE_SUBTYPE,
+          localWasteClassificationId: '20 01 01',
+          subtype: MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
+        },
+        description: WASTE_CLASSIFICATION_CODES.BR['20 01 01'].description,
+        id: '20 01 01',
+        recyclerCountryCode: 'BR',
+        subtype: MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
+      },
+      resultStatus: 'FAILED',
+      scenario:
+        'The classification ID belongs to a CDM category with no eligible subtype',
     },
     {
       events: {
@@ -515,6 +562,12 @@ export const regionalWasteClassificationTestCases: RegionalWasteClassificationTe
       },
       resultComment: RESULT_COMMENTS.failed.INVALID_SUBTYPE_MAPPING,
       resultContent: {
+        crossValidation: {
+          cdmCode: '8.7B',
+          expectedSubtype: MassIDOrganicSubtype.INDUSTRIAL_SLUDGE,
+          localWasteClassificationId: '02 01 01',
+          subtype: MassIDOrganicSubtype.TOBACCO,
+        },
         description: WASTE_CLASSIFICATION_CODES.BR['02 01 01'].description,
         id: '02 01 01',
         recyclerCountryCode: 'BR',

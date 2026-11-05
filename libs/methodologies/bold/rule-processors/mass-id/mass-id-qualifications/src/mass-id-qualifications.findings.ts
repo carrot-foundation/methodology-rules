@@ -1,4 +1,12 @@
-import { defineRuleFindings } from '@carrot-fndn/shared/rule/result';
+import {
+  EXPECTED_SUBTYPE_GUIDANCE,
+  WASTE_SUBTYPE_CLASSIFICATION_EVIDENCE_FIELDS,
+  type WasteSubtypeClassificationEvidence,
+} from '@carrot-fndn/shared/methodologies/bold/utils';
+import {
+  crossValidationEvidence,
+  defineRuleFindings,
+} from '@carrot-fndn/shared/rule/result';
 
 import { RESULT_COMMENTS } from './mass-id-qualifications.constants';
 import { MassIDQualificationsProcessorErrors } from './mass-id-qualifications.errors';
@@ -54,8 +62,10 @@ export const MASS_ID_QUALIFICATIONS_FINDINGS = defineRuleFindings(
       defaultOwner: 'INTEGRATOR',
       description:
         'O subtipo informado não está entre os aceitos pela metodologia.',
-      guidance:
-        'Confira o subtipo do resíduo e envie um dos valores aceitos pela metodologia.',
+      evidence: WASTE_SUBTYPE_CLASSIFICATION_EVIDENCE_FIELDS.map((field) =>
+        crossValidationEvidence<WasteSubtypeClassificationEvidence>(field),
+      ),
+      guidance: EXPECTED_SUBTYPE_GUIDANCE,
       title: 'Subtipo do resíduo não aceito',
     },
     'FAILED.INVALID_TYPE': {

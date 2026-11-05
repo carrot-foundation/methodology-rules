@@ -22,6 +22,7 @@ import {
   MassIDActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
+  type AnyObject,
   DocumentEventAttributeFormat,
   type DocumentParticipant,
 } from '@carrot-fndn/shared/types';
@@ -234,6 +235,7 @@ interface MassIDSortingTestCase extends RuleTestCase {
   actorParticipants: Map<string, DocumentParticipant>;
   massIDEvents: BoldExternalEventsObject;
   partialDocument: PartialDeep<BoldDocument>;
+  resultContent?: AnyObject;
 }
 
 export const massIDSortingTestCases: MassIDSortingTestCase[] = [
@@ -320,6 +322,12 @@ export const massIDSortingTestCases: MassIDSortingTestCase[] = [
     resultComment: RESULT_COMMENTS.failed.SORTING_VALUE_EXCEEDS_TOLERANCE(
       Math.abs(calculatedSortingValue - wrongSortingValue),
     ),
+    resultContent: {
+      crossValidation: {
+        expectedSortingValue: Number(calculatedSortingValue.toFixed(3)),
+        sortingValue: wrongSortingValue,
+      },
+    },
     resultStatus: 'FAILED',
     scenario: 'The sorting value calculation difference is greater than 0.1',
   },
@@ -342,6 +350,14 @@ export const massIDSortingTestCases: MassIDSortingTestCase[] = [
       mismatchedDeductedWeight,
       Number((grossWeight * sortingFactor).toFixed(3)),
     ),
+    resultContent: {
+      crossValidation: {
+        deductedWeight: mismatchedDeductedWeight,
+        expectedDeductedWeight: Number(
+          (grossWeight * sortingFactor).toFixed(3),
+        ),
+      },
+    },
     resultStatus: 'FAILED',
     scenario:
       'The deducted weight does not match the expected value based on sorting factor',

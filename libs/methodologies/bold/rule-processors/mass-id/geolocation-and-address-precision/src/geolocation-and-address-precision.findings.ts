@@ -1,3 +1,4 @@
+import { MassIDActorType } from '@carrot-fndn/shared/methodologies/bold/types';
 import { defineRuleFindings } from '@carrot-fndn/shared/rule/result';
 
 import { RESULT_COMMENTS } from './geolocation-and-address-precision.constants';
@@ -51,6 +52,7 @@ export const GEOLOCATION_AND_ADDRESS_PRECISION_FINDINGS = defineRuleFindings(
     'ERROR.PARTICIPANT_ACCREDITATION_DOCUMENTS_NOT_FOUND': {
       category: 'ACCREDITATION',
       defaultOwner: 'TO_CONFIRM',
+      dependsOnAccreditation: MassIDActorType.RECYCLER,
       description:
         'Nenhum documento de credenciamento foi encontrado para os participantes da MassID.',
       guidance:
@@ -131,6 +133,7 @@ export const GEOLOCATION_AND_ADDRESS_PRECISION_FINDINGS = defineRuleFindings(
     'FAILED.MISSING_ACCREDITATION_ADDRESS': {
       category: 'ACCREDITATION',
       defaultOwner: 'CARROT',
+      dependsOnAccreditation: MassIDActorType.RECYCLER,
       description:
         'Nenhum endereço credenciado foi encontrado para o ator avaliado.',
       guidance:
@@ -140,6 +143,7 @@ export const GEOLOCATION_AND_ADDRESS_PRECISION_FINDINGS = defineRuleFindings(
     'FAILED.MISSING_ACCREDITED_ADDRESS_COORDINATES': {
       category: 'ACCREDITATION',
       defaultOwner: 'CARROT',
+      dependsOnAccreditation: MassIDActorType.RECYCLER,
       description:
         'O endereço credenciado não tem latitude ou longitude, necessárias para validar a distância.',
       guidance:

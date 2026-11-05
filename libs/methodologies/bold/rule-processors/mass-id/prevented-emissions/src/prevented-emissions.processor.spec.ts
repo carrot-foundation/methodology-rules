@@ -5,6 +5,7 @@ import {
   expectRuleFindings,
   expectRuleOutput,
   findTestCase,
+  listAccreditationDependencies,
   type MetadataAttributeParameter,
   type StubBoldDocumentParameters,
   stubBoldEmissionAndCompostingMetricsEvent,
@@ -486,5 +487,19 @@ describe('PreventedEmissionsProcessor', () => {
         ]);
       });
     });
+  });
+});
+
+describe('PREVENTED_EMISSIONS_FINDINGS', () => {
+  it('should declare an accreditation dependency only where the TEST synthetic accreditation fabricates or omits the value', () => {
+    expect(listAccreditationDependencies(PREVENTED_EMISSIONS_FINDINGS)).toEqual(
+      {
+        'prevented-emissions.ERROR.MISSING_GREENHOUSE_GAS_TYPE': 'Recycler',
+        'prevented-emissions.ERROR.MISSING_RECYCLER_ACCREDITATION_DOCUMENT':
+          'Recycler',
+        'prevented-emissions.FAILED.MISSING_RECYCLING_BASELINE_FOR_WASTE_SUBTYPE':
+          'Recycler',
+      },
+    );
   });
 });

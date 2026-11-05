@@ -8,6 +8,7 @@ import {
   expectRuleFindings,
   expectRuleOutput,
   findTestCase,
+  listAccreditationDependencies,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   BoldAttributeName,
@@ -38,6 +39,7 @@ describe('MassIDSortingProcessor', () => {
         massIDEvents,
         partialDocument,
         resultComment,
+        resultContent,
         resultStatus,
       }) => {
         const { ruleInput, ruleOutput } = await createRuleTestFixture({
@@ -54,6 +56,7 @@ describe('MassIDSortingProcessor', () => {
         expectRuleOutput({
           findings: MASS_ID_SORTING_FINDINGS,
           resultComment,
+          resultContent,
           resultStatus,
           ruleInput,
           ruleOutput,
@@ -67,7 +70,7 @@ describe('MassIDSortingProcessor', () => {
       },
     );
 
-    it('should not mark the deducted weight mismatch as dependent on the Recycler accreditation', async () => {
+    it('should mark the deducted weight mismatch as dependent on the Recycler accreditation', async () => {
       const deductedWeightMismatchCase = findTestCase(
         massIDSortingTestCases,
         'The deducted weight does not match the expected value based on sorting factor',
@@ -85,14 +88,13 @@ describe('MassIDSortingProcessor', () => {
         spyOnDocumentQueryServiceLoad,
       });
 
-      expect(ruleOutput.resultContent).toStrictEqual({
-        findings: [
-          {
-            code: 'mass-id-sorting.FAILED.DEDUCTED_WEIGHT_MISMATCH',
-            defaultOwner: 'INTEGRATOR',
-          },
-        ],
-      });
+      expect(ruleOutput.resultContent?.['findings']).toStrictEqual([
+        {
+          code: 'mass-id-sorting.FAILED.DEDUCTED_WEIGHT_MISMATCH',
+          defaultOwner: 'INTEGRATOR',
+          dependsOnAccreditation: 'Recycler',
+        },
+      ]);
     });
   });
 
@@ -156,6 +158,17 @@ describe('MassIDSortingProcessor', () => {
           },
         ],
       });
+    });
+  });
+});
+
+describe('MASS_ID_SORTING_FINDINGS', () => {
+  it('should declare an accreditation dependency only where the TEST synthetic accreditation fabricates or omits the value', () => {
+    expect(listAccreditationDependencies(MASS_ID_SORTING_FINDINGS)).toEqual({
+      'mass-id-sorting.ERROR.MISSING_RECYCLER_ACCREDITATION_DOCUMENT':
+        'Recycler',
+      'mass-id-sorting.ERROR.MISSING_SORTING_FACTOR': 'Recycler',
+      'mass-id-sorting.FAILED.DEDUCTED_WEIGHT_MISMATCH': 'Recycler',
     });
   });
 });
