@@ -86,7 +86,7 @@ Unbound rule execution retrieves and stages document snapshots only through Smau
 
 ## Technology Stack
 
-- **Monorepo**: Nx 22.6.1 workspace with pnpm 10.18.3
+- **Monorepo**: Nx 22.6.1 workspace with pnpm 12.16.1
 - **Node**: 24.14.1 (see `.nvmrc`)
 - **TypeScript**: 5.9.3 with strict mode
 - **Runtime**: AWS Lambda (Node.js)
@@ -353,3 +353,11 @@ pnpm pkgJsonLint                       # npmPkgJsonLint .
 - **Remote Cache**: S3 bucket `carrot-nx-cache` (us-east-1)
 - **Webpack**: Lambda bundling uses `@nx/webpack` with custom config in `.webpack/webpack.nx.config.js`
 - **No cross-processor dependencies**: Each processor is isolated; shared code goes in `libs/shared/`
+
+## Worktree setup
+
+Run `/bin/sh scripts/setup-worktree.sh` after creating a worktree. On CrisOS this
+starts or joins the shared setup receipt, selects the pinned runtimes and arms
+Git hooks. Use `crisos-project-setup status --worktree "$PWD"` to inspect it; use
+`retry` after fixing a failed setup. The portable fallback installs the frozen
+lockfile with `--prefer-offline`.

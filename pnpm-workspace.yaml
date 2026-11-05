@@ -1,0 +1,13 @@
+# Setup and CI select the exact packageManager pin.
+# Keep one lockfile document for GitHub dependency detection.
+pmOnFail: ignore
+engineStrict: true
+saveExact: true
+verifyDepsBeforeRun: error
+allowBuilds:
+  nx: true
+  less: false
+  '@parcel/watcher': false
+  '@swc/core': true
+  esbuild: true
+  unrs-resolver: false

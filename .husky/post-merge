@@ -1,1 +1,1 @@
-pnpm install
+/bin/sh scripts/setup-worktree.sh

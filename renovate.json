@@ -79,12 +79,19 @@
       "matchUpdateTypes": ["minor", "patch"],
       "groupName": "typescript non-major dependencies",
       "groupSlug": "typescript-minor-patch",
-      "matchPackageNames": [
-        "typescript",
-        "/ts-/",
-        "tslib",
-        "/tsconfig/"
-      ]
+      "matchPackageNames": ["typescript", "/ts-/", "tslib", "/tsconfig/"]
+    },
+    {
+      "description": "Keep Node and pnpm declarations synchronized and manually reviewed",
+      "matchPackageNames": ["node", "pnpm"],
+      "groupName": "runtime toolchain",
+      "groupSlug": "runtime-toolchain",
+      "automerge": false
+    },
+    {
+      "description": "Keep pnpm on the validated major version",
+      "matchPackageNames": ["pnpm"],
+      "allowedVersions": ">=12.16.1 <13"
     }
   ],
   "major": {
