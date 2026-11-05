@@ -54,6 +54,53 @@ interface RegionalWasteClassificationTestCase extends RuleTestCase {
   resultContent: AnyObject | undefined;
 }
 
+const subtypeEvidenceCase = ({
+  cdmCode,
+  expectedSubtype,
+  localWasteClassificationId,
+  resultComment,
+  scenario,
+  subtype,
+}: {
+  cdmCode: string;
+  expectedSubtype: string;
+  localWasteClassificationId: keyof typeof WASTE_CLASSIFICATION_CODES.BR;
+  resultComment: string;
+  scenario: string;
+  subtype: string;
+}): RegionalWasteClassificationTestCase => {
+  const { description } =
+    WASTE_CLASSIFICATION_CODES.BR[localWasteClassificationId];
+
+  return {
+    events: {
+      [`${ACTOR}-${RECYCLER}`]: brazilianRecyclerEvent,
+      [PICK_UP]: stubBoldMassIDPickUpEvent({
+        metadataAttributes: [
+          [LOCAL_WASTE_CLASSIFICATION_ID, localWasteClassificationId],
+          [LOCAL_WASTE_CLASSIFICATION_DESCRIPTION, description],
+        ],
+      }),
+    },
+    partialDocument: { subtype },
+    resultComment,
+    resultContent: {
+      crossValidation: {
+        cdmCode,
+        expectedSubtype,
+        localWasteClassificationId,
+        subtype,
+      },
+      description,
+      id: localWasteClassificationId,
+      recyclerCountryCode: 'BR',
+      subtype,
+    },
+    resultStatus: 'FAILED',
+    scenario,
+  };
+};
+
 export const regionalWasteClassificationTestCases: RegionalWasteClassificationTestCase[] =
   [
     {
@@ -345,72 +392,24 @@ export const regionalWasteClassificationTestCases: RegionalWasteClassificationTe
       resultStatus: 'FAILED',
       scenario: 'The local waste classification ID is not valid',
     },
-    {
-      events: {
-        [`${ACTOR}-${RECYCLER}`]: brazilianRecyclerEvent,
-        [PICK_UP]: stubBoldMassIDPickUpEvent({
-          metadataAttributes: [
-            [LOCAL_WASTE_CLASSIFICATION_ID, '02 01 01'],
-            [
-              LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
-              WASTE_CLASSIFICATION_CODES.BR['02 01 01'].description,
-            ],
-          ],
-        }),
-      },
-      partialDocument: {
-        subtype: MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
-      },
+    subtypeEvidenceCase({
+      cdmCode: '8.7B',
+      expectedSubtype: MassIDOrganicSubtype.INDUSTRIAL_SLUDGE,
+      localWasteClassificationId: '02 01 01',
       resultComment: RESULT_COMMENTS.failed.INVALID_SUBTYPE_CDM_CODE_MISMATCH,
-      resultContent: {
-        crossValidation: {
-          cdmCode: '8.7B',
-          expectedSubtype: MassIDOrganicSubtype.INDUSTRIAL_SLUDGE,
-          localWasteClassificationId: '02 01 01',
-          subtype: MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
-        },
-        description: WASTE_CLASSIFICATION_CODES.BR['02 01 01'].description,
-        id: '02 01 01',
-        recyclerCountryCode: 'BR',
-        subtype: MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
-      },
-      resultStatus: 'FAILED',
       scenario:
         'The subtype does not match the CDM_CODE for the provided classification ID',
-    },
-    {
-      events: {
-        [`${ACTOR}-${RECYCLER}`]: brazilianRecyclerEvent,
-        [PICK_UP]: stubBoldMassIDPickUpEvent({
-          metadataAttributes: [
-            [LOCAL_WASTE_CLASSIFICATION_ID, '20 01 01'],
-            [
-              LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
-              WASTE_CLASSIFICATION_CODES.BR['20 01 01'].description,
-            ],
-          ],
-        }),
-      },
-      partialDocument: {
-        subtype: MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
-      },
+      subtype: MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
+    }),
+    subtypeEvidenceCase({
+      cdmCode: '8.2',
+      expectedSubtype: NO_ELIGIBLE_SUBTYPE,
+      localWasteClassificationId: '20 01 01',
       resultComment: RESULT_COMMENTS.failed.INVALID_SUBTYPE_CDM_CODE_MISMATCH,
-      resultContent: {
-        crossValidation: {
-          cdmCode: '8.2',
-          expectedSubtype: NO_ELIGIBLE_SUBTYPE,
-          localWasteClassificationId: '20 01 01',
-          subtype: MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
-        },
-        description: WASTE_CLASSIFICATION_CODES.BR['20 01 01'].description,
-        id: '20 01 01',
-        recyclerCountryCode: 'BR',
-        subtype: MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
-      },
-      resultStatus: 'FAILED',
       scenario:
         'The classification ID belongs to a CDM category with no eligible subtype',
-    },
+      subtype: MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
+    }),
     {
       events: {
         [`${ACTOR}-${RECYCLER}`]: brazilianRecyclerEvent,
@@ -544,38 +543,14 @@ export const regionalWasteClassificationTestCases: RegionalWasteClassificationTe
       resultStatus: 'PASSED',
       scenario: 'The Tobacco subtype matches the CDM_CODE 8.3',
     },
-    {
-      events: {
-        [`${ACTOR}-${RECYCLER}`]: brazilianRecyclerEvent,
-        [PICK_UP]: stubBoldMassIDPickUpEvent({
-          metadataAttributes: [
-            [LOCAL_WASTE_CLASSIFICATION_ID, '02 01 01'],
-            [
-              LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
-              WASTE_CLASSIFICATION_CODES.BR['02 01 01'].description,
-            ],
-          ],
-        }),
-      },
-      partialDocument: {
-        subtype: 'Unmapped Subtype',
-      },
+    subtypeEvidenceCase({
+      cdmCode: '8.7B',
+      expectedSubtype: MassIDOrganicSubtype.INDUSTRIAL_SLUDGE,
+      localWasteClassificationId: '02 01 01',
       resultComment: RESULT_COMMENTS.failed.INVALID_SUBTYPE_MAPPING,
-      resultContent: {
-        crossValidation: {
-          cdmCode: '8.7B',
-          expectedSubtype: MassIDOrganicSubtype.INDUSTRIAL_SLUDGE,
-          localWasteClassificationId: '02 01 01',
-          subtype: MassIDOrganicSubtype.TOBACCO,
-        },
-        description: WASTE_CLASSIFICATION_CODES.BR['02 01 01'].description,
-        id: '02 01 01',
-        recyclerCountryCode: 'BR',
-        subtype: 'Unmapped Subtype',
-      },
-      resultStatus: 'FAILED',
       scenario: 'The subtype does not map to a valid CDM_CODE',
-    },
+      subtype: 'Unmapped Subtype',
+    }),
     {
       events: {
         [`${ACTOR}-${RECYCLER}`]: brazilianRecyclerEvent,
