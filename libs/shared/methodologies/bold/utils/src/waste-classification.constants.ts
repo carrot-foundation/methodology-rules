@@ -943,6 +943,7 @@ export const SUBTYPE_TO_CDM_CODE_MAP: Map<string, string | undefined> = new Map(
     [MassIDOrganicSubtype.GARDEN_YARD_AND_PARK_WASTE, '8.5'],
     [MassIDOrganicSubtype.INDUSTRIAL_SLUDGE, '8.7B'],
     [MassIDOrganicSubtype.OTHERS_IF_ORGANIC, '8.7D'],
+    [MassIDOrganicSubtype.TOBACCO, '8.3'],
     [MassIDOrganicSubtype.WOOD_AND_WOOD_PRODUCTS, '8.1'],
   ],
 );
