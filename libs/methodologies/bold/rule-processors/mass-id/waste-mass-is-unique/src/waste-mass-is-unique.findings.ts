@@ -25,16 +25,16 @@ export const WASTE_MASS_IS_UNIQUE_FINDINGS = defineRuleFindings(
       category: 'PROCESSING_ERROR',
       defaultOwner: 'CARROT',
       description:
-        'O documento da MassID não foi encontrado durante a validação.',
+        'O documento do MassID não foi encontrado durante a validação.',
       guidance:
         'Nenhuma ação do integrador é necessária: a Carrot investiga a falha e reexecuta a auditoria.',
-      title: 'Documento da MassID não encontrado',
+      title: 'Documento do MassID não encontrado',
     },
     'ERROR.MISSING_DROP_OFF_EVENT': {
       category: 'MISSING_EVENT',
       defaultOwner: 'INTEGRATOR',
       description:
-        'A unicidade da massa não pôde ser verificada porque a MassID não tem o evento "Drop-off".',
+        'A unicidade da massa não pôde ser verificada porque o MassID não tem o evento "Drop-off".',
       guidance: 'Envie o evento "Drop-off" da massa.',
       title: 'Evento de recebimento ausente',
     },
@@ -42,7 +42,7 @@ export const WASTE_MASS_IS_UNIQUE_FINDINGS = defineRuleFindings(
       category: 'MISSING_EVENT',
       defaultOwner: 'INTEGRATOR',
       description:
-        'A unicidade da massa não pôde ser verificada porque a MassID não tem o evento "Pick-up".',
+        'A unicidade da massa não pôde ser verificada porque o MassID não tem o evento "Pick-up".',
       guidance: 'Envie o evento "Pick-up" da massa.',
       title: 'Evento de coleta ausente',
     },
@@ -50,7 +50,7 @@ export const WASTE_MASS_IS_UNIQUE_FINDINGS = defineRuleFindings(
       category: 'MISSING_EVENT',
       defaultOwner: 'INTEGRATOR',
       description:
-        'A unicidade da massa não pôde ser verificada porque a MassID não tem o evento de ator "Recycler".',
+        'A unicidade da massa não pôde ser verificada porque o MassID não tem o evento de ator "Recycler".',
       guidance: 'Envie o evento de ator "Recycler" da massa.',
       title: 'Reciclador não identificado',
     },
@@ -67,7 +67,7 @@ export const WASTE_MASS_IS_UNIQUE_FINDINGS = defineRuleFindings(
       category: 'MISSING_EVENT',
       defaultOwner: 'INTEGRATOR',
       description:
-        'A unicidade da massa não pôde ser verificada porque a MassID não tem o evento de ator "Waste Generator".',
+        'A unicidade da massa não pôde ser verificada porque o MassID não tem o evento de ator "Waste Generator".',
       guidance: 'Envie o evento de ator "Waste Generator" da massa.',
       title: 'Gerador não identificado',
     },
@@ -75,7 +75,7 @@ export const WASTE_MASS_IS_UNIQUE_FINDINGS = defineRuleFindings(
       category: 'DUPLICATE_OR_CONFLICT',
       defaultOwner: 'TO_CONFIRM',
       description:
-        'Foram encontradas outras MassIDs semelhantes que não estão canceladas.',
+        'Foram encontrados outros MassIDs semelhantes que não estão cancelados.',
       guidance:
         'Confira se a massa foi enviada mais de uma vez e cancele as duplicatas. A Carrot confirma a origem da duplicidade.',
       title: 'Possível massa duplicada',

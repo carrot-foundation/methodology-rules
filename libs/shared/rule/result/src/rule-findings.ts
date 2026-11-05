@@ -203,10 +203,10 @@ export const SHARED_FINDINGS = defineRuleFindings(
       category: 'PROCESSING_ERROR',
       defaultOwner: 'CARROT',
       description:
-        'O documento da MassID não pôde ser carregado para a auditoria.',
+        'O documento do MassID não pôde ser carregado para a auditoria.',
       guidance:
         'Nenhuma ação do integrador é necessária: a Carrot investiga a falha e reexecuta a auditoria.',
-      title: 'Documento da MassID não carregado',
+      title: 'Documento do MassID não carregado',
     },
   },
 );

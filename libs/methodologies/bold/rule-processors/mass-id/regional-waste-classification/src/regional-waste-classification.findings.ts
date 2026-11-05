@@ -82,7 +82,7 @@ export const REGIONAL_WASTE_CLASSIFICATION_FINDINGS = defineRuleFindings(
       category: 'INVALID_DATA',
       defaultOwner: 'INTEGRATOR',
       description:
-        'O subtipo da MassID não corresponde ao código CDM do "Local Waste Classification ID" informado.',
+        'O subtipo do MassID não corresponde ao código CDM do "Local Waste Classification ID" informado.',
       evidence: subtypeEvidence,
       guidance: EXPECTED_SUBTYPE_GUIDANCE,
       title: 'Subtipo incompatível com a classificação do resíduo',

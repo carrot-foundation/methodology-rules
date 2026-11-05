@@ -44,17 +44,17 @@ export const PREVENTED_EMISSIONS_FINDINGS = defineRuleFindings(
       category: 'INVALID_DATA',
       defaultOwner: 'INTEGRATOR',
       description:
-        'O subtipo da MassID não é válido para o cálculo de emissões evitadas.',
-      guidance: 'Confira o subtipo do resíduo informado na MassID.',
+        'O subtipo do MassID não é válido para o cálculo de emissões evitadas.',
+      guidance: 'Confira o subtipo do resíduo informado no MassID.',
       title: 'Subtipo da massa inválido',
     },
     'ERROR.INVALID_RULE_SUBJECT': {
       category: 'INVALID_DATA',
       defaultOwner: 'INTEGRATOR',
       description:
-        'Os dados da MassID não atendem à estrutura exigida para calcular as emissões evitadas.',
+        'Os dados do MassID não atendem à estrutura exigida para calcular as emissões evitadas.',
       guidance:
-        'Confira os eventos e atributos da MassID usados no cálculo de emissões evitadas.',
+        'Confira os eventos e atributos do MassID usados no cálculo de emissões evitadas.',
       title: 'Dados da massa insuficientes para o cálculo',
     },
     'ERROR.MISSING_GREENHOUSE_GAS_TYPE': {
@@ -71,10 +71,10 @@ export const PREVENTED_EMISSIONS_FINDINGS = defineRuleFindings(
       category: 'PROCESSING_ERROR',
       defaultOwner: 'CARROT',
       description:
-        'O documento da MassID não foi encontrado durante a validação.',
+        'O documento do MassID não foi encontrado durante a validação.',
       guidance:
         'Nenhuma ação do integrador é necessária: a Carrot investiga a falha e reexecuta a auditoria.',
-      title: 'Documento da MassID não encontrado',
+      title: 'Documento do MassID não encontrado',
     },
     'ERROR.MISSING_RECYCLER_ACCREDITATION_DOCUMENT': {
       category: 'ACCREDITATION',
@@ -92,7 +92,7 @@ export const PREVENTED_EMISSIONS_FINDINGS = defineRuleFindings(
       description:
         'O "Local Waste Classification ID" não corresponde ao código CDM 8.7D ("Others if organic").',
       guidance:
-        'Confira o código de classificação local e o subtipo do resíduo enviados na MassID.',
+        'Confira o código de classificação local e o subtipo do resíduo enviados no MassID.',
       title: 'Código de classificação incompatível com o subtipo',
     },
     'FAILED.MISSING_EXCEEDING_EMISSION_COEFFICIENT': {

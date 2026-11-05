@@ -25,14 +25,14 @@ export const PROCESSOR_IDENTIFICATION_FINDINGS = defineRuleFindings(
       category: 'INVALID_DATA',
       defaultOwner: 'INTEGRATOR',
       description:
-        'A MassID tem mais de um evento de ator "Processor"; apenas um é permitido.',
+        'O MassID tem mais de um evento de ator "Processor"; apenas um é permitido.',
       guidance: 'Envie um único evento de ator "Processor".',
       title: 'Mais de um processador informado',
     },
     'FAILED.NOT_FOUND': {
       category: 'MISSING_EVENT',
       defaultOwner: 'INTEGRATOR',
-      description: 'A MassID não tem evento de ator "Processor".',
+      description: 'O MassID não tem evento de ator "Processor".',
       guidance:
         'Envie o evento de ator "Processor" com o participante responsável.',
       title: 'Processador não identificado',
