@@ -1,4 +1,5 @@
 import { isNonEmptyString, normalizeString } from '@carrot-fndn/shared/helpers';
+import { type BoldAttributeValue } from '@carrot-fndn/shared/types';
 
 import {
   SUBTYPE_TO_CDM_CODE_MAP,
@@ -29,15 +30,14 @@ export const WASTE_SUBTYPE_CLASSIFICATION_EVIDENCE_FIELDS = [
   'expectedSubtype',
 ] as const satisfies ReadonlyArray<keyof WasteSubtypeClassificationEvidence>;
 
-export const EXPECTED_SUBTYPE_GUIDANCE =
-  'Envie o subtipo indicado em "expectedSubtype", que corresponde ao código CDM ("cdmCode") do "Local Waste Classification ID" informado. Se "expectedSubtype" for "none", esse código não tem subtipo elegível na metodologia: confira o código de classificação do resíduo.';
+export const EXPECTED_SUBTYPE_GUIDANCE = `Envie o subtipo indicado em "expectedSubtype", que corresponde ao código CDM ("cdmCode") do "Local Waste Classification ID" informado, ou corrija esse código se for ele o errado. Se "expectedSubtype" for "${NO_ELIGIBLE_SUBTYPE}", o código não tem subtipo elegível na metodologia; se estiver vazio, o "Local Waste Classification ID" do evento "Pick-up" está ausente ou não é aceito: confira o código de classificação do resíduo.`;
 
 const BR_WASTE_CLASSIFICATION_IDS = Object.keys(
   WASTE_CLASSIFICATION_CODES.BR,
 ) as BrWasteClassificationId[];
 
 export const findBrWasteClassification = (
-  localWasteClassificationId: unknown,
+  localWasteClassificationId: BoldAttributeValue | undefined,
 ): BrWasteClassification | undefined => {
   if (!isNonEmptyString(localWasteClassificationId)) {
     return undefined;
@@ -60,7 +60,7 @@ export const getWasteSubtypeClassificationEvidence = ({
   localWasteClassificationId,
   subtype,
 }: {
-  localWasteClassificationId: unknown;
+  localWasteClassificationId: BoldAttributeValue | undefined;
   subtype: string | undefined;
 }): WasteSubtypeClassificationEvidence => {
   const classification = findBrWasteClassification(localWasteClassificationId);
@@ -74,6 +74,7 @@ export const getWasteSubtypeClassificationEvidence = ({
       cdmCode: classification.CDM_CODE,
       expectedSubtype:
         getSubtypeByCdmCode(classification.CDM_CODE) ?? NO_ELIGIBLE_SUBTYPE,
+      localWasteClassificationId: classification.id,
     }),
   };
 };

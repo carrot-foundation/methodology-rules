@@ -307,17 +307,20 @@ export class ParticipantAccreditationsAndVerificationsRequirementsProcessor exte
         participantId: string;
       };
 
-      if (
-        hasDuplicateIntegratorActorEvents(
-          massIDDocument,
-          firstParticipant.participantId,
-          firstParticipant.actorType,
-        )
-      ) {
+      const duplicatedIntegrator = participantsWithMultipleValid.find(
+        ({ actorType, participantId }) =>
+          hasDuplicateIntegratorActorEvents(
+            massIDDocument,
+            participantId,
+            actorType,
+          ),
+      );
+
+      if (duplicatedIntegrator) {
         return this.errorProcessor.getKnownError(
           PARTICIPANT_ACCREDITATIONS_AND_VERIFICATIONS_REQUIREMENTS_FINDINGS.render(
             'ERROR.DUPLICATE_INTEGRATOR_ACTOR_EVENT',
-            firstParticipant.participantId,
+            duplicatedIntegrator.participantId,
           ),
         );
       }

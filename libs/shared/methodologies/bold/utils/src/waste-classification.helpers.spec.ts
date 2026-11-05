@@ -67,6 +67,15 @@ describe('getWasteSubtypeClassificationEvidence', () => {
     });
   });
 
+  it('should report the classification code in its canonical spelling', () => {
+    expect(
+      getWasteSubtypeClassificationEvidence({
+        localWasteClassificationId: '020103',
+        subtype: 'Paper',
+      }),
+    ).toMatchObject({ localWasteClassificationId: '02 01 03' });
+  });
+
   it('should omit the CDM fields when the classification code is unknown', () => {
     expect(
       getWasteSubtypeClassificationEvidence({

@@ -147,7 +147,7 @@ export const MASS_ID_SORTING_FINDINGS = defineRuleFindings(
         ),
       ],
       guidance:
-        'Envie no evento "Sorting" o "Deducted Weight" indicado em "expectedDeductedWeight" (kg), que é o "Gross Weight" multiplicado pelo fator de triagem credenciado do reciclador, sem arredondar.',
+        'Envie no evento "Sorting" o "Deducted Weight" indicado em "expectedDeductedWeight" (kg, com 3 casas decimais), que é o "Gross Weight" multiplicado pelo fator de triagem credenciado do reciclador, e mantenha o valor do evento "Sorting" e a quantidade da MassID iguais ao "Gross Weight" menos o "Deducted Weight".',
       title: 'Peso descontado não confere com o fator de triagem',
     },
     'FAILED.DOCUMENT_VALUE_MISMATCH': {
@@ -185,7 +185,7 @@ export const MASS_ID_SORTING_FINDINGS = defineRuleFindings(
         crossValidationEvidence<SortingValueEvidence>('expectedSortingValue'),
       ],
       guidance:
-        'Envie como valor do evento "Sorting" o indicado em "expectedSortingValue" (kg), que é o "Gross Weight" menos o "Deducted Weight" declarados, sem arredondar.',
+        'Envie como valor do evento "Sorting", e como quantidade da MassID, o indicado em "expectedSortingValue" (kg, com 3 casas decimais), que é o "Gross Weight" menos o "Deducted Weight" declarados.',
       title: 'Valor triado fora da tolerância',
     },
   },

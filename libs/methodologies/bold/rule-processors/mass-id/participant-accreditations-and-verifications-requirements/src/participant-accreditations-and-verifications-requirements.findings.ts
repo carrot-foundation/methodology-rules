@@ -1,3 +1,4 @@
+import { MassIDActorType } from '@carrot-fndn/shared/methodologies/bold/types';
 import { defineRuleFindings } from '@carrot-fndn/shared/rule/result';
 
 import { RESULT_COMMENTS } from './participant-accreditations-and-verifications-requirements.constants';
@@ -18,6 +19,7 @@ export const PARTICIPANT_ACCREDITATIONS_AND_VERIFICATIONS_REQUIREMENTS_FINDINGS 
       'ERROR.ACCREDITATION_DOCUMENTS_NOT_FOUND': {
         category: 'ACCREDITATION',
         defaultOwner: 'TO_CONFIRM',
+        dependsOnAccreditation: MassIDActorType.RECYCLER,
         description:
           'Nenhum documento de credenciamento foi encontrado para a MassID.',
         guidance:

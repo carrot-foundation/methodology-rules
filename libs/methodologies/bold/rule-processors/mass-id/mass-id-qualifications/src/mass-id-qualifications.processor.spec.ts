@@ -134,6 +134,41 @@ describe('MassIDQualificationsProcessor', () => {
     },
   );
 
+  it('should report only the received subtype when the pick-up has no classification code', async () => {
+    const { massIDDocument } = new BoldStubsBuilder()
+      .createMassIDDocuments()
+      .build();
+
+    documentLoaderService.mockResolvedValueOnce({
+      ...massIDDocument,
+      externalEvents: massIDDocument.externalEvents?.filter(
+        ({ name }) => name !== BoldDocumentEventName.PICK_UP.toString(),
+      ),
+      subtype: 'Unlisted Subtype',
+    });
+
+    const ruleOutput = await ruleDataProcessor.process(stubRuleInput());
+
+    expect(ruleOutput.resultContent?.['crossValidation']).toStrictEqual({
+      subtype: 'Unlisted Subtype',
+    });
+  });
+
+  it('should attach no subtype evidence when the subtype is valid', async () => {
+    const { massIDDocument } = new BoldStubsBuilder()
+      .createMassIDDocuments()
+      .build();
+
+    documentLoaderService.mockResolvedValueOnce({
+      ...massIDDocument,
+      type: 'INVALID_TYPE',
+    });
+
+    const ruleOutput = await ruleDataProcessor.process(stubRuleInput());
+
+    expect(ruleOutput.resultContent).not.toHaveProperty('crossValidation');
+  });
+
   it('should return one finding per joined failure message in the same order', async () => {
     const { massIDDocument } = new BoldStubsBuilder()
       .createMassIDDocuments()
