@@ -10,7 +10,7 @@ import {
   FINDING_OWNER_LABELS,
   type FindingCatalogContext,
 } from './finding-catalog';
-import { defineRuleFindings } from './rule-findings';
+import { crossValidationEvidence, defineRuleFindings } from './rule-findings';
 import { stubFindingMeta } from './rule-findings.stubs';
 
 const SOURCE_COMMIT = 'abc1234';
@@ -28,7 +28,9 @@ const TEST_FINDINGS = defineRuleFindings(
     }),
     'FAILED.PLATE_MISMATCH': stubFindingMeta({
       documentKinds: [BoldReportType.MTR],
-      evidence: [{ field: 'vehiclePlate', source: 'CROSS_VALIDATION' }],
+      evidence: [
+        crossValidationEvidence<{ vehiclePlate: string }>('vehiclePlate'),
+      ],
     }),
     'FAILED.WEIGHT_MISMATCH': stubFindingMeta({
       dependsOnAccreditation: MassIDActorType.RECYCLER,
@@ -241,7 +243,13 @@ describe('buildFindingCatalog', () => {
     it('should keep the typed evidence selectors of a finding', () => {
       expect(
         findEntry(catalog, 'test-rule.FAILED.PLATE_MISMATCH')?.evidence,
-      ).toEqual([{ field: 'vehiclePlate', source: 'CROSS_VALIDATION' }]);
+      ).toEqual([
+        {
+          field: 'vehiclePlate',
+          label: 'Placa do veículo',
+          source: 'CROSS_VALIDATION',
+        },
+      ]);
     });
 
     it('should report every finding without structured evidence', () => {

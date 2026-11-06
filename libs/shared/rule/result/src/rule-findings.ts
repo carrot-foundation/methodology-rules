@@ -23,8 +23,36 @@ export interface FindingDeclaration {
   meta: FindingMeta;
 }
 
+export const EVIDENCE_FIELD_LABELS = {
+  cdmCode: 'Código CDM',
+  deductedWeight: 'Peso descontado enviado',
+  documentNumber: 'Número do documento',
+  expectedDeductedWeight: 'Peso descontado esperado',
+  expectedDescription: 'Descrição esperada',
+  expectedSortingValue: 'Sorting esperado',
+  expectedSubtype: 'Subtipo esperado',
+  generator: 'Gerador',
+  hauler: 'Transportador',
+  issueDate: 'Data de emissão',
+  localWasteClassificationId: 'Código Ibama',
+  mtrNumbers: 'Números de MTR',
+  processingPeriod: 'Período de processamento',
+  receiver: 'Destinador',
+  receivingDate: 'Data de recebimento',
+  recycler: 'Reciclador',
+  sortingValue: 'Sorting enviado',
+  subtype: 'Subtipo enviado',
+  transportDate: 'Data de transporte',
+  vehiclePlate: 'Placa do veículo',
+  wasteQuantityWeight: 'Quantidade do resíduo',
+  wasteType: 'Tipo de resíduo',
+} as const satisfies Record<string, string>;
+
+export type EvidenceField = keyof typeof EVIDENCE_FIELD_LABELS;
+
 export interface FindingEvidenceSelector {
-  field: string;
+  field: EvidenceField;
+  label: string;
   source: 'CROSS_VALIDATION';
 }
 
@@ -98,8 +126,13 @@ const renderMessage = (
 
 // The report reads each selected field from the rule result's `resultContent.crossValidation`
 export const crossValidationEvidence = <Evidence extends object>(
-  field: keyof Evidence & string,
-): FindingEvidenceSelector => ({ field, source: 'CROSS_VALIDATION' });
+  field: EvidenceField & keyof Evidence,
+): FindingEvidenceSelector => ({
+  field,
+  // eslint-disable-next-line security/detect-object-injection
+  label: EVIDENCE_FIELD_LABELS[field],
+  source: 'CROSS_VALIDATION',
+});
 
 export const joinRenderedFindings = (
   renderedFindings: RenderedRuleFinding[],
@@ -146,6 +179,19 @@ export const defineRuleFindings = <M extends FindingMessageGroups>(
   if (keysWithoutCopy.length > 0) {
     throw new Error(
       `Finding metadata of rule "${slug}" has empty catalog copy: [${keysWithoutCopy.join(', ')}]`,
+    );
+  }
+
+  const evidenceFields = Object.keys(EVIDENCE_FIELD_LABELS);
+  const keysQuotingEvidenceFields = [...metaByKey]
+    .filter(([, { guidance }]) =>
+      evidenceFields.some((field) => guidance.includes(`"${field}"`)),
+    )
+    .map(([key]) => key);
+
+  if (keysQuotingEvidenceFields.length > 0) {
+    throw new Error(
+      `Finding guidance of rule "${slug}" quotes a raw evidence field instead of its label: [${keysQuotingEvidenceFields.join(', ')}]`,
     );
   }
 

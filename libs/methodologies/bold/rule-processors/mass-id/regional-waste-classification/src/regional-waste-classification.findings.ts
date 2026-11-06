@@ -6,6 +6,7 @@ import {
 import {
   crossValidationEvidence,
   defineRuleFindings,
+  EVIDENCE_FIELD_LABELS,
 } from '@carrot-fndn/shared/rule/result';
 
 import type { ClassificationDescriptionEvidence } from './regional-waste-classification.types';
@@ -65,8 +66,7 @@ export const REGIONAL_WASTE_CLASSIFICATION_FINDINGS = defineRuleFindings(
           'expectedDescription',
         ),
       ],
-      guidance:
-        'Envie no evento "Pick-up" a descrição indicada em "expectedDescription", que é a descrição oficial do código informado.',
+      guidance: `Envie no evento "Pick-up" a descrição indicada em "${EVIDENCE_FIELD_LABELS.expectedDescription}", que é a descrição oficial do "${EVIDENCE_FIELD_LABELS.localWasteClassificationId}" informado.`,
       title: 'Descrição da classificação do resíduo não confere',
     },
     'FAILED.INVALID_CLASSIFICATION_ID': {
