@@ -83,7 +83,7 @@ export const PREVENTED_EMISSIONS_FINDINGS = defineRuleFindings(
       description:
         'O documento de credenciamento do reciclador não foi encontrado.',
       guidance:
-        'Confirme que o reciclador da massa está credenciado e referenciado corretamente. A Carrot confirma a origem da pendência.',
+        'Confirme que o reciclador da massa está credenciado e referenciado corretamente, e corrija na origem o que estiver errado.',
       title: 'Credenciamento do reciclador não encontrado',
     },
     'ERROR.SUBTYPE_CDM_CODE_MISMATCH': {

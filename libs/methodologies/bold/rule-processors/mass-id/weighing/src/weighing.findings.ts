@@ -51,7 +51,7 @@ export const WEIGHING_FINDINGS = defineRuleFindings(
       description:
         'O documento de credenciamento do reciclador não foi encontrado.',
       guidance:
-        'Confirme que o reciclador da massa está credenciado e referenciado corretamente. A Carrot confirma a origem da pendência.',
+        'Confirme que o reciclador da massa está credenciado e referenciado corretamente, e corrija na origem o que estiver errado.',
       title: 'Credenciamento do reciclador não encontrado',
     },
     'INVALID.CONTAINER_CAPACITY_FORMAT': {
@@ -110,7 +110,7 @@ export const WEIGHING_FINDINGS = defineRuleFindings(
       description:
         'A verificação do ticket de balança é exigida, mas o arquivo do ticket não pôde ser localizado: não há ticket anexado ao evento "Weighing" ou o armazenamento de anexos não estava disponível.',
       guidance:
-        'Verifique se o ticket de balança está anexado ao evento "Weighing" e anexe-o se faltar. A Carrot confirma a origem da pendência.',
+        'Verifique se o ticket de balança está anexado ao evento "Weighing" e anexe-o se faltar.',
       title: 'Ticket de balança não localizado',
     },
     'INVALID.SCALE_TICKET_NET_WEIGHT_MISMATCH': {
@@ -196,7 +196,7 @@ export const WEIGHING_FINDINGS = defineRuleFindings(
       description:
         'O "Vehicle License Plate" da pesagem não está em um formato válido.',
       guidance:
-        'Confira a placa registrada na pesagem. A Carrot confirma a origem da pendência.',
+        'Confira a placa registrada na pesagem, confirme se está correta e corrija na origem.',
       title: 'Placa do veículo em formato inválido',
     },
     'INVALID.WEIGHING_CAPTURE_METHOD': {

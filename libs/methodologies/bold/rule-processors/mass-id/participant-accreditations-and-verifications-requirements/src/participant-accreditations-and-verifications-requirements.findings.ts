@@ -23,7 +23,7 @@ export const PARTICIPANT_ACCREDITATIONS_AND_VERIFICATIONS_REQUIREMENTS_FINDINGS 
         description:
           'Nenhum documento de credenciamento foi encontrado para o MassID.',
         guidance:
-          'Confirme que os participantes da massa estão credenciados e referenciados corretamente. A Carrot confirma a origem da pendência.',
+          'Confirme que os participantes da massa estão credenciados e referenciados corretamente, e corrija na origem o que estiver errado.',
         title: 'Credenciamentos não encontrados',
       },
       'ERROR.DUPLICATE_INTEGRATOR_ACTOR_EVENT': {
@@ -66,7 +66,7 @@ export const PARTICIPANT_ACCREDITATIONS_AND_VERIFICATIONS_REQUIREMENTS_FINDINGS 
         description:
           'Um ou mais participantes do MassID não têm credenciamento válido.',
         guidance:
-          'Confirme que todos os participantes da massa estão credenciados. A Carrot confirma a origem da pendência.',
+          'Confirme que todos os participantes da massa estão credenciados e corrija na origem o que estiver errado.',
         title: 'Participantes sem credenciamento válido',
       },
       'ERROR.MULTIPLE_VALID_ACCREDITATIONS_FOR_PARTICIPANT': {
