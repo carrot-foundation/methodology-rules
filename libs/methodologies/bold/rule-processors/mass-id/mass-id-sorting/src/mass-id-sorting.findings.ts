@@ -2,6 +2,7 @@ import { MassIDActorType } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
   crossValidationEvidence,
   defineRuleFindings,
+  EVIDENCE_FIELD_LABELS,
 } from '@carrot-fndn/shared/rule/result';
 
 import type {
@@ -146,8 +147,7 @@ export const MASS_ID_SORTING_FINDINGS = defineRuleFindings(
           'expectedDeductedWeight',
         ),
       ],
-      guidance:
-        'Envie no evento "Sorting" o "Deducted Weight" indicado em "expectedDeductedWeight" (kg, com 3 casas decimais), que é o "Gross Weight" multiplicado pelo fator de triagem credenciado do reciclador, e mantenha o valor do evento "Sorting" e a quantidade do MassID iguais ao "Gross Weight" menos o "Deducted Weight".',
+      guidance: `Envie no evento "Sorting" o "Deducted Weight" indicado em "${EVIDENCE_FIELD_LABELS.expectedDeductedWeight}" (kg, com 3 casas decimais), que é o "Gross Weight" multiplicado pelo fator de triagem credenciado do reciclador, e mantenha o valor do evento "Sorting" e a quantidade do MassID iguais ao "Gross Weight" menos o "Deducted Weight".`,
       title: 'Peso descontado não confere com o fator de triagem',
     },
     'FAILED.DOCUMENT_VALUE_MISMATCH': {
@@ -184,8 +184,7 @@ export const MASS_ID_SORTING_FINDINGS = defineRuleFindings(
         crossValidationEvidence<SortingValueEvidence>('sortingValue'),
         crossValidationEvidence<SortingValueEvidence>('expectedSortingValue'),
       ],
-      guidance:
-        'Envie como valor do evento "Sorting", e como quantidade do MassID, o indicado em "expectedSortingValue" (kg, com 3 casas decimais), que é o "Gross Weight" menos o "Deducted Weight" declarados.',
+      guidance: `Envie como valor do evento "Sorting", e como quantidade do MassID, o indicado em "${EVIDENCE_FIELD_LABELS.expectedSortingValue}" (kg, com 3 casas decimais), que é o "Gross Weight" menos o "Deducted Weight" declarados.`,
       title: 'Valor triado fora da tolerância',
     },
   },

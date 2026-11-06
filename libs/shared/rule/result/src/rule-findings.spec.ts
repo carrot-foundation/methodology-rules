@@ -4,6 +4,7 @@ import { faker } from '@faker-js/faker';
 import {
   crossValidationEvidence,
   defineRuleFindings,
+  EVIDENCE_FIELD_LABELS,
   joinRenderedFindings,
   SHARED_FINDINGS,
 } from './rule-findings';
@@ -168,6 +169,33 @@ describe('defineRuleFindings', () => {
     },
   );
 
+  it.each(Object.keys(EVIDENCE_FIELD_LABELS))(
+    'should throw naming the keys whose guidance quotes the raw evidence field "%s"',
+    (field) => {
+      expect(() =>
+        defineRuleFindings('test-rule', TEST_MESSAGES, {
+          'ERROR.INVALID_SUBJECT': stubFindingMeta(),
+          'FAILED.MASS_MISMATCH': stubFindingMeta({
+            guidance: `Envie o valor indicado em "${field}".`,
+          }),
+        }),
+      ).toThrow(
+        'Finding guidance of rule "test-rule" quotes a raw evidence field instead of its label: [FAILED.MASS_MISMATCH]',
+      );
+    },
+  );
+
+  it('should accept guidance that quotes the evidence label', () => {
+    expect(() =>
+      defineRuleFindings('test-rule', TEST_MESSAGES, {
+        'ERROR.INVALID_SUBJECT': stubFindingMeta(),
+        'FAILED.MASS_MISMATCH': stubFindingMeta({
+          guidance: `Envie o subtipo indicado em "${EVIDENCE_FIELD_LABELS.expectedSubtype}".`,
+        }),
+      }),
+    ).not.toThrow();
+  });
+
   it('should expose one declaration per key with its emitted finding and metadata', () => {
     expect(TEST_FINDINGS.declarations).toStrictEqual([
       {
@@ -244,6 +272,10 @@ describe('crossValidationEvidence', () => {
   it('should select a field of the result content cross validation', () => {
     expect(
       crossValidationEvidence<{ expectedSubtype: string }>('expectedSubtype'),
-    ).toStrictEqual({ field: 'expectedSubtype', source: 'CROSS_VALIDATION' });
+    ).toStrictEqual({
+      field: 'expectedSubtype',
+      label: 'Subtipo esperado',
+      source: 'CROSS_VALIDATION',
+    });
   });
 });
