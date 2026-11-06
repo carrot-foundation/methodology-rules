@@ -4,7 +4,6 @@ import {
   findBrWasteClassification,
   getSubtypesByCdmCode,
   getWasteSubtypeClassificationEvidence,
-  NO_ELIGIBLE_SUBTYPE,
 } from './waste-classification.helpers';
 
 describe('findBrWasteClassification', () => {
@@ -40,7 +39,7 @@ describe('getSubtypesByCdmCode', () => {
 });
 
 describe('getWasteSubtypeClassificationEvidence', () => {
-  it('should return the subtype the classification code expects', () => {
+  it('should quote each subtype the classification code accepts as a separate option', () => {
     expect(
       getWasteSubtypeClassificationEvidence({
         localWasteClassificationId: '02 01 03',
@@ -48,13 +47,25 @@ describe('getWasteSubtypeClassificationEvidence', () => {
       }),
     ).toEqual({
       cdmCode: '8.3',
-      expectedSubtype: `${MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES} | ${MassIDOrganicSubtype.TOBACCO}`,
+      expectedSubtype: '“Food, Food Waste and Beverages” ou “Tobacco”',
       localWasteClassificationId: '02 01 03',
       subtype: MassIDOrganicSubtype.WOOD_AND_WOOD_PRODUCTS,
     });
   });
 
-  it('should report no eligible subtype when the CDM category has none', () => {
+  it('should quote the only subtype the classification code accepts', () => {
+    expect(
+      getWasteSubtypeClassificationEvidence({
+        localWasteClassificationId: '02 01 01',
+        subtype: 'Paper',
+      }),
+    ).toMatchObject({
+      cdmCode: '8.7B',
+      expectedSubtype: '“Industrial Sludge”',
+    });
+  });
+
+  it('should name the CDM category the methodology does not accept when it has no eligible subtype', () => {
     expect(
       getWasteSubtypeClassificationEvidence({
         localWasteClassificationId: '20 01 01',
@@ -62,7 +73,8 @@ describe('getWasteSubtypeClassificationEvidence', () => {
       }),
     ).toEqual({
       cdmCode: '8.2',
-      expectedSubtype: NO_ELIGIBLE_SUBTYPE,
+      expectedSubtype:
+        'nenhum: a categoria CDM 8.2 não é aceita pela metodologia',
       localWasteClassificationId: '20 01 01',
       subtype: 'Paper',
     });
@@ -77,12 +89,22 @@ describe('getWasteSubtypeClassificationEvidence', () => {
     ).toMatchObject({ localWasteClassificationId: '02 01 03' });
   });
 
-  it('should omit the CDM fields when the classification code is unknown', () => {
-    expect(
-      getWasteSubtypeClassificationEvidence({
-        localWasteClassificationId: '99 99 99',
-        subtype: undefined,
-      }),
-    ).toEqual({ localWasteClassificationId: '99 99 99' });
-  });
+  it.each([
+    { expected: { localWasteClassificationId: '99 99 99' }, id: '99 99 99' },
+    { expected: {}, id: undefined },
+  ])(
+    'should omit the CDM code and say the Ibama code is not accepted when it is $id',
+    ({ expected, id }) => {
+      expect(
+        getWasteSubtypeClassificationEvidence({
+          localWasteClassificationId: id,
+          subtype: undefined,
+        }),
+      ).toEqual({
+        ...expected,
+        expectedSubtype:
+          'nenhum: o código Ibama não foi informado ou não é aceito',
+      });
+    },
+  );
 });

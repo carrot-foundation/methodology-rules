@@ -11,7 +11,6 @@ import {
   BoldDocumentEventName,
   MassIDOrganicSubtype,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { NO_ELIGIBLE_SUBTYPE } from '@carrot-fndn/shared/methodologies/bold/utils';
 import {
   type RuleOutput,
   type RuleOutputStatus,
@@ -90,13 +89,14 @@ describe('MassIDQualificationsProcessor', () => {
   it.each([
     {
       cdmCode: '8.3',
-      expectedSubtype: `${MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES} | ${MassIDOrganicSubtype.TOBACCO}`,
+      expectedSubtype: '“Food, Food Waste and Beverages” ou “Tobacco”',
       localWasteClassificationId: '02 01 03',
       scenario: 'the subtype the classification code expects',
     },
     {
       cdmCode: '8.2',
-      expectedSubtype: NO_ELIGIBLE_SUBTYPE,
+      expectedSubtype:
+        'nenhum: a categoria CDM 8.2 não é aceita pela metodologia',
       localWasteClassificationId: '20 01 01',
       scenario: 'no eligible subtype for a non-organic CDM category',
     },
@@ -134,7 +134,7 @@ describe('MassIDQualificationsProcessor', () => {
     },
   );
 
-  it('should report only the received subtype when the pick-up has no classification code', async () => {
+  it('should say the Ibama code is missing when the pick-up has no classification code', async () => {
     const { massIDDocument } = new BoldStubsBuilder()
       .createMassIDDocuments()
       .build();
@@ -150,6 +150,8 @@ describe('MassIDQualificationsProcessor', () => {
     const ruleOutput = await ruleDataProcessor.process(stubRuleInput());
 
     expect(ruleOutput.resultContent?.['crossValidation']).toStrictEqual({
+      expectedSubtype:
+        'nenhum: o código Ibama não foi informado ou não é aceito',
       subtype: 'Unlisted Subtype',
     });
   });

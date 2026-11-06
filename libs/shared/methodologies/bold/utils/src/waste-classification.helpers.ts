@@ -7,8 +7,6 @@ import {
   WASTE_CLASSIFICATION_CODES,
 } from './waste-classification.constants';
 
-export const NO_ELIGIBLE_SUBTYPE = 'none';
-
 export interface BrWasteClassification {
   CDM_CODE: string;
   description: string;
@@ -17,7 +15,7 @@ export interface BrWasteClassification {
 
 export interface WasteSubtypeClassificationEvidence {
   cdmCode?: string;
-  expectedSubtype?: string;
+  expectedSubtype: string;
   localWasteClassificationId?: string;
   subtype?: string;
 }
@@ -31,7 +29,10 @@ export const WASTE_SUBTYPE_CLASSIFICATION_EVIDENCE_FIELDS = [
   'expectedSubtype',
 ] as const satisfies ReadonlyArray<keyof WasteSubtypeClassificationEvidence>;
 
-export const EXPECTED_SUBTYPE_GUIDANCE = `Envie o subtipo indicado em "${EVIDENCE_FIELD_LABELS.expectedSubtype}" (um deles, quando vierem separados por "|"), que corresponde ao "${EVIDENCE_FIELD_LABELS.cdmCode}" do "${EVIDENCE_FIELD_LABELS.localWasteClassificationId}" (o "Local Waste Classification ID" do evento "Pick-up"), ou corrija esse código se for ele o errado. Se "${EVIDENCE_FIELD_LABELS.expectedSubtype}" for "${NO_ELIGIBLE_SUBTYPE}", o código não tem subtipo elegível na metodologia; se estiver vazio, o "Local Waste Classification ID" do evento "Pick-up" está ausente ou não é aceito: confira o código de classificação do resíduo.`;
+export const UNKNOWN_CLASSIFICATION_EXPECTED_SUBTYPE =
+  'nenhum: o código Ibama não foi informado ou não é aceito';
+
+export const EXPECTED_SUBTYPE_GUIDANCE = `Envie exatamente um dos subtipos listados em "${EVIDENCE_FIELD_LABELS.expectedSubtype}", sem as aspas: são os que correspondem ao "${EVIDENCE_FIELD_LABELS.cdmCode}" do "${EVIDENCE_FIELD_LABELS.localWasteClassificationId}" (o "Local Waste Classification ID" do evento "Pick-up"). Se o código estiver errado, corrija-o. Quando "${EVIDENCE_FIELD_LABELS.expectedSubtype}" começa com "nenhum", nenhum subtipo é aceito e o motivo vem em seguida: a categoria CDM do código não é aceita pela metodologia, ou o código Ibama não foi informado ou não é aceito; confira o código de classificação do resíduo.`;
 
 const BR_WASTE_CLASSIFICATION_IDS = Object.keys(
   WASTE_CLASSIFICATION_CODES.BR,
@@ -59,9 +60,14 @@ export const getSubtypesByCdmCode = (cdmCode: string): string[] =>
     .filter(([, code]) => code === cdmCode)
     .map(([subtype]) => subtype);
 
-// Subtype names contain commas, so the report's comma join of an array would be ambiguous
-const joinExpectedSubtypes = (subtypes: string[]): string =>
-  subtypes.length === 0 ? NO_ELIGIBLE_SUBTYPE : subtypes.join(' | ');
+// Subtype names contain commas, so each option is quoted to read as one value
+const formatExpectedSubtype = (cdmCode: string): string => {
+  const subtypes = getSubtypesByCdmCode(cdmCode);
+
+  return subtypes.length === 0
+    ? `nenhum: a categoria CDM ${cdmCode} não é aceita pela metodologia`
+    : subtypes.map((subtype) => `“${subtype}”`).join(' ou ');
+};
 
 export const getWasteSubtypeClassificationEvidence = ({
   localWasteClassificationId,
@@ -77,11 +83,10 @@ export const getWasteSubtypeClassificationEvidence = ({
     ...(isNonEmptyString(localWasteClassificationId) && {
       localWasteClassificationId,
     }),
+    expectedSubtype: UNKNOWN_CLASSIFICATION_EXPECTED_SUBTYPE,
     ...(classification && {
       cdmCode: classification.CDM_CODE,
-      expectedSubtype: joinExpectedSubtypes(
-        getSubtypesByCdmCode(classification.CDM_CODE),
-      ),
+      expectedSubtype: formatExpectedSubtype(classification.CDM_CODE),
       localWasteClassificationId: classification.id,
     }),
   };
