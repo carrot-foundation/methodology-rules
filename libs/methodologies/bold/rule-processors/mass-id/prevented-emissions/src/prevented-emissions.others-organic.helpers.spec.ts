@@ -10,8 +10,12 @@ import {
   type BoldDocument,
   MassIDOrganicSubtype,
 } from '@carrot-fndn/shared/methodologies/bold/types';
+import { WASTE_CLASSIFICATION_CODES } from '@carrot-fndn/shared/methodologies/bold/utils';
 
-import { OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_LOCAL_CODE } from './prevented-emissions.constants';
+import {
+  CDM_CODE_OTHERS_IF_ORGANIC,
+  OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_LOCAL_CODE,
+} from './prevented-emissions.constants';
 import { PreventedEmissionsProcessorErrors } from './prevented-emissions.errors';
 import {
   buildOthersIfOrganicAuditDetails,
@@ -54,15 +58,53 @@ const buildWasteGeneratorAccreditationDocumentWithEvents = (
   });
 
 describe('OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_LOCAL_CODE (author-defined)', () => {
-  it.each([
-    ['16 03 06', '0.05'],
-    ['19 08 14', '0.09'],
-    ['19 02 06', '0.05'],
-    ['17 05 06', '0.05'],
-  ])('has the author-defined carbon fraction for %s', (code, fraction) => {
+  const AUTHOR_DEFINED_FRACTIONS = {
+    '02 01 06': '0.15',
+    '02 04 04': '0.014',
+    '02 04 05': '0.33',
+    '02 07 02': '0.086',
+    '04 01 01': '0.18',
+    '04 01 08': '0.33',
+    '04 02 10': '0.18',
+    '04 02 15': '0.18',
+    '10 02 15': '0.09',
+    '11 01 10': '0.09',
+    '16 03 06': '0.05',
+    '17 05 06': '0.05',
+    '19 02 03': '0.05',
+    '19 02 06': '0.05',
+    '19 05 01': '0.15',
+    '19 05 02': '0.15',
+    '19 05 03': '0.05',
+    '19 07 03': '0.09',
+    '19 08 01': '0.05',
+    '19 08 14': '0.09',
+    '19 09 01': '0.05',
+    '20 03 01': '0.05',
+    '20 03 03': '0.2',
+    '20 03 99': '0.05',
+  };
+
+  it('should hold exactly the author-defined carbon fractions', () => {
     expect(
-      OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_LOCAL_CODE[code]?.carbonFraction,
-    ).toBe(fraction);
+      Object.fromEntries(
+        Object.entries(OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_LOCAL_CODE).map(
+          ([code, { carbonFraction }]) => [code, carbonFraction],
+        ),
+      ),
+    ).toStrictEqual(AUTHOR_DEFINED_FRACTIONS);
+  });
+
+  it('should key only codes the waste classification maps to CDM 8.7D', () => {
+    const othersIfOrganicCodes = Object.entries(WASTE_CLASSIFICATION_CODES.BR)
+      .filter(([, { CDM_CODE }]) => CDM_CODE === CDM_CODE_OTHERS_IF_ORGANIC)
+      .map(([code]) => code);
+
+    expect(othersIfOrganicCodes).toEqual(
+      expect.arrayContaining(
+        Object.keys(OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_LOCAL_CODE),
+      ),
+    );
   });
 });
 

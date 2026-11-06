@@ -100,6 +100,7 @@ export interface EventsManifest {
 }
 
 export interface LocalWasteClassification {
+  carbonFraction?: string;
   cdmCode: string;
   description: string;
   id: string;

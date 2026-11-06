@@ -1,3 +1,4 @@
+import { OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_LOCAL_CODE } from '@carrot-fndn/shared/methodologies/bold/rule-processors/mass-id/prevented-emissions/constants';
 import {
   BoldDocumentEventName,
   MassIDActorType,
@@ -335,6 +336,11 @@ describe('mass-id-catalog projections', () => {
       expect(toWasteClassification().localWasteClassifications).toStrictEqual(
         Object.entries(WASTE_CLASSIFICATION_CODES.BR).map(
           ([id, { CDM_CODE, description }]) => ({
+            ...(id in OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_LOCAL_CODE && {
+              carbonFraction:
+                OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_LOCAL_CODE[id]
+                  ?.carbonFraction,
+            }),
             cdmCode: CDM_CODE,
             description,
             id,
@@ -344,6 +350,30 @@ describe('mass-id-catalog projections', () => {
       expect(
         toWasteClassification().localWasteClassifications.length,
       ).toBeGreaterThan(0);
+    });
+
+    it('should carry the rule carbon fraction on the 8.7D codes that have one', () => {
+      const { localWasteClassifications } = toWasteClassification();
+
+      expect(localWasteClassifications).toContainEqual({
+        carbonFraction: '0.014',
+        cdmCode: '8.7D',
+        description: 'Vinhaça',
+        id: '02 04 04',
+      });
+      expect(
+        localWasteClassifications.find(({ id }) => id === '02 01 99'),
+      ).not.toHaveProperty('carbonFraction');
+      expect(
+        localWasteClassifications.find(({ id }) => id === '19 08 12'),
+      ).not.toHaveProperty('carbonFraction');
+      expect(
+        localWasteClassifications.filter(
+          ({ carbonFraction }) => carbonFraction !== undefined,
+        ),
+      ).toHaveLength(
+        Object.keys(OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_LOCAL_CODE).length,
+      );
     });
   });
 
