@@ -31,7 +31,7 @@ export const WASTE_SUBTYPE_CLASSIFICATION_EVIDENCE_FIELDS = [
   'expectedSubtype',
 ] as const satisfies ReadonlyArray<keyof WasteSubtypeClassificationEvidence>;
 
-export const EXPECTED_SUBTYPE_GUIDANCE = `Envie o subtipo indicado em "${EVIDENCE_FIELD_LABELS.expectedSubtype}" (um deles, quando vierem separados por "|"), que corresponde ao "${EVIDENCE_FIELD_LABELS.cdmCode}" do "${EVIDENCE_FIELD_LABELS.localWasteClassificationId}" informado no "Local Waste Classification ID", ou corrija esse código se for ele o errado. Se "${EVIDENCE_FIELD_LABELS.expectedSubtype}" for "${NO_ELIGIBLE_SUBTYPE}", o código não tem subtipo elegível na metodologia; se estiver vazio, o "Local Waste Classification ID" do evento "Pick-up" está ausente ou não é aceito: confira o código de classificação do resíduo.`;
+export const EXPECTED_SUBTYPE_GUIDANCE = `Envie o subtipo indicado em "${EVIDENCE_FIELD_LABELS.expectedSubtype}" (um deles, quando vierem separados por "|"), que corresponde ao "${EVIDENCE_FIELD_LABELS.cdmCode}" do "${EVIDENCE_FIELD_LABELS.localWasteClassificationId}" (o "Local Waste Classification ID" do evento "Pick-up"), ou corrija esse código se for ele o errado. Se "${EVIDENCE_FIELD_LABELS.expectedSubtype}" for "${NO_ELIGIBLE_SUBTYPE}", o código não tem subtipo elegível na metodologia; se estiver vazio, o "Local Waste Classification ID" do evento "Pick-up" está ausente ou não é aceito: confira o código de classificação do resíduo.`;
 
 const BR_WASTE_CLASSIFICATION_IDS = Object.keys(
   WASTE_CLASSIFICATION_CODES.BR,

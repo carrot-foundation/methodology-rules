@@ -268,6 +268,15 @@ describe('SHARED_FINDINGS', () => {
   });
 });
 
+describe('EVIDENCE_FIELD_LABELS', () => {
+  it('should give every evidence field a distinct non-empty label', () => {
+    const labels = Object.values(EVIDENCE_FIELD_LABELS);
+
+    expect(labels.every((label) => label.trim() !== '')).toBe(true);
+    expect(new Set(labels).size).toBe(labels.length);
+  });
+});
+
 describe('crossValidationEvidence', () => {
   it('should select a field of the result content cross validation', () => {
     expect(
