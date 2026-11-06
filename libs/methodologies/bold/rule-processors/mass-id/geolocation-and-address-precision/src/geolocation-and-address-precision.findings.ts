@@ -56,7 +56,7 @@ export const GEOLOCATION_AND_ADDRESS_PRECISION_FINDINGS = defineRuleFindings(
       description:
         'Nenhum documento de credenciamento foi encontrado para os participantes do MassID.',
       guidance:
-        'Confirme que os participantes da massa estão credenciados e que a massa os referencia corretamente. A Carrot confirma a origem da pendência.',
+        'Confirme que os participantes da massa estão credenciados e que a massa os referencia corretamente, e corrija na origem o que estiver errado.',
       title: 'Credenciamentos dos participantes não encontrados',
     },
     'FAILED.FAILED_ADDRESS_SIMILARITY': {
@@ -156,7 +156,7 @@ export const GEOLOCATION_AND_ADDRESS_PRECISION_FINDINGS = defineRuleFindings(
       description:
         'A distância do endereço do evento foi aceita, mas os dados do endereço diferem parcialmente do credenciado.',
       guidance:
-        'Confira se o endereço enviado é o da unidade credenciada. A Carrot revisa a divergência e confirma a origem.',
+        'Confira o endereço enviado e o da unidade credenciada, confirme qual está correto e corrija na origem.',
       title: 'Endereço do evento exige revisão',
     },
     'REVIEW_REQUIRED.REVIEW_REQUIRED_WITH_ADDRESS_SIMILARITY_NO_EVENT_COORDINATES':
@@ -166,7 +166,7 @@ export const GEOLOCATION_AND_ADDRESS_PRECISION_FINDINGS = defineRuleFindings(
         description:
           'O evento não traz coordenadas e os dados do endereço diferem parcialmente do credenciado.',
         guidance:
-          'Envie as coordenadas do endereço do evento. A Carrot revisa a divergência e confirma a origem.',
+          'Envie as coordenadas do endereço do evento. Confira o endereço enviado e o da unidade credenciada, confirme qual está correto e corrija na origem.',
         title: 'Endereço do evento exige revisão',
       },
   },

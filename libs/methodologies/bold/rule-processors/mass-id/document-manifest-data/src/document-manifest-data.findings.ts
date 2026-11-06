@@ -63,7 +63,7 @@ export const DOCUMENT_MANIFEST_DATA_FINDINGS = defineRuleFindings(
       documentKinds: [BoldReportType.CDF],
       evidence: [crossValidationEvidence('processingPeriod')],
       guidance:
-        'Confira a data do evento "Drop-off" e o CDF anexado. A Carrot confirma a origem da divergência.',
+        'Confira a data do evento "Drop-off" e o CDF anexado, confirme qual está correto e corrija na origem.',
       title: 'Recebimento fora do período do CDF',
     },
     'CROSS_VALIDATION.FIELD_NOT_EXTRACTED': {
@@ -82,7 +82,7 @@ export const DOCUMENT_MANIFEST_DATA_FINDINGS = defineRuleFindings(
         'O endereço do gerador lido no documento anexado não confere com o endereço do evento de ator "Waste Generator".',
       evidence: [crossValidationEvidence('generator')],
       guidance:
-        'Confira o endereço do gerador enviado e o documento anexado. A Carrot confirma a origem da divergência.',
+        'Confira o endereço do gerador enviado e o documento anexado, confirme qual está correto e corrija na origem.',
       title: 'Endereço do gerador diverge do anexo',
     },
     'CROSS_VALIDATION.GENERATOR_TAX_ID_MISMATCH': {
@@ -92,7 +92,7 @@ export const DOCUMENT_MANIFEST_DATA_FINDINGS = defineRuleFindings(
         'O documento fiscal do gerador lido no documento anexado não é o mesmo do participante "Waste Generator".',
       evidence: [crossValidationEvidence('generator')],
       guidance:
-        'Confira o gerador enviado e o documento anexado. A Carrot confirma a origem da divergência.',
+        'Confira o gerador enviado e o documento anexado, confirme qual está correto e corrija na origem.',
       title: 'Documento fiscal do gerador diverge do anexo',
     },
     'CROSS_VALIDATION.HAULER_TAX_ID_MISMATCH': {
@@ -103,7 +103,7 @@ export const DOCUMENT_MANIFEST_DATA_FINDINGS = defineRuleFindings(
       documentKinds: [BoldReportType.MTR],
       evidence: [crossValidationEvidence('hauler')],
       guidance:
-        'Confira o transportador enviado e o MTR anexado. A Carrot confirma a origem da divergência.',
+        'Confira o transportador enviado e o MTR anexado, confirme qual está correto e corrija na origem.',
       title: 'Documento fiscal do transportador diverge do MTR',
     },
     'CROSS_VALIDATION.ISSUE_DATE_MISMATCH': {
@@ -124,7 +124,7 @@ export const DOCUMENT_MANIFEST_DATA_FINDINGS = defineRuleFindings(
       documentKinds: [BoldReportType.CDF],
       evidence: [crossValidationEvidence('mtrNumbers')],
       guidance:
-        'Confira se o CDF anexado cobre o MTR desta massa. A Carrot confirma a origem da divergência.',
+        'Confira o MTR desta massa e o CDF anexado, confirme qual está correto e corrija na origem.',
       title: 'MTR não consta no CDF',
     },
     'CROSS_VALIDATION.RECEIVER_ADDRESS_MISMATCH': {
@@ -135,7 +135,7 @@ export const DOCUMENT_MANIFEST_DATA_FINDINGS = defineRuleFindings(
       documentKinds: [BoldReportType.MTR],
       evidence: [crossValidationEvidence('receiver')],
       guidance:
-        'Confira o endereço do reciclador enviado e o MTR anexado. A Carrot confirma a origem da divergência.',
+        'Confira o endereço do reciclador enviado e o MTR anexado, confirme qual está correto e corrija na origem.',
       title: 'Endereço do destinador diverge do MTR',
     },
     'CROSS_VALIDATION.RECEIVER_TAX_ID_MISMATCH': {
@@ -146,7 +146,7 @@ export const DOCUMENT_MANIFEST_DATA_FINDINGS = defineRuleFindings(
       documentKinds: [BoldReportType.MTR],
       evidence: [crossValidationEvidence('receiver')],
       guidance:
-        'Confira o reciclador enviado e o MTR anexado. A Carrot confirma a origem da divergência.',
+        'Confira o reciclador enviado e o MTR anexado, confirme qual está correto e corrija na origem.',
       title: 'Documento fiscal do destinador diverge do MTR',
     },
     'CROSS_VALIDATION.RECEIVING_DATE_MISMATCH': {
@@ -157,7 +157,7 @@ export const DOCUMENT_MANIFEST_DATA_FINDINGS = defineRuleFindings(
       documentKinds: [BoldReportType.MTR],
       evidence: [crossValidationEvidence('receivingDate')],
       guidance:
-        'Confira a data do evento "Drop-off" e o MTR anexado. A Carrot confirma a origem da divergência.',
+        'Confira a data do evento "Drop-off" e o MTR anexado, confirme qual está correto e corrija na origem.',
       title: 'Data de recebimento diverge do MTR',
     },
     'CROSS_VALIDATION.RECYCLER_TAX_ID_MISMATCH': {
@@ -168,7 +168,7 @@ export const DOCUMENT_MANIFEST_DATA_FINDINGS = defineRuleFindings(
       documentKinds: [BoldReportType.CDF],
       evidence: [crossValidationEvidence('recycler')],
       guidance:
-        'Confira o reciclador enviado e o CDF anexado. A Carrot confirma a origem da divergência.',
+        'Confira o reciclador enviado e o CDF anexado, confirme qual está correto e corrija na origem.',
       title: 'Documento fiscal do reciclador diverge do CDF',
     },
     'CROSS_VALIDATION.RECYCLING_MANIFEST_WASTE_QUANTITY_WEIGHT_MISMATCH': {
@@ -179,7 +179,7 @@ export const DOCUMENT_MANIFEST_DATA_FINDINGS = defineRuleFindings(
       documentKinds: [BoldReportType.CDF],
       evidence: [crossValidationEvidence('wasteQuantityWeight')],
       guidance:
-        'Confira a pesagem e o CDF anexado. A Carrot confirma a origem da divergência.',
+        'Confira a pesagem e o CDF anexado, confirme qual está correto e corrija na origem.',
       title: 'Quantidade do CDF menor que a pesagem',
     },
     'CROSS_VALIDATION.RECYCLING_MANIFEST_WASTE_TYPE_MISMATCH': {
@@ -190,7 +190,7 @@ export const DOCUMENT_MANIFEST_DATA_FINDINGS = defineRuleFindings(
       documentKinds: [BoldReportType.CDF],
       evidence: [crossValidationEvidence('wasteType')],
       guidance:
-        'Confira a classificação do resíduo enviada e o CDF anexado. A Carrot confirma a origem da divergência.',
+        'Confira a classificação do resíduo enviada e o CDF anexado, confirme qual está correto e corrija na origem.',
       title: 'Resíduo do CDF diverge da classificação',
     },
     'CROSS_VALIDATION.TRANSPORT_DATE_MISMATCH': {
@@ -201,7 +201,7 @@ export const DOCUMENT_MANIFEST_DATA_FINDINGS = defineRuleFindings(
       documentKinds: [BoldReportType.MTR],
       evidence: [crossValidationEvidence('transportDate')],
       guidance:
-        'Confira a data do evento "Pick-up" e o MTR anexado. A Carrot confirma a origem da divergência.',
+        'Confira a data do evento "Pick-up" e o MTR anexado, confirme qual está correto e corrija na origem.',
       title: 'Data de transporte diverge do MTR',
     },
     'CROSS_VALIDATION.VEHICLE_PLATE_MISMATCH': {
@@ -223,7 +223,7 @@ export const DOCUMENT_MANIFEST_DATA_FINDINGS = defineRuleFindings(
       documentKinds: [BoldReportType.MTR],
       evidence: [crossValidationEvidence('wasteQuantityWeight')],
       guidance:
-        'Confira a pesagem e o MTR anexado. A Carrot confirma a origem da divergência.',
+        'Confira a pesagem e o MTR anexado, confirme qual está correto e corrija na origem.',
       title: 'Quantidade do MTR menor que a pesagem',
     },
     'CROSS_VALIDATION.WASTE_TYPE_MISMATCH': {
@@ -234,7 +234,7 @@ export const DOCUMENT_MANIFEST_DATA_FINDINGS = defineRuleFindings(
       documentKinds: [BoldReportType.MTR],
       evidence: [crossValidationEvidence('wasteType')],
       guidance:
-        'Confira a classificação do resíduo enviada e o MTR anexado. A Carrot confirma a origem da divergência.',
+        'Confira a classificação do resíduo enviada e o MTR anexado, confirme qual está correto e corrija na origem.',
       title: 'Resíduo do MTR diverge da classificação',
     },
     'DOCUMENT_EXTRACTION.EXTRACTION_FAILED': {

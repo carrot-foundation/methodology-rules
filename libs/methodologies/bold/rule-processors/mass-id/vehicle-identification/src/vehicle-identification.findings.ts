@@ -44,7 +44,7 @@ export const VEHICLE_IDENTIFICATION_FINDINGS = defineRuleFindings(
       description:
         'O tipo de veículo do evento "Pick-up" exige o "Vehicle License Plate", que não foi informado.',
       guidance:
-        'Verifique se a placa foi registrada na coleta e informe-a no evento "Pick-up". A Carrot confirma a origem da pendência.',
+        'Verifique se a placa foi registrada na coleta e informe-a no evento "Pick-up".',
       title: 'Placa do veículo ausente',
     },
     'FAILED.PICK_UP_EVENT_MISSING': {

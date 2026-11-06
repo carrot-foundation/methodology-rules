@@ -14,10 +14,7 @@ import {
   BoldDocumentEventName,
   MassIDOrganicSubtype,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import {
-  NO_ELIGIBLE_SUBTYPE,
-  WASTE_CLASSIFICATION_CODES,
-} from '@carrot-fndn/shared/methodologies/bold/utils';
+import { WASTE_CLASSIFICATION_CODES } from '@carrot-fndn/shared/methodologies/bold/utils';
 import { type AnyObject } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 
@@ -394,7 +391,7 @@ export const regionalWasteClassificationTestCases: RegionalWasteClassificationTe
     },
     subtypeEvidenceCase({
       cdmCode: '8.7B',
-      expectedSubtype: MassIDOrganicSubtype.INDUSTRIAL_SLUDGE,
+      expectedSubtype: '“Industrial Sludge”',
       localWasteClassificationId: '02 01 01',
       resultComment: RESULT_COMMENTS.failed.INVALID_SUBTYPE_CDM_CODE_MISMATCH,
       scenario:
@@ -403,7 +400,8 @@ export const regionalWasteClassificationTestCases: RegionalWasteClassificationTe
     }),
     subtypeEvidenceCase({
       cdmCode: '8.2',
-      expectedSubtype: NO_ELIGIBLE_SUBTYPE,
+      expectedSubtype:
+        'nenhum: a categoria CDM 8.2 não é aceita pela metodologia',
       localWasteClassificationId: '20 01 01',
       resultComment: RESULT_COMMENTS.failed.INVALID_SUBTYPE_CDM_CODE_MISMATCH,
       scenario:
@@ -545,7 +543,7 @@ export const regionalWasteClassificationTestCases: RegionalWasteClassificationTe
     },
     subtypeEvidenceCase({
       cdmCode: '8.7B',
-      expectedSubtype: MassIDOrganicSubtype.INDUSTRIAL_SLUDGE,
+      expectedSubtype: '“Industrial Sludge”',
       localWasteClassificationId: '02 01 01',
       resultComment: RESULT_COMMENTS.failed.INVALID_SUBTYPE_MAPPING,
       scenario: 'The subtype does not map to a valid CDM_CODE',

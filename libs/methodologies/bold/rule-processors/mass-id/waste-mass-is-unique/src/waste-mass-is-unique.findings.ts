@@ -60,7 +60,7 @@ export const WASTE_MASS_IS_UNIQUE_FINDINGS = defineRuleFindings(
       description:
         'A unicidade da massa não pôde ser verificada porque a placa do veículo não foi informada.',
       guidance:
-        'Verifique se a placa foi registrada na coleta e informe-a no evento "Pick-up". A Carrot confirma a origem da pendência.',
+        'Verifique se a placa foi registrada na coleta e informe-a no evento "Pick-up".',
       title: 'Placa do veículo ausente',
     },
     'ERROR.MISSING_WASTE_GENERATOR_EVENT': {
@@ -77,7 +77,7 @@ export const WASTE_MASS_IS_UNIQUE_FINDINGS = defineRuleFindings(
       description:
         'Foram encontrados outros MassIDs semelhantes que não estão cancelados.',
       guidance:
-        'Confira se a massa foi enviada mais de uma vez e cancele as duplicatas. A Carrot confirma a origem da duplicidade.',
+        'Confira se a massa foi enviada mais de uma vez e cancele as duplicatas.',
       title: 'Possível massa duplicada',
     },
   },
