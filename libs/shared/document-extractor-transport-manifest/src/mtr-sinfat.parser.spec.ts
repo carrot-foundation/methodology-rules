@@ -801,6 +801,155 @@ Tecnologia: Compostagem`;
     });
   });
 
+  describe('table layout defects', () => {
+    type BlockInput = Parameters<
+      typeof stubTextExtractionResultWithBlocks
+    >[1][number];
+
+    const cell = (
+      text: string,
+      left: number,
+      top: number,
+      width = 0.05,
+      blockType = 'LINE',
+    ): BlockInput => ({
+      blockType,
+      boundingBox: { height: 0.008, left, top, width },
+      text,
+    });
+
+    const headerCells = (top: number): BlockInput[] => [
+      cell('Item. Código IBAMA e Denominação', 0.04, top, 0.18),
+      cell('Estado Físico', 0.4, top, 0.07),
+      cell('Classe', 0.49, top, 0.03),
+      cell('Acondicionamento', 0.54, top, 0.09),
+      cell('Qtde', 0.65, top, 0.02),
+      cell('Unidade', 0.72, top, 0.04),
+      cell('Tecnologia', 0.84, top, 0.05),
+    ];
+
+    const wasteRowCells = (top: number): BlockInput[] => [
+      cell('1. 999999 Waste X', 0.04, top, 0.2),
+      cell('IIA', 0.49, top, 0.02),
+      cell('1.234,00000', 0.63, top),
+      cell('Quilograma', 0.72, top),
+    ];
+
+    const expectedWasteX = {
+      classification: 'IIA',
+      code: '999999',
+      description: 'Waste X',
+      quantity: 1234,
+      unit: 'Quilograma',
+    };
+
+    it('should split a waste row that Textract returned as one line into its word cells', () => {
+      const rowTop = 0.71;
+      const word = (text: string, left: number, right: number) =>
+        cell(text, left, rowTop, right - left, 'WORD');
+
+      const result = parser.parse(
+        stubTextExtractionResultWithBlocks(validSinfatText, [
+          ...headerCells(0.68),
+          cell(
+            '1. 999999 Waste X Solido IIA Bag 1.234,00000 Quilograma',
+            0.04,
+            rowTop,
+            0.73,
+          ),
+          word('1.', 0.04, 0.05),
+          word('999999', 0.053, 0.1),
+          word('Waste', 0.103, 0.22),
+          word('X', 0.223, 0.23),
+          word('Solido', 0.4, 0.43),
+          word('IIA', 0.49, 0.505),
+          word('Bag', 0.54, 0.56),
+          word('1.234,00000', 0.63, 0.68),
+          word('Quilograma', 0.72, 0.77),
+        ]),
+      );
+
+      expect(result.data.wasteTypes?.map(toWasteTypeEntryData)).toEqual([
+        expectedWasteX,
+      ]);
+    });
+
+    it('should keep page-1 lines out of a waste table that starts on page 2', () => {
+      const result = parser.parse(
+        stubTextExtractionResultWithBlocks(validSinfatText, [
+          cell('Identificação do Destinador', 0.04, 0.6, 0.3),
+          cell('Endereço: Rua Ficticia, 100', 0.04, 0.712, 0.3),
+          cell('Telefone: (00) 0000-0000', 0.49, 0.712, 0.2),
+          cell('Data do recebimento: 18/03/2024', 0.65, 0.712, 0.2),
+          cell('Rodapé da página 1', 0.04, 0.95, 0.3),
+          cell('Identificação dos Resíduos', 0.04, 0.05, 0.3),
+          ...headerCells(0.68),
+          ...wasteRowCells(0.71),
+        ]),
+      );
+
+      expect(result.data.wasteTypes?.map(toWasteTypeEntryData)).toEqual([
+        expectedWasteX,
+      ]);
+    });
+
+    it('should split a one-line waste row on page 2 and stop at the page-2 receipt remarks', () => {
+      const rowTop = 0.71;
+      const word = (text: string, left: number, right: number) =>
+        cell(text, left, rowTop, right - left, 'WORD');
+
+      const result = parser.parse(
+        stubTextExtractionResultWithBlocks(validSinfatText, [
+          cell('Endereço: Rua Ficticia, 100', 0.04, 0.712, 0.3),
+          cell('Rodapé da página 1', 0.04, 0.95, 0.3),
+          cell('Identificação dos Resíduos', 0.04, 0.05, 0.3),
+          ...headerCells(0.68),
+          cell(
+            '1. 999999 Waste X IIA 1.234,00000 Quilograma',
+            0.04,
+            rowTop,
+            0.73,
+          ),
+          cell('Observação do Recebimento: 888888 alterado', 0.04, 0.76, 0.35),
+          word('1.', 0.04, 0.05),
+          word('999999', 0.053, 0.1),
+          word('Waste', 0.103, 0.22),
+          word('X', 0.223, 0.23),
+          word('IIA', 0.49, 0.505),
+          word('1.234,00000', 0.63, 0.68),
+          word('Quilograma', 0.72, 0.77),
+        ]),
+      );
+
+      expect(result.data.wasteTypes?.map(toWasteTypeEntryData)).toEqual([
+        expectedWasteX,
+      ]);
+    });
+
+    it('should stop the waste table at the receipt remarks', () => {
+      const extraction = stubTextExtractionResultWithBlocks(validSinfatText, [
+        cell('Observação do Recebimento dos Resíduos', 0.04, 0.6, 0.35),
+        ...headerCells(0.68),
+        ...wasteRowCells(0.71),
+        cell('Observação do Recebimento: 888888 alterado', 0.04, 0.76, 0.35),
+        cell('Resíduo alterado, correto é 888888', 0.2, 0.78, 0.2),
+        cell('777777', 0.1, 0.784, 0.04),
+      ]);
+
+      extraction.blocks.unshift({
+        blockType: 'LINE',
+        boundingBox: { height: 0.008, left: 0.04, top: 0.74, width: 0.1 },
+        id: 'line-without-text',
+      });
+
+      const result = parser.parse(extraction);
+
+      expect(result.data.wasteTypes?.map(toWasteTypeEntryData)).toEqual([
+        expectedWasteX,
+      ]);
+    });
+  });
+
   describe('getMatchScore', () => {
     it('should return high score for valid SINFAT MTR text', () => {
       const score = parser.getMatchScore(

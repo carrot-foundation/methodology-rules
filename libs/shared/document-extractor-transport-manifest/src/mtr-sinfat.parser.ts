@@ -19,6 +19,7 @@ import {
 import {
   detectTableColumns,
   extractTableFromBlocks,
+  normalizeMultiPageBlocks,
 } from '@carrot-fndn/shared/text-extractor';
 
 import {
@@ -84,6 +85,22 @@ const SINFAT_WASTE_CODE_PATTERN = /\b(\d{6})\b[\s.,\-–]*([\s\S]+)/;
 
 // eslint-disable-next-line sonarjs/slow-regex
 const SINFAT_WASTE_ITEM_PATTERN = /\d+\.\s+(\d{6})\s+(.+)/g;
+
+const RECEIPT_REMARKS_PATTERN = /^Observa..o\s+do\s+Recebimento/i;
+
+type TextBlock = TextExtractionResult['blocks'][number];
+
+const findReceiptRemarksTop = (
+  blocks: readonly TextBlock[],
+  headerTop: number,
+): number | undefined =>
+  blocks.find(
+    (block) =>
+      block.blockType === 'LINE' &&
+      block.boundingBox !== undefined &&
+      block.boundingBox.top > headerTop &&
+      RECEIPT_REMARKS_PATTERN.test(block.text ?? ''),
+  )?.boundingBox!.top;
 
 // eslint-disable-next-line sonarjs/slow-regex
 const TRAILING_ITEM_MARKER_PATTERN = /\s*\b\d+\.\s*$/;
@@ -218,13 +235,11 @@ export class MtrSinfatParser implements DocumentParser<MtrExtractedData> {
     text: string,
     partialData: Partial<MtrExtractedData>,
   ): void {
-    const detected = detectTableColumns(
-      extractionResult.blocks,
-      SINFAT_HEADER_DEFS,
-    );
+    const blocks = normalizeMultiPageBlocks(extractionResult.blocks);
+    const detected = detectTableColumns(blocks, SINFAT_HEADER_DEFS);
 
     if (detected) {
-      this.extractWasteFromTable(extractionResult, detected, partialData);
+      this.extractWasteFromTable(blocks, detected, partialData);
 
       return;
     }
@@ -233,21 +248,27 @@ export class MtrSinfatParser implements DocumentParser<MtrExtractedData> {
   }
 
   private extractWasteFromTable(
-    extractionResult: TextExtractionResult,
+    blocks: readonly TextBlock[],
     detected: {
       columns: Array<TableColumnConfig<SinfatWasteColumn>>;
       headerTop: number;
     },
     partialData: Partial<MtrExtractedData>,
   ): void {
-    const { rows } = extractTableFromBlocks(extractionResult.blocks, {
+    const { rows } = extractTableFromBlocks(blocks, {
       anchorColumn: SINFAT_ANCHOR_COLUMN,
       columns: detected.columns as [
         TableColumnConfig<SinfatWasteColumn>,
         ...Array<TableColumnConfig<SinfatWasteColumn>>,
       ],
       maxRowGap: 0.03,
-      yRange: { max: 1, min: detected.headerTop + 0.01 },
+      splitSpanningLines: true,
+      yRange: {
+        max:
+          (findReceiptRemarksTop(blocks, detected.headerTop) ??
+            Number.POSITIVE_INFINITY) - 0.001,
+        min: detected.headerTop + 0.01,
+      },
     });
 
     const rowsWithDescription = rows.filter(
