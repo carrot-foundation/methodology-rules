@@ -205,7 +205,7 @@ const buildWeightValidation = (
   ];
 };
 
-// A manifest can list the same waste type on several rows (e.g. one at 0 kg); any single row may account for the weighing.
+// A manifest can repeat a waste type across rows (e.g. one at 0 kg); one row must cover the weighing.
 const findLargestMatchedEntry = (
   entries: WasteTypeEntryData[],
   eventCode: string | undefined,

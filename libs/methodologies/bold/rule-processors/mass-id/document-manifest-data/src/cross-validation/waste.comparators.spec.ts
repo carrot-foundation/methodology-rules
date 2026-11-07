@@ -203,10 +203,11 @@ describe('cross-validation waste comparators', () => {
         expect(result.validation).toEqual([]);
       });
 
-      it('should compare the largest matching row, not their sum, against the weighing weight', () => {
+      it('should compare the largest matching row, not the first, last or sum, against the weighing weight', () => {
         const entries: WasteTypeEntryData[] = [
           { code: '01 01 01', description: 'Papel', quantity: 0.2, unit: 't' },
           { code: '01 01 01', description: 'Papel', quantity: 300, unit: 'kg' },
+          { code: '01 01 01', description: 'Papel', quantity: 0, unit: 'kg' },
         ];
 
         const result = compareWasteQuantity(
