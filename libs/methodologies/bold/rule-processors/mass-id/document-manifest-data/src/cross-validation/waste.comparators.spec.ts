@@ -183,6 +183,84 @@ describe('cross-validation waste comparators', () => {
         expect(result.validation).toEqual([]);
       });
 
+      it('should use the largest quantity when several rows match the waste type', () => {
+        const entries: WasteTypeEntryData[] = [
+          { code: '01 01 01', description: 'Papel', quantity: 0, unit: 'kg' },
+          { code: '01 01 01', description: 'Papel', quantity: 500, unit: 'kg' },
+        ];
+
+        const result = compareWasteQuantity(
+          entries,
+          '01 01 01',
+          'Papel',
+          [{ value: 480 }],
+          { onMismatch: onQuantityMismatch },
+        );
+
+        expect(result.debug?.source).toBe('matched-entry');
+        expect(result.debug?.extracted).toBe(500);
+        expect(result.debug?.isMatch).toBe(true);
+        expect(result.validation).toEqual([]);
+      });
+
+      it('should compare the largest matching row, not their sum, against the weighing weight', () => {
+        const entries: WasteTypeEntryData[] = [
+          { code: '01 01 01', description: 'Papel', quantity: 0.2, unit: 't' },
+          { code: '01 01 01', description: 'Papel', quantity: 300, unit: 'kg' },
+        ];
+
+        const result = compareWasteQuantity(
+          entries,
+          '01 01 01',
+          'Papel',
+          [{ value: 480 }],
+          { onMismatch: onQuantityMismatch },
+        );
+
+        expect(result.debug?.extracted).toBe(300);
+        expect(result.debug?.isMatch).toBe(false);
+        expect(result.validation[0]?.reviewReason?.code).toBe(
+          'WEIGHT_BELOW_WEIGHING',
+        );
+      });
+
+      it('should use a later matching row when the first matching row has no quantity', () => {
+        const entries: WasteTypeEntryData[] = [
+          { code: '01 01 01', description: 'Papel' },
+          { code: '01 01 01', description: 'Papel', quantity: 500, unit: 'kg' },
+          { description: 'Other', quantity: 900, unit: 'kg' },
+        ];
+
+        const result = compareWasteQuantity(
+          entries,
+          '01 01 01',
+          'Papel',
+          [{ value: 480 }],
+          { onMismatch: onQuantityMismatch },
+        );
+
+        expect(result.debug?.source).toBe('matched-entry');
+        expect(result.debug?.extracted).toBe(500);
+      });
+
+      it('should prefer a matching row in a known unit over one in an unknown unit', () => {
+        const entries: WasteTypeEntryData[] = [
+          { code: '01 01 01', description: 'Papel', quantity: 9, unit: 'm3' },
+          { code: '01 01 01', description: 'Papel', quantity: 500, unit: 'kg' },
+        ];
+
+        const result = compareWasteQuantity(
+          entries,
+          '01 01 01',
+          'Papel',
+          [{ value: 480 }],
+          { onMismatch: onQuantityMismatch },
+        );
+
+        expect(result.debug?.extracted).toBe(500);
+        expect(result.validation).toEqual([]);
+      });
+
       it('should return match when extracted weight equals weighing weight', () => {
         const entries: WasteTypeEntryData[] = [
           {

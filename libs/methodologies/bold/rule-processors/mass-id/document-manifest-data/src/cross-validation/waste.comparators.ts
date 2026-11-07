@@ -205,6 +205,36 @@ const buildWeightValidation = (
   ];
 };
 
+// A manifest can list the same waste type on several rows (e.g. one at 0 kg); any single row may account for the weighing.
+const findLargestMatchedEntry = (
+  entries: WasteTypeEntryData[],
+  eventCode: string | undefined,
+  eventDescription: string | undefined,
+): undefined | WasteTypeEntryData => {
+  let largestEntry: undefined | WasteTypeEntryData;
+  let largestKg = Number.NEGATIVE_INFINITY;
+
+  for (const entry of entries) {
+    if (
+      entry.quantity === undefined ||
+      !matchWasteTypeEntry(entry, eventCode, eventDescription).isMatch
+    ) {
+      continue;
+    }
+
+    const quantityKg =
+      normalizeQuantityToKg(entry.quantity, entry.unit) ??
+      Number.NEGATIVE_INFINITY;
+
+    if (largestEntry === undefined || quantityKg > largestKg) {
+      largestEntry = entry;
+      largestKg = quantityKg;
+    }
+  }
+
+  return largestEntry;
+};
+
 export const compareWasteQuantity = (
   entries: undefined | WasteTypeEntryData[],
   eventCode: string | undefined,
@@ -233,10 +263,10 @@ export const compareWasteQuantity = (
   const trimmedEventCode = eventCode?.trim() || undefined;
   const trimmedEventDescription = eventDescription?.trim() || undefined;
 
-  const matchedEntry = entries.find(
-    (entry) =>
-      matchWasteTypeEntry(entry, trimmedEventCode, trimmedEventDescription)
-        .isMatch,
+  const matchedEntry = findLargestMatchedEntry(
+    entries,
+    trimmedEventCode,
+    trimmedEventDescription,
   );
 
   if (matchedEntry?.quantity !== undefined) {
