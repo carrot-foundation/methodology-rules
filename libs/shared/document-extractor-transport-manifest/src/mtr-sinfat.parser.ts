@@ -247,6 +247,7 @@ export class MtrSinfatParser implements DocumentParser<MtrExtractedData> {
         ...Array<TableColumnConfig<SinfatWasteColumn>>,
       ],
       maxRowGap: 0.03,
+      splitSpanningLines: true,
       yRange: { max: 1, min: detected.headerTop + 0.01 },
     });
 

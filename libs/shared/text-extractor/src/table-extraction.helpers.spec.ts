@@ -343,6 +343,129 @@ describe('extractTableFromBlocks', () => {
   });
 });
 
+describe('extractTableFromBlocks with splitSpanningLines', () => {
+  const SPLIT_CONFIG: TableExtractionConfig = {
+    anchorColumn: 'description',
+    columns: [
+      { headerLeft: 0.04, name: 'description' },
+      { headerLeft: 0.4, name: 'state' },
+      { headerLeft: 0.65, name: 'quantity' },
+      { headerLeft: 0.72, name: 'unit' },
+    ],
+    splitSpanningLines: true,
+  };
+  const ROW_TOP = 0.5;
+
+  const makeWord = (
+    text: string,
+    left: number,
+    right: number,
+    top = ROW_TOP,
+  ): TextBlock =>
+    makeBlock(text, left, top, {
+      blockType: 'WORD',
+      boundingBox: { height: 0.008, left, top, width: right - left },
+    });
+
+  const spanningLine = makeBlock(
+    '1. 999999 Waste X Solido 1.234,00000 Quilograma',
+    0.04,
+    ROW_TOP,
+    { boundingBox: { height: 0.008, left: 0.04, top: ROW_TOP, width: 0.73 } },
+  );
+
+  const spanningLineWords = [
+    makeWord('1.', 0.04, 0.05),
+    makeWord('999999', 0.053, 0.1),
+    makeWord('Waste', 0.103, 0.22),
+    makeWord('X', 0.223, 0.23),
+    makeWord('Solido', 0.4, 0.43),
+    makeWord('1.234,00000', 0.63, 0.68),
+    makeWord('Quilograma', 0.72, 0.77),
+  ];
+
+  it('should split a line that spans later columns into its word cells', () => {
+    const { rows } = extractTableFromBlocks(
+      [spanningLine, ...spanningLineWords],
+      SPLIT_CONFIG,
+    );
+
+    expect(rows).toEqual([
+      {
+        description: '1. 999999 Waste X',
+        quantity: '1.234,00000',
+        state: 'Solido',
+        unit: 'Quilograma',
+      },
+    ]);
+  });
+
+  it('should keep the spanning line whole when the option is off', () => {
+    const { rows } = extractTableFromBlocks(
+      [spanningLine, ...spanningLineWords],
+      { ...SPLIT_CONFIG, splitSpanningLines: false },
+    );
+
+    expect(rows).toEqual([{ description: spanningLine.text }]);
+  });
+
+  it('should ignore words outside the line span, from other rows, or without text or geometry', () => {
+    const { rows } = extractTableFromBlocks(
+      [
+        spanningLine,
+        ...spanningLineWords,
+        makeWord('Above', 0.1, 0.12, ROW_TOP - 0.006),
+        makeWord('Below', 0.1, 0.12, ROW_TOP + 0.006),
+        makeWord('Before', 0.01, 0.03),
+        makeWord('After', 0.8, 0.85),
+        makeWord('', 0.2, 0.21),
+        { blockType: 'WORD', id: 'word-without-geometry', text: 'Lost' },
+      ],
+      SPLIT_CONFIG,
+    );
+
+    expect(rows).toEqual([
+      {
+        description: '1. 999999 Waste X',
+        quantity: '1.234,00000',
+        state: 'Solido',
+        unit: 'Quilograma',
+      },
+    ]);
+  });
+
+  it('should keep the spanning line whole when it has no words', () => {
+    const { rows } = extractTableFromBlocks([spanningLine], SPLIT_CONFIG);
+
+    expect(rows).toEqual([{ description: spanningLine.text }]);
+  });
+
+  it('should not split lines in the last column or outside every column', () => {
+    const lastColumnLine = makeBlock('Quilograma extra', 0.72, ROW_TOP, {
+      boundingBox: { height: 0.008, left: 0.72, top: ROW_TOP, width: 0.2 },
+    });
+    const outsideLine = makeBlock('Margin note', 0.01, ROW_TOP, {
+      boundingBox: { height: 0.008, left: 0.01, top: ROW_TOP, width: 0.5 },
+    });
+
+    const { rows } = extractTableFromBlocks(
+      [
+        makeBlock('1. 999999 Waste X', 0.04, ROW_TOP),
+        lastColumnLine,
+        outsideLine,
+        makeWord('Quilograma', 0.72, 0.8),
+        makeWord('extra', 0.85, 0.92),
+        makeWord('note', 0.45, 0.5),
+      ],
+      SPLIT_CONFIG,
+    );
+
+    expect(rows).toEqual([
+      { description: '1. 999999 Waste X', unit: 'Quilograma extra' },
+    ]);
+  });
+});
+
 describe('detectTableColumns', () => {
   const HEADER_DEFS: [HeaderColumnDefinition, ...HeaderColumnDefinition[]] = [
     { headerPattern: 'Item', name: 'item' },
