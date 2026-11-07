@@ -828,6 +828,13 @@ Tecnologia: Compostagem`;
       cell('Tecnologia', 0.84, top, 0.05),
     ];
 
+    const wasteRowCells = (top: number): BlockInput[] => [
+      cell('1. 999999 Waste X', 0.04, top, 0.2),
+      cell('IIA', 0.49, top, 0.02),
+      cell('1.234,00000', 0.63, top),
+      cell('Quilograma', 0.72, top),
+    ];
+
     const expectedWasteX = {
       classification: 'IIA',
       code: '999999',
@@ -861,6 +868,47 @@ Tecnologia: Compostagem`;
           word('Quilograma', 0.72, 0.77),
         ]),
       );
+
+      expect(result.data.wasteTypes?.map(toWasteTypeEntryData)).toEqual([
+        expectedWasteX,
+      ]);
+    });
+
+    it('should keep page-1 lines out of a waste table that starts on page 2', () => {
+      const result = parser.parse(
+        stubTextExtractionResultWithBlocks(validSinfatText, [
+          cell('Identificação do Destinador', 0.04, 0.6, 0.3),
+          cell('Endereço: Rua Ficticia, 100', 0.04, 0.712, 0.3),
+          cell('Telefone: (00) 0000-0000', 0.49, 0.712, 0.2),
+          cell('Data do recebimento: 18/03/2024', 0.65, 0.712, 0.2),
+          cell('Rodapé da página 1', 0.04, 0.95, 0.3),
+          cell('Identificação dos Resíduos', 0.04, 0.05, 0.3),
+          ...headerCells(0.68),
+          ...wasteRowCells(0.71),
+        ]),
+      );
+
+      expect(result.data.wasteTypes?.map(toWasteTypeEntryData)).toEqual([
+        expectedWasteX,
+      ]);
+    });
+
+    it('should stop the waste table at the receipt remarks', () => {
+      const extraction = stubTextExtractionResultWithBlocks(validSinfatText, [
+        ...headerCells(0.68),
+        ...wasteRowCells(0.71),
+        cell('Observação do Recebimento dos Resíduos', 0.04, 0.76, 0.35),
+        cell('Resíduo alterado, correto é 888888', 0.2, 0.78, 0.2),
+        cell('777777', 0.1, 0.784, 0.04),
+      ]);
+
+      extraction.blocks.unshift({
+        blockType: 'LINE',
+        boundingBox: { height: 0.008, left: 0.04, top: 0.74, width: 0.1 },
+        id: 'line-without-text',
+      });
+
+      const result = parser.parse(extraction);
 
       expect(result.data.wasteTypes?.map(toWasteTypeEntryData)).toEqual([
         expectedWasteX,
