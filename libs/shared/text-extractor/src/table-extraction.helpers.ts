@@ -130,6 +130,8 @@ const spansIntoLaterColumn = (
   const index = findColumnIndex(line.boundingBox!.left, columnRanges);
   const nextColumn = index === -1 ? undefined : columns[index + 1];
 
+  // Not the midpoint range: left-aligned descriptions routinely pass it without merging cells.
+
   return nextColumn !== undefined && rightEdge(line) > nextColumn.headerLeft;
 };
 

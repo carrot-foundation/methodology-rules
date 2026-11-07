@@ -893,11 +893,45 @@ Tecnologia: Compostagem`;
       ]);
     });
 
+    it('should split a one-line waste row on page 2 and stop at the page-2 receipt remarks', () => {
+      const rowTop = 0.71;
+      const word = (text: string, left: number, right: number) =>
+        cell(text, left, rowTop, right - left, 'WORD');
+
+      const result = parser.parse(
+        stubTextExtractionResultWithBlocks(validSinfatText, [
+          cell('Endereço: Rua Ficticia, 100', 0.04, 0.712, 0.3),
+          cell('Rodapé da página 1', 0.04, 0.95, 0.3),
+          cell('Identificação dos Resíduos', 0.04, 0.05, 0.3),
+          ...headerCells(0.68),
+          cell(
+            '1. 999999 Waste X IIA 1.234,00000 Quilograma',
+            0.04,
+            rowTop,
+            0.73,
+          ),
+          cell('Observação do Recebimento: 888888 alterado', 0.04, 0.76, 0.35),
+          word('1.', 0.04, 0.05),
+          word('999999', 0.053, 0.1),
+          word('Waste', 0.103, 0.22),
+          word('X', 0.223, 0.23),
+          word('IIA', 0.49, 0.505),
+          word('1.234,00000', 0.63, 0.68),
+          word('Quilograma', 0.72, 0.77),
+        ]),
+      );
+
+      expect(result.data.wasteTypes?.map(toWasteTypeEntryData)).toEqual([
+        expectedWasteX,
+      ]);
+    });
+
     it('should stop the waste table at the receipt remarks', () => {
       const extraction = stubTextExtractionResultWithBlocks(validSinfatText, [
+        cell('Observação do Recebimento dos Resíduos', 0.04, 0.6, 0.35),
         ...headerCells(0.68),
         ...wasteRowCells(0.71),
-        cell('Observação do Recebimento dos Resíduos', 0.04, 0.76, 0.35),
+        cell('Observação do Recebimento: 888888 alterado', 0.04, 0.76, 0.35),
         cell('Resíduo alterado, correto é 888888', 0.2, 0.78, 0.2),
         cell('777777', 0.1, 0.784, 0.04),
       ]);

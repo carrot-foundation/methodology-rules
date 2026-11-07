@@ -265,8 +265,8 @@ export class MtrSinfatParser implements DocumentParser<MtrExtractedData> {
       splitSpanningLines: true,
       yRange: {
         max:
-          findReceiptRemarksTop(blocks, detected.headerTop) ??
-          Number.POSITIVE_INFINITY,
+          (findReceiptRemarksTop(blocks, detected.headerTop) ??
+            Number.POSITIVE_INFINITY) - 0.001,
         min: detected.headerTop + 0.01,
       },
     });
