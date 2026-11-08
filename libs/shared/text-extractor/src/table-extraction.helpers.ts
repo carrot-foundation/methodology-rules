@@ -22,6 +22,7 @@ export interface TableExtractionConfig<TColumn extends string = string> {
    */
   isNewRow?: (anchorValue: string) => boolean;
   maxRowGap?: number;
+  splitSpanningLines?: boolean;
   xTolerance?: number;
   yRange?: { max: number; min: number };
   yTolerance?: number;
@@ -112,6 +113,115 @@ const clusterBlocksByY = (
   return clusters;
 };
 
+const rightEdge = (block: TextBlock): number =>
+  block.boundingBox!.left + block.boundingBox!.width;
+
+const findColumnIndex = (
+  left: number,
+  columnRanges: readonly ColumnRange[],
+): number =>
+  columnRanges.findIndex((range) => left >= range.min && left < range.max);
+
+const spansIntoLaterColumn = (
+  line: TextBlock,
+  columns: readonly TableColumnConfig[],
+  columnRanges: readonly ColumnRange[],
+): boolean => {
+  const index = findColumnIndex(line.boundingBox!.left, columnRanges);
+  const nextColumn = index === -1 ? undefined : columns[index + 1];
+
+  // Not the midpoint range: left-aligned descriptions routinely pass it without merging cells.
+
+  return nextColumn !== undefined && rightEdge(line) > nextColumn.headerLeft;
+};
+
+const findLineWords = (
+  line: TextBlock,
+  blocks: readonly TextBlock[],
+  xTolerance: number,
+): TextBlock[] => {
+  const { height, left, top } = line.boundingBox!;
+  const right = rightEdge(line);
+
+  return blocks
+    .filter((block) => {
+      if (
+        block.blockType !== 'WORD' ||
+        !block.text ||
+        block.boundingBox === undefined
+      ) {
+        return false;
+      }
+
+      const center = block.boundingBox.top + block.boundingBox.height / 2;
+
+      return (
+        center >= top &&
+        center <= top + height &&
+        block.boundingBox.left >= left - xTolerance &&
+        rightEdge(block) <= right + xTolerance
+      );
+    })
+    .sort((a, b) => a.boundingBox!.left - b.boundingBox!.left);
+};
+
+// Words closer than the line height belong to one cell; wider gaps separate cells.
+const groupWordsIntoCells = (
+  words: readonly TextBlock[],
+  maxWordGap: number,
+): TextBlock[][] => {
+  const cells: TextBlock[][] = [];
+
+  for (const word of words) {
+    const cell = cells.at(-1);
+    const previous = cell?.at(-1);
+
+    if (
+      cell &&
+      previous &&
+      word.boundingBox!.left - rightEdge(previous) <= maxWordGap
+    ) {
+      cell.push(word);
+    } else {
+      cells.push([word]);
+    }
+  }
+
+  return cells;
+};
+
+const splitSpanningLine = (
+  line: TextBlock,
+  blocks: readonly TextBlock[],
+  columns: readonly TableColumnConfig[],
+  columnRanges: readonly ColumnRange[],
+  xTolerance: number,
+): TextBlock[] => {
+  if (!spansIntoLaterColumn(line, columns, columnRanges)) {
+    return [line];
+  }
+
+  const words = findLineWords(line, blocks, xTolerance);
+
+  if (words.length === 0) {
+    return [line];
+  }
+
+  return groupWordsIntoCells(words, line.boundingBox!.height).map((cell) => {
+    const left = cell[0]!.boundingBox!.left;
+
+    return {
+      ...line,
+      boundingBox: {
+        ...line.boundingBox!,
+        left,
+        width: rightEdge(cell.at(-1)!) - left,
+      },
+      text: cell.map((word) => word.text!).join(' '),
+    };
+  });
+};
+
 const assignBlocksToColumns = (
   cluster: readonly TextBlock[],
   columnRanges: readonly ColumnRange[],
@@ -119,10 +229,8 @@ const assignBlocksToColumns = (
   const row: TableRow = {};
 
   for (const block of cluster) {
-    const left = block.boundingBox!.left;
-    const matchedColumn = columnRanges.find(
-      (range) => left >= range.min && left < range.max,
-    );
+    const matchedColumn =
+      columnRanges[findColumnIndex(block.boundingBox!.left, columnRanges)];
 
     if (matchedColumn) {
       const existing = row[matchedColumn.name];
@@ -270,7 +378,19 @@ export const extractTableFromBlocks = <TColumn extends string>(
 
   const lineBlocks = filterLineBlocks(blocks, config.yRange);
   const columnRanges = buildColumnRanges(config.columns, xTolerance);
-  const clusters = clusterBlocksByY(lineBlocks, yTolerance);
+  const rowBlocks =
+    config.splitSpanningLines === true
+      ? lineBlocks.flatMap((line) =>
+          splitSpanningLine(
+            line,
+            blocks,
+            config.columns,
+            columnRanges,
+            xTolerance,
+          ),
+        )
+      : lineBlocks;
+  const clusters = clusterBlocksByY(rowBlocks, yTolerance);
   const partialRows = clusters.map((cluster) => ({
     row: assignBlocksToColumns(cluster, columnRanges),
     top: cluster[0]!.boundingBox!.top,
