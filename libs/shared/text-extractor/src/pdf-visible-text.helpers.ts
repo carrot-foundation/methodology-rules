@@ -21,6 +21,7 @@ interface Cover {
 interface Glyph {
   color: string;
   coversBefore: number;
+  isLegible: boolean;
   rect: Rect;
   text: string;
 }
@@ -184,15 +185,14 @@ const isGlyphVisible = (glyph: Glyph, covers: readonly Cover[]): boolean => {
   );
 };
 
-const joinGlyphsIntoWords = (
-  glyphs: readonly (Glyph | undefined)[],
-): VisibleWord[] => {
+const joinGlyphsIntoWords = (glyphs: readonly Glyph[]): VisibleWord[] => {
   const words: VisibleWord[] = [];
   let current: Rect | undefined;
   let text = '';
+  let isEveryGlyphVisible = true;
 
   const flush = () => {
-    if (current) {
+    if (current && isEveryGlyphVisible) {
       words.push({
         height: current.bottom - current.top,
         left: current.left,
@@ -204,10 +204,11 @@ const joinGlyphsIntoWords = (
 
     current = undefined;
     text = '';
+    isEveryGlyphVisible = true;
   };
 
   for (const glyph of glyphs) {
-    if (!glyph || glyph.text.trim().length === 0) {
+    if (glyph.isLegible && glyph.text.trim().length === 0) {
       flush();
       continue;
     }
@@ -233,6 +234,7 @@ const joinGlyphsIntoWords = (
         }
       : rect;
     text += glyph.text;
+    isEveryGlyphVisible &&= glyph.isLegible;
   }
 
   flush();
@@ -329,7 +331,7 @@ const walkOperatorList = async (
   };
 
   const covers: Cover[] = [];
-  const glyphs: Array<Glyph | undefined> = [];
+  const glyphs: Glyph[] = [];
   const stack: State[] = [];
   const formFloors: number[] = [];
   let state: State = {
@@ -382,6 +384,9 @@ const walkOperatorList = async (
           renderingMatrix[0] * renderingMatrix[3] -
             renderingMatrix[1] * renderingMatrix[2],
         ) / width;
+
+      assertModelled(height >= MIN_FONT_SIZE_POINTS, 'text below minimum size');
+
       const isPainted =
         state.renderMode === FILL_RENDER_MODE &&
         (item.isInFont || state.font?.missingFile === true);
@@ -392,19 +397,13 @@ const walkOperatorList = async (
         GLYPH_ASCENT,
       ]);
 
-      glyphs.push(
-        isPainted &&
-          !state.clipped &&
-          height >= MIN_FONT_SIZE_POINTS &&
-          width >= height / 2
-          ? {
-              color: state.fillColor,
-              coversBefore: covers.length,
-              rect,
-              text: item.unicode,
-            }
-          : undefined,
-      );
+      glyphs.push({
+        color: state.fillColor,
+        coversBefore: covers.length,
+        isLegible: isPainted && !state.clipped && width >= height / 2,
+        rect,
+        text: item.unicode,
+      });
 
       if (isPainted) {
         covers.push({ color: state.fillColor, rect });
@@ -654,11 +653,12 @@ const walkOperatorList = async (
     handler((argsArray[index] as null | unknown[]) ?? []);
   }
 
-  return joinGlyphsIntoWords(
-    glyphs.map((glyph) =>
-      glyph && isGlyphVisible(glyph, covers) ? glyph : undefined,
-    ),
+  assertModelled(
+    glyphs.every((glyph) => !glyph.isLegible || isGlyphVisible(glyph, covers)),
+    'painted text that is not visible',
   );
+
+  return joinGlyphsIntoWords(glyphs);
 };
 
 export const extractVisibleWords = async (

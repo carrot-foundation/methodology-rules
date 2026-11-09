@@ -72,6 +72,31 @@ const strokeAfterText = (setup: Operation[]) =>
   ]);
 
 describe('extractVisibleWords', () => {
+  it('should drop the page rather than truncate a value when painted text is covered', async () => {
+    expect(
+      await wordsOf([
+        ...textAt('AB', 10, 50),
+        ...textAt('CD', 30, 50),
+        ...paintRect('#ffffff', [29, 48, 36, 55]),
+      ]),
+    ).toEqual([]);
+  });
+
+  it('should drop a word split by a hidden space rather than emit its halves', async () => {
+    expect(
+      await wordsOf([
+        [OPS.beginText, null],
+        [OPS.setFont, ['f1', 4]],
+        [OPS.setTextMatrix, [[1, 0, 0, 1, 10, 50]]],
+        [OPS.showText, [glyphs('Gab')]],
+        [OPS.setTextRenderingMode, [3]],
+        [OPS.showText, [[glyph(' '), 250]]],
+        [OPS.setTextRenderingMode, [0]],
+        [OPS.showText, [glyphs('riel')]],
+      ]),
+    ).toEqual([]);
+  });
+
   it('should place a visible word in 0-1 page space with a top-left origin', async () => {
     expect(await extractVisibleWords(fakePage(textAt('AB')))).toEqual([
       {
@@ -139,19 +164,77 @@ describe('extractVisibleWords', () => {
     expect(word?.width).toBeCloseTo(0.08, 5);
   });
 
-  it('should split words on a gap, a new line and a concealed glyph', async () => {
+  it('should split words on a gap and a new line', async () => {
     expect(
       await wordsOf([
         ...textAt('A', 10, 50),
         ...textAt('B', 30, 50),
         ...textAt('C', 12, 40),
+      ]),
+    ).toEqual(['A', 'B', 'C']);
+  });
+
+  it.each([
+    {
+      operations: [
+        ...textAt('C', 12, 40),
         [OPS.setTextRenderingMode, [3]],
         ...textAt('X', 14, 40),
         [OPS.setTextRenderingMode, [0]],
         ...textAt('D', 16, 40),
-      ]),
-    ).toEqual(['A', 'B', 'C', 'D']);
-  });
+      ],
+      rule: 'drawn invisibly',
+    },
+    {
+      operations: [
+        [OPS.beginText, null],
+        [OPS.setFont, ['f1', 4]],
+        [OPS.setTextMatrix, [[1, 0, 0, 1, 10, 50]]],
+        [OPS.showText, [[glyph('C'), glyph('X', false), glyph('D')]]],
+      ],
+      rule: 'missing from its font',
+    },
+    {
+      operations: [
+        ...textAt('C', 12, 40),
+        [OPS.setFillRGBColor, ['#ffffff']],
+        ...textAt('X', 14, 40),
+        [OPS.setFillRGBColor, ['#000000']],
+        ...textAt('D', 16, 40),
+      ],
+      rule: 'without contrast',
+    },
+    {
+      operations: [
+        [OPS.beginText, null],
+        [OPS.setFont, ['f1', 4]],
+        [OPS.setTextMatrix, [[1, 0, 0, 1, 10, 50]]],
+        [
+          OPS.showSpacedText,
+          [[glyph('C'), glyph('X'), 200, glyph('D'), glyph('E')]],
+        ],
+      ],
+      rule: 'overlapped by the next glyph through kerning',
+    },
+    {
+      operations: [
+        [OPS.beginText, null],
+        [OPS.setFont, ['f1', 4]],
+        [OPS.setLeading, [3]],
+        [OPS.setTextMatrix, [[1, 0, 0, 1, 10, 50]]],
+        [OPS.showText, [glyphs('CXD')]],
+        [OPS.nextLineShowText, [glyphs('E')]],
+      ],
+      rule: 'overlapped by the next line through tight leading',
+    },
+  ] as Array<{ operations: Operation[]; rule: string }>)(
+    'should drop a whole word when one of its glyphs is $rule',
+    async ({ operations }) => {
+      const words = await wordsOf(operations);
+
+      expect(words.filter((word) => /[CD]/.test(word))).toEqual([]);
+    },
+  );
 
   it.each([
     { operations: textAt('A', 120, 50), rule: 'outside the page' },
@@ -377,6 +460,21 @@ describe('extractVisibleWords', () => {
   ])('should drop the whole page for an unmodelled font %o', async (font) => {
     expect(
       await extractVisibleWords(fakePage(textAt('A'), { f1: font })),
+    ).toEqual([]);
+  });
+
+  it('should drop the whole page when a glyph inside a word is below the minimum rendered size', async () => {
+    expect(
+      await wordsOf([
+        [OPS.beginText, null],
+        [OPS.setFont, ['f1', 4]],
+        [OPS.setTextMatrix, [[1, 0, 0, 1, 10, 50]]],
+        [OPS.showText, [glyphs('C')]],
+        [OPS.setFont, ['f1', 1]],
+        [OPS.showText, [glyphs('X')]],
+        [OPS.setFont, ['f1', 4]],
+        [OPS.showText, [glyphs('D')]],
+      ]),
     ).toEqual([]);
   });
 
