@@ -120,9 +120,6 @@ const assertModelled = (isModelled: boolean, reason: string): void => {
 
 const ignore = (): void => undefined;
 
-const effectiveMiterLimit = (limit: number): number =>
-  Number.isFinite(limit) && limit > 0 ? limit : DEFAULT_MITER_LIMIT;
-
 const multiply = (m1: Matrix, m2: Matrix): Matrix => [
   m1[0] * m2[0] + m1[1] * m2[2],
   m1[0] * m2[1] + m1[1] * m2[3],
@@ -581,6 +578,15 @@ const walkOperatorList = async (
     }
   };
 
+  const setStrokeParameter = (
+    name: 'lineJoin' | 'lineWidth' | 'miterLimit',
+    value: number,
+  ) => {
+    if (name !== 'miterLimit' || (Number.isFinite(value) && value > 0)) {
+      // eslint-disable-next-line security/detect-object-injection
+      state[name] = value;
+    }
+  };
   const save = () => {
     stack.push({ ...state });
   };
@@ -669,7 +675,7 @@ const walkOperatorList = async (
         if (STROKE_PATH_OPS.has(paintOperator)) {
           const miterLimit = NON_MITER_JOINS.has(state.lineJoin)
             ? undefined
-            : effectiveMiterLimit(state.miterLimit);
+            : state.miterLimit;
 
           covers.push(
             ...[firstPath!, ...otherPaths]
@@ -786,8 +792,10 @@ const walkOperatorList = async (
 
         for (const [key, value] of entries) {
           if (key in STROKE_GSTATE_KEYS) {
-            state[STROKE_GSTATE_KEYS[key as keyof typeof STROKE_GSTATE_KEYS]] =
-              value as number;
+            setStrokeParameter(
+              STROKE_GSTATE_KEYS[key as keyof typeof STROKE_GSTATE_KEYS],
+              value as number,
+            );
           }
         }
       },
@@ -826,7 +834,7 @@ const walkOperatorList = async (
     [
       OPS.setMiterLimit,
       (arguments_) => {
-        state.miterLimit = arguments_[0] as number;
+        setStrokeParameter('miterLimit', arguments_[0] as number);
       },
     ],
     [

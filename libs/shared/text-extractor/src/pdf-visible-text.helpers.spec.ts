@@ -491,6 +491,15 @@ describe('extractVisibleWords', () => {
     ).toEqual(['A']);
     expect(await wordsOf(spike([[OPS.setLineJoin, [5]]]))).toEqual([]);
     expect(await wordsOf(spike([[OPS.setMiterLimit, [0]]]))).toEqual([]);
+    expect(
+      await wordsOf(
+        spike([
+          [OPS.setMiterLimit, [2]],
+          [OPS.setMiterLimit, [0]],
+          [OPS.setGState, [[['ML', -1]]]],
+        ]),
+      ),
+    ).toEqual(['A']);
   });
 
   it('should hide text under a closed path join, curves and quadratic curves', async () => {
