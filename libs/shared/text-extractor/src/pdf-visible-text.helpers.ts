@@ -15,14 +15,12 @@ type Bounds = [number, number, number, number];
 
 interface Cover {
   color: string | undefined;
-  kind: 'fill' | 'glyph' | 'image' | 'stroke';
+  isBackground: boolean;
   rect: Rect;
-  text?: string;
 }
 
 interface Glyph {
   color: string;
-  core: Rect;
   coversBefore: number;
   rect: Rect;
   text: string;
@@ -62,13 +60,19 @@ interface State {
   fontSize: number;
   hScale: number;
   leading: number;
-  lineJoin: number;
   lineWidth: number;
   miterLimit: number;
   renderMode: number;
   rise: number;
   wordSpacing: number;
 }
+
+type StateSetting =
+  | 'charSpacing'
+  | 'leading'
+  | 'lineWidth'
+  | 'rise'
+  | 'wordSpacing';
 
 class UnmodelledContentError extends Error {}
 
@@ -78,39 +82,23 @@ const DEFAULT_FONT_MATRIX = [0.001, 0, 0, 0.001, 0, 0];
 const GLYPH_DESCENT = -0.2;
 const GLYPH_ASCENT = 0.8;
 const MIN_CONTRAST_RATIO = 2;
+const MIN_FONT_SIZE_POINTS = 4;
+const OVERLAP_EPSILON = 1e-6;
 const WHITE = '#ffffff';
 const FILL_RENDER_MODES = new Set([0, 2]);
 const INVISIBLE_RENDER_MODE = 3;
-const MIN_FONT_SIZE_POINTS = 4;
-const GLYPH_CORE_INSET = 0.1;
-const GLYPH_CORE_TOP = 0.6;
-const OVERPRINT_TOLERANCE = 0.25;
-const AXIS_EPSILON = 1e-6;
-const PATH_MOVE_TO = 0;
-const PATH_LINE_TO = 1;
-const PATH_CURVE_TO = 2;
-const PATH_QUADRATIC_CURVE_TO = 3;
-const PATH_CLOSE = 4;
-const MITER_JOIN = 0;
-const NON_MITER_JOINS = new Set([1, 2]);
-const DEFAULT_MITER_LIMIT = 10;
 
 const NO_VISUAL_EFFECT_GSTATE_KEYS = new Set([
   'D',
   'FL',
   'LC',
+  'LJ',
   'OP',
   'op',
   'OPM',
   'RI',
   'SA',
 ]);
-
-const STROKE_GSTATE_KEYS = {
-  LJ: 'lineJoin',
-  LW: 'lineWidth',
-  ML: 'miterLimit',
-} as const;
 
 const assertModelled = (isModelled: boolean, reason: string): void => {
   if (!isModelled) {
@@ -133,7 +121,8 @@ const translate = (x: number, y: number): Matrix => [1, 0, 0, 1, x, y];
 
 const isGStateEntryModelled = ([key, value]: GStateEntry): boolean =>
   NO_VISUAL_EFFECT_GSTATE_KEYS.has(key) ||
-  key in STROKE_GSTATE_KEYS ||
+  key === 'LW' ||
+  key === 'ML' ||
   (key === 'SMask' && value === false) ||
   ((key === 'ca' || key === 'CA') && value === 1) ||
   (key === 'BM' && (value === 'source-over' || value === 'Normal'));
@@ -157,163 +146,18 @@ const contrastRatio = (first: string, second: string): number => {
 };
 
 const overlaps = (a: Rect, b: Rect): boolean =>
-  a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom;
+  a.left + OVERLAP_EPSILON < b.right &&
+  b.left + OVERLAP_EPSILON < a.right &&
+  a.top + OVERLAP_EPSILON < b.bottom &&
+  b.top + OVERLAP_EPSILON < a.bottom;
 
 const contains = (rect: Rect, x: number, y: number): boolean =>
   x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
-
-const coversPage = (rect: Rect): boolean =>
-  rect.left <= 0 && rect.top <= 0 && rect.right >= 1 && rect.bottom >= 1;
-
-const isAxisAligned = (matrix: Matrix): boolean =>
-  (Math.abs(matrix[1]) < AXIS_EPSILON && Math.abs(matrix[2]) < AXIS_EPSILON) ||
-  (Math.abs(matrix[0]) < AXIS_EPSILON && Math.abs(matrix[3]) < AXIS_EPSILON);
-
-const isSingleRectangle = (path: ArrayLike<number>): boolean => {
-  if (path.length !== 12 && !(path.length === 13 && path[12] === PATH_CLOSE)) {
-    return false;
-  }
-
-  const [x0, y0, x1, y1, x2, y2, x3, y3] = [1, 2, 4, 5, 7, 8, 10, 11].map(
-    // eslint-disable-next-line security/detect-object-injection
-    (offset) => path[offset]!,
-  );
-
-  return (
-    path[0] === PATH_MOVE_TO &&
-    // eslint-disable-next-line security/detect-object-injection
-    [3, 6, 9].every((offset) => path[offset] === PATH_LINE_TO) &&
-    x0 !== x2 &&
-    y0 !== y2 &&
-    ((x0 === x1 && y1 === y2 && x2 === x3 && y3 === y0) ||
-      (y0 === y1 && x1 === x2 && y2 === y3 && x3 === x0))
-  );
-};
-
-type Point = [number, number];
-
-const boundsAround = (points: readonly Point[], pad: number): Bounds => [
-  Math.min(...points.map(([x]) => x)) - pad,
-  Math.min(...points.map(([, y]) => y)) - pad,
-  Math.max(...points.map(([x]) => x)) + pad,
-  Math.max(...points.map(([, y]) => y)) + pad,
-];
-
-const direction = ([x0, y0]: Point, [x1, y1]: Point): Point | undefined => {
-  const length = Math.hypot(x1 - x0, y1 - y0);
-
-  return length > 0 ? [(x1 - x0) / length, (y1 - y0) / length] : undefined;
-};
-
-const strokeBounds = (
-  path: ArrayLike<number>,
-  half: number,
-  miterLimit: number | undefined,
-): Bounds[] => {
-  const result: Bounds[] = [];
-  // eslint-disable-next-line security/detect-object-injection
-  const read = (offset: number): Point => [path[offset]!, path[offset + 1]!];
-  let start: Point = [0, 0];
-  let current: Point = [0, 0];
-  let incoming: Point | undefined;
-  let first: Point | undefined;
-
-  const join = (outgoing: Point | undefined) => {
-    if (miterLimit !== undefined && incoming && outgoing) {
-      const ratio =
-        1 /
-        Math.sqrt(
-          (1 + incoming[0] * outgoing[0] + incoming[1] * outgoing[1]) / 2,
-        );
-
-      if (ratio <= miterLimit) {
-        result.push(boundsAround([current], half * ratio));
-      }
-    }
-  };
-  const segment = (points: readonly Point[], end: Point) => {
-    const startDirection = points
-      .map((point) => direction(current, point))
-      .find((value) => value !== undefined);
-
-    join(startDirection);
-    first ??= startDirection;
-    result.push(boundsAround([current, ...points], half * Math.SQRT2));
-    incoming =
-      [current, ...points]
-        .reverse()
-        .map((point) => direction(point, end))
-        .find((value) => value !== undefined) ?? incoming;
-    current = end;
-  };
-
-  for (let index = 0; index < path.length; ) {
-    // eslint-disable-next-line security/detect-object-injection
-    const command = path[index];
-
-    switch (command) {
-      case PATH_CURVE_TO: {
-        segment(
-          [read(index + 1), read(index + 3), read(index + 5)],
-          read(index + 5),
-        );
-        index += 7;
-
-        break;
-      }
-      case PATH_LINE_TO: {
-        segment([read(index + 1)], read(index + 1));
-        index += 3;
-
-        break;
-      }
-      case PATH_MOVE_TO: {
-        start = read(index + 1);
-        current = start;
-        incoming = undefined;
-        first = undefined;
-        index += 3;
-
-        break;
-      }
-      case PATH_QUADRATIC_CURVE_TO: {
-        segment([read(index + 1), read(index + 3)], read(index + 3));
-        index += 5;
-
-        break;
-      }
-
-      default: {
-        assertModelled(command === PATH_CLOSE, 'path command');
-        segment([start], start);
-        join(first);
-        index += 1;
-      }
-    }
-  }
-
-  return result;
-};
 
 const isInsidePage = (rect: Rect): boolean =>
   rect.left >= 0 && rect.top >= 0 && rect.right <= 1 && rect.bottom <= 1;
 
 const isGlyphVisible = (glyph: Glyph, covers: readonly Cover[]): boolean => {
-  if (!isInsidePage(glyph.rect)) {
-    return false;
-  }
-
-  const height = glyph.rect.bottom - glyph.rect.top;
-  const isOverprint = (cover: Cover) =>
-    cover.kind === 'glyph' &&
-    cover.text === glyph.text &&
-    cover.color === glyph.color &&
-    Math.abs(cover.rect.left - glyph.core.left) +
-      Math.abs(cover.rect.top - glyph.core.top) <
-      height * OVERPRINT_TOLERANCE;
-  const isCoveredLater = covers
-    .slice(glyph.coversBefore)
-    .some((cover) => overlaps(cover.rect, glyph.core) && !isOverprint(cover));
   const centerX = (glyph.rect.left + glyph.rect.right) / 2;
   const centerY = (glyph.rect.top + glyph.rect.bottom) / 2;
   const backgroundColors = [
@@ -321,15 +165,16 @@ const isGlyphVisible = (glyph: Glyph, covers: readonly Cover[]): boolean => {
     ...covers
       .slice(0, glyph.coversBefore)
       .filter(
-        (cover) =>
-          (cover.kind === 'fill' || cover.kind === 'image') &&
-          contains(cover.rect, centerX, centerY),
+        (cover) => cover.isBackground && contains(cover.rect, centerX, centerY),
       )
       .map((cover) => cover.color),
   ];
 
   return (
-    !isCoveredLater &&
+    isInsidePage(glyph.rect) &&
+    !covers
+      .slice(glyph.coversBefore)
+      .some((cover) => overlaps(cover.rect, glyph.rect)) &&
     backgroundColors.every(
       (color) =>
         color !== undefined &&
@@ -419,14 +264,14 @@ const walkOperatorList = async (
     OPS.stroke,
   ]);
 
-  const IMAGE_OPS = new Set<number>([
+  const IMAGE_OPS = [
     OPS.paintImageMaskXObject,
     OPS.paintImageXObject,
     OPS.paintInlineImageXObject,
     OPS.paintSolidColorImageMask,
-  ]);
+  ];
 
-  const NO_VISUAL_EFFECT_OPS = new Set<number>([
+  const NO_VISUAL_EFFECT_OPS = [
     OPS.beginCompat,
     OPS.beginMarkedContent,
     OPS.dependency,
@@ -438,9 +283,18 @@ const walkOperatorList = async (
     OPS.setDash,
     OPS.setFlatness,
     OPS.setLineCap,
+    OPS.setLineJoin,
     OPS.setRenderingIntent,
     OPS.setStrokeRGBColor,
-  ]);
+  ];
+
+  const STATE_SETTINGS: Array<[number, StateSetting]> = [
+    [OPS.setCharSpacing, 'charSpacing'],
+    [OPS.setLeading, 'leading'],
+    [OPS.setLineWidth, 'lineWidth'],
+    [OPS.setTextRise, 'rise'],
+    [OPS.setWordSpacing, 'wordSpacing'],
+  ];
 
   const toRect = (matrix: Matrix, [x0, y0, x1, y1]: Bounds): Rect => {
     const points = [
@@ -485,9 +339,8 @@ const walkOperatorList = async (
     fontSize: 0,
     hScale: 1,
     leading: 0,
-    lineJoin: MITER_JOIN,
     lineWidth: 1,
-    miterLimit: DEFAULT_MITER_LIMIT,
+    miterLimit: 10,
     renderMode: 0,
     rise: 0,
     wordSpacing: 0,
@@ -534,12 +387,10 @@ const walkOperatorList = async (
         advance,
         GLYPH_ASCENT,
       ]);
-      const core = toRect(renderingMatrix, [
-        advance * GLYPH_CORE_INSET,
-        GLYPH_CORE_INSET,
-        advance * (1 - GLYPH_CORE_INSET),
-        GLYPH_CORE_TOP,
-      ]);
+
+      if (isPainted) {
+        covers.push({ color: state.fillColor, isBackground: false, rect });
+      }
 
       glyphs.push(
         isPainted &&
@@ -548,22 +399,12 @@ const walkOperatorList = async (
           width >= height / 2
           ? {
               color: state.fillColor,
-              core,
               coversBefore: covers.length,
               rect,
               text: item.unicode,
             }
           : undefined,
       );
-
-      if (isPainted) {
-        covers.push({
-          color: state.fillColor,
-          kind: 'glyph',
-          rect: core,
-          text: item.unicode,
-        });
-      }
 
       textMatrix = multiply(
         translate(
@@ -578,32 +419,21 @@ const walkOperatorList = async (
     }
   };
 
-  const setStrokeParameter = (
-    name: 'lineJoin' | 'lineWidth' | 'miterLimit',
-    value: number,
-  ) => {
-    if (name !== 'miterLimit' || (Number.isFinite(value) && value > 0)) {
-      // eslint-disable-next-line security/detect-object-injection
-      state[name] = value;
+  const setMiterLimit = (limit: number) => {
+    if (Number.isFinite(limit) && limit > 0) {
+      state.miterLimit = limit;
     }
   };
   const save = () => {
     stack.push({ ...state });
   };
   const restore = () => {
-    if (stack.length > (formFloors.at(-1) ?? 0)) {
-      state = stack.pop()!;
-    }
+    assertModelled(
+      stack.length > (formFloors.at(-1) ?? 0),
+      'unbalanced restore',
+    );
+    state = stack.pop()!;
   };
-  const isPageCoveringRectangle = (
-    matrix: Matrix,
-    bounds: Bounds | null,
-    path: ArrayLike<number>,
-  ): boolean =>
-    bounds !== null &&
-    isAxisAligned(matrix) &&
-    isSingleRectangle(path) &&
-    coversPage(toRect(matrix, bounds));
   const nextLine = () => {
     moveText(0, -state.leading);
   };
@@ -616,14 +446,23 @@ const walkOperatorList = async (
   const paintImage = () => {
     covers.push({
       color: undefined,
-      kind: 'image',
+      isBackground: true,
       rect: toRect(state.ctm, UNIT_SQUARE),
     });
   };
 
   const handlers = new Map<number, (arguments_: readonly unknown[]) => void>([
-    ...[...IMAGE_OPS].map((op) => [op, paintImage] as const),
-    ...[...NO_VISUAL_EFFECT_OPS].map((op) => [op, ignore] as const),
+    ...IMAGE_OPS.map((op) => [op, paintImage] as const),
+    ...NO_VISUAL_EFFECT_OPS.map((op) => [op, ignore] as const),
+    ...STATE_SETTINGS.map(
+      ([op, setting]) =>
+        [
+          op,
+          (arguments_: readonly unknown[]) => {
+            Object.assign(state, { [setting]: arguments_[0] as number });
+          },
+        ] as const,
+    ),
     [
       OPS.beginMarkedContentProps,
       (arguments_) => {
@@ -642,22 +481,9 @@ const walkOperatorList = async (
       OPS.constructPath,
       (arguments_) => {
         const paintOperator = arguments_[0] as number;
-        const [firstPath, ...otherPaths] = arguments_[1] as Array<
-          ArrayLike<number>
-        >;
         const bounds = arguments_[2] as Bounds | null;
 
-        if (
-          pendingClip &&
-          !(
-            firstPath !== undefined &&
-            otherPaths.length === 0 &&
-            isPageCoveringRectangle(state.ctm, bounds, firstPath)
-          )
-        ) {
-          state.clipped = true;
-        }
-
+        state.clipped ||= pendingClip;
         pendingClip = false;
 
         if (!bounds) {
@@ -667,27 +493,21 @@ const walkOperatorList = async (
         if (FILL_PATH_OPS.has(paintOperator)) {
           covers.push({
             color: state.clipped ? undefined : state.fillColor,
-            kind: 'fill',
+            isBackground: true,
             rect: toRect(state.ctm, bounds),
           });
         }
 
         if (STROKE_PATH_OPS.has(paintOperator)) {
-          const miterLimit = NON_MITER_JOINS.has(state.lineJoin)
-            ? undefined
-            : state.miterLimit;
+          const pad =
+            (state.lineWidth * Math.max(state.miterLimit, Math.SQRT2)) / 2;
+          const [x0, y0, x1, y1] = bounds;
 
-          covers.push(
-            ...[firstPath!, ...otherPaths]
-              .flatMap((path) =>
-                strokeBounds(path, state.lineWidth / 2, miterLimit),
-              )
-              .map((strokeBound) => ({
-                color: undefined,
-                kind: 'stroke' as const,
-                rect: toRect(state.ctm, strokeBound),
-              })),
-          );
+          covers.push({
+            color: undefined,
+            isBackground: false,
+            rect: toRect(state.ctm, [x0 - pad, y0 - pad, x1 + pad, y1 + pad]),
+          });
         }
       },
     ],
@@ -717,33 +537,13 @@ const walkOperatorList = async (
     [
       OPS.paintFormXObjectBegin,
       (arguments_) => {
-        const bounds = arguments_[1] as Bounds | null;
-
         save();
         formFloors.push(stack.length);
         state.ctm = multiply(
           (arguments_[0] as Matrix | null) ?? IDENTITY,
           state.ctm,
         );
-
-        if (bounds) {
-          const [x0, y0, x1, y1] = bounds;
-
-          state.clipped ||= !isPageCoveringRectangle(state.ctm, bounds, [
-            PATH_MOVE_TO,
-            x0,
-            y0,
-            PATH_LINE_TO,
-            x1,
-            y0,
-            PATH_LINE_TO,
-            x1,
-            y1,
-            PATH_LINE_TO,
-            x0,
-            y1,
-          ]);
-        }
+        state.clipped = true;
       },
     ],
     [
@@ -755,12 +555,6 @@ const walkOperatorList = async (
     ],
     [OPS.restore, restore],
     [OPS.save, save],
-    [
-      OPS.setCharSpacing,
-      (arguments_) => {
-        state.charSpacing = arguments_[0] as number;
-      },
-    ],
     [
       OPS.setFillRGBColor,
       (arguments_) => {
@@ -791,11 +585,10 @@ const walkOperatorList = async (
         );
 
         for (const [key, value] of entries) {
-          if (key in STROKE_GSTATE_KEYS) {
-            setStrokeParameter(
-              STROKE_GSTATE_KEYS[key as keyof typeof STROKE_GSTATE_KEYS],
-              value as number,
-            );
+          if (key === 'LW') {
+            state.lineWidth = value as number;
+          } else if (key === 'ML') {
+            setMiterLimit(value as number);
           }
         }
       },
@@ -807,36 +600,13 @@ const walkOperatorList = async (
       },
     ],
     [
-      OPS.setLeading,
-      (arguments_) => {
-        state.leading = arguments_[0] as number;
-      },
-    ],
-    [
       OPS.setLeadingMoveText,
       (arguments_) => {
         state.leading = -(arguments_[1] as number);
         moveText(arguments_[0] as number, arguments_[1] as number);
       },
     ],
-    [
-      OPS.setLineJoin,
-      (arguments_) => {
-        state.lineJoin = arguments_[0] as number;
-      },
-    ],
-    [
-      OPS.setLineWidth,
-      (arguments_) => {
-        state.lineWidth = arguments_[0] as number;
-      },
-    ],
-    [
-      OPS.setMiterLimit,
-      (arguments_) => {
-        setStrokeParameter('miterLimit', arguments_[0] as number);
-      },
-    ],
+    [OPS.setMiterLimit, (arguments_) => setMiterLimit(arguments_[0] as number)],
     [
       OPS.setTextMatrix,
       (arguments_) => {
@@ -854,18 +624,6 @@ const walkOperatorList = async (
           'text render mode',
         );
         state.renderMode = mode;
-      },
-    ],
-    [
-      OPS.setTextRise,
-      (arguments_) => {
-        state.rise = arguments_[0] as number;
-      },
-    ],
-    [
-      OPS.setWordSpacing,
-      (arguments_) => {
-        state.wordSpacing = arguments_[0] as number;
       },
     ],
     [OPS.showSpacedText, (arguments_) => show(arguments_[0])],
