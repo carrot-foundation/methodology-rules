@@ -62,7 +62,9 @@ interface State {
   fontSize: number;
   hScale: number;
   leading: number;
+  lineJoin: number;
   lineWidth: number;
+  miterLimit: number;
   renderMode: number;
   rise: number;
   wordSpacing: number;
@@ -86,20 +88,27 @@ const OVERPRINT_TOLERANCE = 0.25;
 const AXIS_EPSILON = 1e-6;
 const PATH_MOVE_TO = 0;
 const PATH_LINE_TO = 1;
+const PATH_CURVE_TO = 2;
+const PATH_QUADRATIC_CURVE_TO = 3;
 const PATH_CLOSE = 4;
+const MITER_JOIN = 0;
 
 const NO_VISUAL_EFFECT_GSTATE_KEYS = new Set([
   'D',
   'FL',
   'LC',
-  'LJ',
-  'ML',
   'OP',
   'op',
   'OPM',
   'RI',
   'SA',
 ]);
+
+const STROKE_GSTATE_KEYS = {
+  LJ: 'lineJoin',
+  LW: 'lineWidth',
+  ML: 'miterLimit',
+} as const;
 
 const assertModelled = (isModelled: boolean, reason: string): void => {
   if (!isModelled) {
@@ -122,7 +131,7 @@ const translate = (x: number, y: number): Matrix => [1, 0, 0, 1, x, y];
 
 const isGStateEntryModelled = ([key, value]: GStateEntry): boolean =>
   NO_VISUAL_EFFECT_GSTATE_KEYS.has(key) ||
-  key === 'LW' ||
+  key in STROKE_GSTATE_KEYS ||
   (key === 'SMask' && value === false) ||
   ((key === 'ca' || key === 'CA') && value === 1) ||
   (key === 'BM' && (value === 'source-over' || value === 'Normal'));
@@ -179,6 +188,111 @@ const isSingleRectangle = (path: ArrayLike<number>): boolean => {
   );
 };
 
+type Point = [number, number];
+
+const boundsAround = (points: readonly Point[], pad: number): Bounds => [
+  Math.min(...points.map(([x]) => x)) - pad,
+  Math.min(...points.map(([, y]) => y)) - pad,
+  Math.max(...points.map(([x]) => x)) + pad,
+  Math.max(...points.map(([, y]) => y)) + pad,
+];
+
+const direction = ([x0, y0]: Point, [x1, y1]: Point): Point | undefined => {
+  const length = Math.hypot(x1 - x0, y1 - y0);
+
+  return length > 0 ? [(x1 - x0) / length, (y1 - y0) / length] : undefined;
+};
+
+const strokeBounds = (
+  path: ArrayLike<number>,
+  half: number,
+  miterLimit: number | undefined,
+): Bounds[] => {
+  const result: Bounds[] = [];
+  // eslint-disable-next-line security/detect-object-injection
+  const read = (offset: number): Point => [path[offset]!, path[offset + 1]!];
+  let start: Point = [0, 0];
+  let current: Point = [0, 0];
+  let incoming: Point | undefined;
+  let first: Point | undefined;
+
+  const join = (outgoing: Point | undefined) => {
+    if (miterLimit !== undefined && incoming && outgoing) {
+      const ratio =
+        1 /
+        Math.sqrt(
+          (1 + incoming[0] * outgoing[0] + incoming[1] * outgoing[1]) / 2,
+        );
+
+      if (ratio <= miterLimit) {
+        result.push(boundsAround([current], half * ratio));
+      }
+    }
+  };
+  const segment = (points: readonly Point[], end: Point) => {
+    const startDirection = points
+      .map((point) => direction(current, point))
+      .find((value) => value !== undefined);
+
+    join(startDirection);
+    first ??= startDirection;
+    result.push(boundsAround([current, ...points], half));
+    incoming =
+      [current, ...points]
+        .reverse()
+        .map((point) => direction(point, end))
+        .find((value) => value !== undefined) ?? incoming;
+    current = end;
+  };
+
+  for (let index = 0; index < path.length; ) {
+    // eslint-disable-next-line security/detect-object-injection
+    const command = path[index];
+
+    switch (command) {
+      case PATH_CURVE_TO: {
+        segment(
+          [read(index + 1), read(index + 3), read(index + 5)],
+          read(index + 5),
+        );
+        index += 7;
+
+        break;
+      }
+      case PATH_LINE_TO: {
+        segment([read(index + 1)], read(index + 1));
+        index += 3;
+
+        break;
+      }
+      case PATH_MOVE_TO: {
+        start = read(index + 1);
+        current = start;
+        incoming = undefined;
+        first = undefined;
+        index += 3;
+
+        break;
+      }
+      case PATH_QUADRATIC_CURVE_TO: {
+        segment([read(index + 1), read(index + 3)], read(index + 3));
+        index += 5;
+
+        break;
+      }
+
+      default: {
+        assertModelled(command === PATH_CLOSE, 'path command');
+        segment([start], start);
+        join(first);
+        index += 1;
+      }
+    }
+  }
+
+  return result;
+};
+
 const isInsidePage = (rect: Rect): boolean =>
   rect.left >= 0 && rect.top >= 0 && rect.right <= 1 && rect.bottom <= 1;
 
@@ -191,8 +305,9 @@ const isGlyphVisible = (glyph: Glyph, covers: readonly Cover[]): boolean => {
   const isOverprint = (cover: Cover) =>
     cover.kind === 'glyph' &&
     cover.text === glyph.text &&
-    Math.abs(cover.rect.left - glyph.rect.left) +
-      Math.abs(cover.rect.top - glyph.rect.top) <
+    cover.color === glyph.color &&
+    Math.abs(cover.rect.left - glyph.core.left) +
+      Math.abs(cover.rect.top - glyph.core.top) <
       height * OVERPRINT_TOLERANCE;
   const isCoveredLater = covers
     .slice(glyph.coversBefore)
@@ -321,8 +436,6 @@ const walkOperatorList = async (
     OPS.setDash,
     OPS.setFlatness,
     OPS.setLineCap,
-    OPS.setLineJoin,
-    OPS.setMiterLimit,
     OPS.setRenderingIntent,
     OPS.setStrokeRGBColor,
   ]);
@@ -370,7 +483,9 @@ const walkOperatorList = async (
     fontSize: 0,
     hScale: 1,
     leading: 0,
+    lineJoin: MITER_JOIN,
     lineWidth: 1,
+    miterLimit: 10,
     renderMode: 0,
     rise: 0,
     wordSpacing: 0,
@@ -417,6 +532,12 @@ const walkOperatorList = async (
         advance,
         GLYPH_ASCENT,
       ]);
+      const core = toRect(renderingMatrix, [
+        advance * GLYPH_CORE_INSET,
+        GLYPH_CORE_INSET,
+        advance * (1 - GLYPH_CORE_INSET),
+        GLYPH_CORE_TOP,
+      ]);
 
       glyphs.push(
         isPainted &&
@@ -425,12 +546,7 @@ const walkOperatorList = async (
           width >= height / 2
           ? {
               color: state.fillColor,
-              core: toRect(renderingMatrix, [
-                advance * GLYPH_CORE_INSET,
-                GLYPH_CORE_INSET,
-                advance * (1 - GLYPH_CORE_INSET),
-                GLYPH_CORE_TOP,
-              ]),
+              core,
               coversBefore: covers.length,
               rect,
               text: item.unicode,
@@ -442,7 +558,7 @@ const walkOperatorList = async (
         covers.push({
           color: state.fillColor,
           kind: 'glyph',
-          rect,
+          rect: core,
           text: item.unicode,
         });
       }
@@ -515,15 +631,17 @@ const walkOperatorList = async (
       OPS.constructPath,
       (arguments_) => {
         const paintOperator = arguments_[0] as number;
-        const [path, ...otherPaths] = arguments_[1] as Array<ArrayLike<number>>;
+        const [firstPath, ...otherPaths] = arguments_[1] as Array<
+          ArrayLike<number>
+        >;
         const bounds = arguments_[2] as Bounds | null;
 
         if (
           pendingClip &&
           !(
-            path !== undefined &&
+            firstPath !== undefined &&
             otherPaths.length === 0 &&
-            isPageCoveringRectangle(state.ctm, bounds, path)
+            isPageCoveringRectangle(state.ctm, bounds, firstPath)
           )
         ) {
           state.clipped = true;
@@ -544,18 +662,20 @@ const walkOperatorList = async (
         }
 
         if (STROKE_PATH_OPS.has(paintOperator)) {
-          const half = state.lineWidth / 2;
+          const miterLimit =
+            state.lineJoin === MITER_JOIN ? state.miterLimit : undefined;
 
-          covers.push({
-            color: undefined,
-            kind: 'stroke',
-            rect: toRect(state.ctm, [
-              bounds[0] - half,
-              bounds[1] - half,
-              bounds[2] + half,
-              bounds[3] + half,
-            ]),
-          });
+          covers.push(
+            ...[firstPath!, ...otherPaths]
+              .flatMap((path) =>
+                strokeBounds(path, state.lineWidth / 2, miterLimit),
+              )
+              .map((strokeBound) => ({
+                color: undefined,
+                kind: 'stroke' as const,
+                rect: toRect(state.ctm, strokeBound),
+              })),
+          );
         }
       },
     ],
@@ -659,8 +779,9 @@ const walkOperatorList = async (
         );
 
         for (const [key, value] of entries) {
-          if (key === 'LW') {
-            state.lineWidth = value as number;
+          if (key in STROKE_GSTATE_KEYS) {
+            state[STROKE_GSTATE_KEYS[key as keyof typeof STROKE_GSTATE_KEYS]] =
+              value as number;
           }
         }
       },
@@ -685,9 +806,21 @@ const walkOperatorList = async (
       },
     ],
     [
+      OPS.setLineJoin,
+      (arguments_) => {
+        state.lineJoin = arguments_[0] as number;
+      },
+    ],
+    [
       OPS.setLineWidth,
       (arguments_) => {
         state.lineWidth = arguments_[0] as number;
+      },
+    ],
+    [
+      OPS.setMiterLimit,
+      (arguments_) => {
+        state.miterLimit = arguments_[0] as number;
       },
     ],
     [

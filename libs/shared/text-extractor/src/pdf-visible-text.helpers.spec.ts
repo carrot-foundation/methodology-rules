@@ -62,7 +62,14 @@ const fillRect = (
   paintOp: number = OPS.fill,
 ): Operation[] => [
   [OPS.setFillRGBColor, [color]],
-  [OPS.constructPath, [paintOp, [], [x0, y0, x1, y1]]],
+  [
+    OPS.constructPath,
+    [
+      paintOp,
+      [[0, x0, y0, 1, x1, y0, 1, x1, y1, 1, x0, y1, 4]],
+      [x0, y0, x1, y1],
+    ],
+  ],
   [OPS.setFillRGBColor, ['#000000']],
 ];
 
@@ -71,6 +78,11 @@ const wordsOf = async (operations: readonly Operation[]) => {
 
   return words.map(({ text }) => text);
 };
+
+const strokeOver = (path: number[]): Operation[] => [
+  ...textAt('A', 10, 50),
+  [OPS.constructPath, [OPS.closeStroke, [path], [0, 0, 100, 100]]],
+];
 
 describe('extractVisibleWords', () => {
   it('should place a visible word in 0-1 page space with a top-left origin', async () => {
@@ -229,7 +241,7 @@ describe('extractVisibleWords', () => {
       operations: [
         ...textAt('A'),
         [OPS.setLineWidth, [5]],
-        ...fillRect('#ffffff', [0, 40, 50, 60], OPS.stroke),
+        ...fillRect('#ffffff', [0, 51, 50, 51], OPS.stroke),
       ] as Operation[],
     },
     {
@@ -446,6 +458,78 @@ describe('extractVisibleWords', () => {
     const overprint = await wordsOf([...textAt('A'), ...textAt('A')]);
 
     expect(overprint.join('')).toBe('AA');
+  });
+
+  const spike = (setup: Operation[] = []): Operation[] => [
+    ...textAt('A', 22, 50),
+    ...setup,
+    [OPS.setLineWidth, [2]],
+    [
+      OPS.constructPath,
+      [OPS.stroke, [[0, 0, 48, 1, 20, 51, 1, 0, 54]], [0, 48, 20, 54]],
+    ],
+  ];
+
+  it('should hide text under a miter spike, unless the join cannot spike', async () => {
+    expect(await wordsOf(spike())).toEqual([]);
+    expect(await wordsOf(spike([[OPS.setLineJoin, [1]]]))).toEqual(['A']);
+    expect(await wordsOf(spike([[OPS.setMiterLimit, [2]]]))).toEqual(['A']);
+    expect(
+      await wordsOf(
+        spike([
+          [
+            OPS.setGState,
+            [
+              [
+                ['LJ', 2],
+                ['ML', 10],
+              ],
+            ],
+          ],
+        ]),
+      ),
+    ).toEqual(['A']);
+  });
+
+  it('should hide text under a closed path join, curves and quadratic curves', async () => {
+    expect(
+      await wordsOf(strokeOver([0, 11, 40, 1, 11, 51, 1, 30, 40, 4])),
+    ).toEqual([]);
+    expect(
+      await wordsOf(strokeOver([0, 0, 0, 2, 11, 51, 11, 51, 0, 100])),
+    ).toEqual([]);
+    expect(await wordsOf(strokeOver([0, 0, 0, 3, 11, 51, 0, 100]))).toEqual([]);
+  });
+
+  it('should drop the whole page on an unknown path command', async () => {
+    expect(
+      await wordsOf([
+        ...textAt('A'),
+        [OPS.constructPath, [OPS.stroke, [[9, 0, 0]], [0, 0, 1, 1]]],
+      ]),
+    ).toEqual([]);
+  });
+
+  it('should keep text inside a stroked cell border and with tight spacing', async () => {
+    expect(
+      await wordsOf([
+        ...textAt('A'),
+        ...fillRect('#000000', [0, 40, 50, 60], OPS.stroke),
+      ]),
+    ).toEqual(['A']);
+    expect(
+      await wordsOf([[OPS.setCharSpacing, [-0.3]], ...textAt('AB')]),
+    ).toEqual(['AB']);
+  });
+
+  it('should hide text under a copy of itself in another colour', async () => {
+    expect(
+      await wordsOf([
+        ...textAt('A'),
+        [OPS.setFillRGBColor, ['#ffffff']],
+        ...textAt('A'),
+      ]),
+    ).toEqual([]);
   });
 
   it('should drop the whole page on non-finite geometry', async () => {
