@@ -10,6 +10,15 @@ type Operation = [number, null | unknown[]];
 
 const PAGE_SIZE = 100;
 const PAGE_RECT = [0, 0, PAGE_SIZE, PAGE_SIZE];
+const PAGE_PATH = [0, 0, 0, 1, 100, 0, 1, 100, 100, 1, 0, 100];
+
+const pageClip = (
+  path: number[] = PAGE_PATH,
+  bounds: null | number[] = PAGE_RECT,
+): Operation[] => [
+  [OPS.clip, null],
+  [OPS.constructPath, [OPS.endPath, [path], bounds]],
+];
 
 const glyph = (unicode: string) => ({
   isSpace: unicode === ' ',
@@ -185,12 +194,109 @@ describe('extractVisibleWords', () => {
       operations: [...fillRect('#000000', [0, 40, 50, 60]), ...textAt('A')],
     },
     {
-      description: 'inside a clip',
+      description: 'in light colour, even over a dark fill',
       operations: [
-        [OPS.clip, null],
-        [OPS.constructPath, [OPS.endPath, [], [0, 0, 50, 50]]],
+        ...fillRect('#000000', [0, 40, 50, 60]),
+        [OPS.setFillRGBColor, ['#ffffff']],
         ...textAt('A'),
       ] as Operation[],
+    },
+    {
+      description: 'over a fill painted inside a clip',
+      operations: [
+        [OPS.save, null],
+        ...pageClip(PAGE_PATH, [0, 0, 1, 1]),
+        ...fillRect('#ff0000', [0, 40, 50, 60]),
+        [OPS.restore, null],
+        ...textAt('A'),
+      ] as Operation[],
+    },
+    {
+      description: 'too small to read',
+      operations: [
+        [OPS.beginText, null],
+        [OPS.setFont, ['f1', 1]],
+        [OPS.setTextMatrix, [[1, 0, 0, 1, 10, 50]]],
+        [OPS.showText, [glyphs('A')]],
+      ] as Operation[],
+    },
+    {
+      description: 'squeezed horizontally',
+      operations: [[OPS.setHScale, [10]], ...textAt('A')] as Operation[],
+    },
+    {
+      description: 'under a thick stroke drawn later',
+      operations: [
+        ...textAt('A'),
+        [OPS.setLineWidth, [5]],
+        ...fillRect('#ffffff', [0, 40, 50, 60], OPS.stroke),
+      ] as Operation[],
+    },
+    {
+      description: 'under a thick stroke set through the graphics state',
+      operations: [
+        ...textAt('A'),
+        [OPS.setGState, [[['LW', 5]]]],
+        ...fillRect('#ffffff', [0, 40, 50, 60], OPS.fillStroke),
+      ] as Operation[],
+    },
+    {
+      description: 'inside a page-sized clip made of two paths',
+      operations: [
+        [OPS.clip, null],
+        [OPS.constructPath, [OPS.endPath, [PAGE_PATH, PAGE_PATH], PAGE_RECT]],
+        ...textAt('A'),
+      ] as Operation[],
+    },
+    {
+      description: 'inside a page-sized clip that is not a rectangle',
+      operations: [
+        ...pageClip([0, 50, 0, 1, 100, 50, 1, 50, 100, 1, 0, 50]),
+        ...textAt('A'),
+      ],
+    },
+    {
+      description: 'inside a page-sized clip that does not start with a move',
+      operations: [
+        ...pageClip([1, 0, 0, 1, 100, 0, 1, 100, 100, 1, 0, 100]),
+        ...textAt('A'),
+      ],
+    },
+    {
+      description: 'inside a page-sized clip with a trailing curve',
+      operations: [...pageClip([...PAGE_PATH, 2]), ...textAt('A')],
+    },
+    {
+      description: 'inside a page-sized clip with no bounds',
+      operations: [...pageClip(PAGE_PATH, null), ...textAt('A')],
+    },
+    {
+      description: 'inside a rotated page-sized clip',
+      operations: [
+        [OPS.transform, [0.7, 0.7, -0.7, 0.7, 50, 0]],
+        ...pageClip(),
+        [OPS.transform, [0.7, -0.7, 0.7, 0.7, -35, 35]],
+        ...textAt('A'),
+      ] as Operation[],
+    },
+    {
+      description: 'after an unbalanced restore inside a clipped form',
+      operations: [
+        [
+          OPS.paintFormXObjectBegin,
+          [
+            [1, 0, 0, 1, 0, 0],
+            [0, 0, 1, 1],
+          ],
+        ],
+        [OPS.restore, null],
+        ...textAt('A'),
+        [OPS.paintFormXObjectEnd, null],
+      ] as Operation[],
+    },
+    {
+      description: 'inside a clip',
+      operations: [...pageClip(PAGE_PATH, [0, 0, 50, 50]), ...textAt('A')],
     },
     {
       description: 'inside a clip with no bounds',
@@ -223,11 +329,10 @@ describe('extractVisibleWords', () => {
       description: 'after a clip covering the page is restored',
       operations: [
         [OPS.save, null],
-        [OPS.clip, null],
-        [OPS.constructPath, [OPS.endPath, [], [0, 0, 10, 10]]],
+        ...pageClip(PAGE_PATH, [0, 0, 10, 10]),
         [OPS.restore, null],
-        [OPS.clip, null],
-        [OPS.constructPath, [OPS.endPath, [], PAGE_RECT]],
+        ...pageClip(),
+        ...pageClip([...PAGE_PATH, 4]),
         ...textAt('A'),
       ] as Operation[],
     },
@@ -235,7 +340,7 @@ describe('extractVisibleWords', () => {
       description: 'inside a form covering the page or without bounds',
       operations: [
         [OPS.paintFormXObjectBegin, [[1, 0, 0, 1, 0, 0], PAGE_RECT]],
-        [OPS.paintFormXObjectBegin, [[1, 0, 0, 1, 0, 0], null]],
+        [OPS.paintFormXObjectBegin, [null, null]],
         ...textAt('A'),
         [OPS.paintFormXObjectEnd, null],
         [OPS.paintFormXObjectEnd, null],
@@ -243,15 +348,23 @@ describe('extractVisibleWords', () => {
       ] as Operation[],
     },
     {
-      description: 'in light colour over a dark fill',
+      description: 'inside a page-sized clip under a quarter turn',
       operations: [
-        ...fillRect('#000000', [0, 40, 50, 60]),
-        [OPS.setFillRGBColor, ['#ffffff']],
+        [OPS.transform, [0, 1, -1, 0, 100, 0]],
+        ...pageClip(),
+        [OPS.transform, [0, -1, 1, 0, 0, 100]],
         ...textAt('A'),
       ] as Operation[],
     },
     {
-      description: 'under a stroked path or a path without bounds',
+      description: 'inside non-optional marked content',
+      operations: [
+        [OPS.beginMarkedContentProps, ['Span', {}]],
+        ...textAt('A'),
+      ] as Operation[],
+    },
+    {
+      description: 'under a thin stroke, a path without bounds',
       operations: [
         ...textAt('A'),
         ...fillRect('#ffffff', [0, 40, 50, 60], OPS.stroke),
@@ -281,7 +394,53 @@ describe('extractVisibleWords', () => {
     expect(await wordsOf(operations)).toEqual(['A']);
   });
 
+  it('should not splice a concealed glyph into a visible word', async () => {
+    expect(
+      await wordsOf([
+        [OPS.beginText, null],
+        [OPS.setFont, ['f1', 4]],
+        [OPS.setTextMatrix, [[1, 0, 0, 1, 10, 50]]],
+        [OPS.showText, [glyphs('A')]],
+        [OPS.setFillRGBColor, ['#ffffff']],
+        [OPS.showText, [glyphs('X')]],
+        [OPS.setFillRGBColor, ['#000000']],
+        [OPS.showText, [glyphs('C')]],
+      ]),
+    ).toEqual(['A', 'C']);
+  });
+
+  it('should hide a glyph under a later glyph of another colour only', async () => {
+    expect(
+      await wordsOf([
+        ...textAt('A'),
+        ...textAt('B'),
+        [OPS.setFillRGBColor, ['#ff0000']],
+        ...textAt('C'),
+      ] as Operation[]),
+    ).toEqual(['C']);
+    const sameColour = await wordsOf([...textAt('A'), ...textAt('B')]);
+
+    expect(sameColour.join('')).toBe('AB');
+  });
+
+  it('should drop the whole page on non-finite geometry', async () => {
+    expect(
+      await wordsOf([
+        [OPS.transform, [Number.NaN, 0, 0, 1, 0, 0]],
+        ...textAt('A'),
+      ]),
+    ).toEqual([]);
+  });
+
   it.each([
+    {
+      description: 'an unknown operator',
+      operation: [9999, null],
+    },
+    {
+      description: 'optional content',
+      operation: [OPS.beginMarkedContentProps, ['OC', {}]],
+    },
     {
       description: 'a soft mask',
       operation: [OPS.setGState, [[['SMask', {}]]]],

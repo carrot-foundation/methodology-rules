@@ -5,8 +5,12 @@ import type { BaseExtractedData } from './document-extractor.types';
 import {
   createHighConfidenceField,
   createLowConfidenceField,
+  lowConfidenceReviewReason,
 } from './confidence.helpers';
-import { mergeTextLayerFields } from './text-layer-merge.helpers';
+import {
+  applyTextLayerMerge,
+  mergeTextLayerFields,
+} from './text-layer-merge.helpers';
 
 type StubData = BaseExtractedData & Record<string, unknown>;
 
@@ -127,6 +131,11 @@ describe('mergeTextLayerFields', () => {
       }),
     },
     {
+      description: 'the only anchors hold no letters or digits',
+      primary: stubData({ documentNumber: createHighConfidenceField('-') }),
+      textLayer: stubData({ documentNumber: createHighConfidenceField('.') }),
+    },
+    {
       description: 'the text layer lacks the anchor OCR read',
       primary: stubData({ generator: entity('12.345.678/0001-90') }),
       textLayer: stubData({ generator: entity('') }),
@@ -139,4 +148,47 @@ describe('mergeTextLayerFields', () => {
       });
     },
   );
+});
+
+describe('applyTextLayerMerge', () => {
+  const otherReason = { code: 'LOW_LAYOUT_MATCH_SCORE', description: 'other' };
+  const output = {
+    data: stubData({}, ['driverName', 'issueDate']),
+    reviewReasons: [
+      lowConfidenceReviewReason('driverName'),
+      otherReason,
+      lowConfidenceReviewReason('issueDate'),
+    ],
+    reviewRequired: true,
+  };
+
+  it('should keep other reasons, drop cleared ones and add new ones', () => {
+    const data = stubData({}, ['issueDate', 'hauler.taxId']);
+
+    expect(applyTextLayerMerge(output, { data, outcome: 'filled' })).toEqual({
+      data,
+      reviewReasons: [
+        otherReason,
+        lowConfidenceReviewReason('issueDate'),
+        lowConfidenceReviewReason('hauler.taxId'),
+      ],
+      reviewRequired: true,
+    });
+  });
+
+  it('should clear review when every reason is resolved', () => {
+    const resolved = {
+      ...output,
+      reviewReasons: [lowConfidenceReviewReason('driverName')],
+    };
+    const data = stubData({});
+
+    expect(
+      applyTextLayerMerge(resolved, { data, outcome: 'filled' }),
+    ).toMatchObject({ data, reviewReasons: [], reviewRequired: false });
+  });
+
+  it('should return the output unchanged when unverified', () => {
+    expect(applyTextLayerMerge(output, { outcome: 'unverified' })).toBe(output);
+  });
 });

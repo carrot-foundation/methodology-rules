@@ -5,7 +5,7 @@ import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { Readable } from 'node:stream';
-import { PDFDocument } from 'pdf-lib';
+import { PDFDocument, StandardFonts } from 'pdf-lib';
 
 import { PdfTextLayerExtractor } from './pdf-text-layer.extractor';
 import { stubImageOnlyPdf, stubPdfWithLines } from './pdf-text-layer.stubs';
@@ -111,7 +111,7 @@ describe('PdfTextLayerExtractor', () => {
       extractor.extractText({
         filePath: await writePdf(await stubImageOnlyPdf()),
       }),
-    ).rejects.toThrow();
+    ).rejects.toHaveProperty('name', 'ZodError');
   });
 
   it('should reject a file that is not a PDF', async () => {
@@ -119,7 +119,27 @@ describe('PdfTextLayerExtractor', () => {
       extractor.extractText({
         filePath: await writePdf(new Uint8Array([1, 2, 3])),
       }),
-    ).rejects.toThrow();
+    ).rejects.toHaveProperty('name', 'InvalidPDFException');
+  });
+
+  it('should drop only the page that uses unmodelled content', async () => {
+    const document = await PDFDocument.load(
+      await stubPdfWithLines([{ text: 'Kept page' }]),
+    );
+    const font = await document.embedFont(StandardFonts.Helvetica);
+
+    document
+      .addPage()
+      .drawText('Translucent page', { font, opacity: 0.5, x: 40, y: 700 });
+
+    const result = await extractor.extractText({
+      filePath: await writePdf(await document.save()),
+    });
+
+    expect(result.rawText).toBe('Kept page');
+    expect(
+      result.blocks.filter((block) => block.blockType === 'PAGE'),
+    ).toHaveLength(2);
   });
 
   it('should reject an input without a file or S3 location', async () => {

@@ -1,5 +1,6 @@
 import type { PDFPageProxy } from 'unpdf/pdfjs';
 
+import { logger } from '@carrot-fndn/shared/helpers';
 import { getResolvedPDFJS } from 'unpdf';
 
 export interface VisibleWord {
@@ -14,6 +15,7 @@ type Bounds = [number, number, number, number];
 
 interface Cover {
   color: string | undefined;
+  kind: 'fill' | 'glyph' | 'image' | 'stroke';
   rect: Rect;
 }
 
@@ -58,6 +60,7 @@ interface State {
   fontSize: number;
   hScale: number;
   leading: number;
+  lineWidth: number;
   renderMode: number;
   rise: number;
   wordSpacing: number;
@@ -74,13 +77,18 @@ const MIN_CONTRAST_RATIO = 2;
 const WHITE = '#ffffff';
 const FILL_RENDER_MODES = new Set([0, 2]);
 const INVISIBLE_RENDER_MODE = 3;
+const MIN_FONT_SIZE_POINTS = 4;
+const MIN_COVERING_STROKE_POINTS = 2;
+const AXIS_EPSILON = 1e-6;
+const PATH_MOVE_TO = 0;
+const PATH_LINE_TO = 1;
+const PATH_CLOSE = 4;
 
 const NO_VISUAL_EFFECT_GSTATE_KEYS = new Set([
   'D',
   'FL',
   'LC',
   'LJ',
-  'LW',
   'ML',
   'OP',
   'op',
@@ -89,9 +97,9 @@ const NO_VISUAL_EFFECT_GSTATE_KEYS = new Set([
   'SA',
 ]);
 
-const assertModelled = (isModelled: boolean): void => {
+const assertModelled = (isModelled: boolean, reason: string): void => {
   if (!isModelled) {
-    throw new UnmodelledContentError();
+    throw new UnmodelledContentError(reason);
   }
 };
 
@@ -110,6 +118,7 @@ const translate = (x: number, y: number): Matrix => [1, 0, 0, 1, x, y];
 
 const isGStateEntryModelled = ([key, value]: GStateEntry): boolean =>
   NO_VISUAL_EFFECT_GSTATE_KEYS.has(key) ||
+  key === 'LW' ||
   (key === 'SMask' && value === false) ||
   ((key === 'ca' || key === 'CA') && value === 1) ||
   (key === 'BM' && (value === 'source-over' || value === 'Normal'));
@@ -141,6 +150,35 @@ const contains = (rect: Rect, x: number, y: number): boolean =>
 const coversPage = (rect: Rect): boolean =>
   rect.left <= 0 && rect.top <= 0 && rect.right >= 1 && rect.bottom >= 1;
 
+const isAxisAligned = (matrix: Matrix): boolean =>
+  (Math.abs(matrix[1]) < AXIS_EPSILON && Math.abs(matrix[2]) < AXIS_EPSILON) ||
+  (Math.abs(matrix[0]) < AXIS_EPSILON && Math.abs(matrix[3]) < AXIS_EPSILON);
+
+const isSingleRectangle = (path: ArrayLike<number> | undefined): boolean => {
+  if (
+    path?.length !== 12 &&
+    !(path?.length === 13 && path[12] === PATH_CLOSE)
+  ) {
+    return false;
+  }
+
+  const points = [0, 3, 6, 9].map((offset) => [
+    path[offset + 1]!,
+    path[offset + 2]!,
+  ]);
+
+  return (
+    path[0] === PATH_MOVE_TO &&
+    // eslint-disable-next-line security/detect-object-injection
+    [3, 6, 9].every((offset) => path[offset] === PATH_LINE_TO) &&
+    points.every(([x, y], index) => {
+      const [nextX, nextY] = points[(index + 1) % points.length]!;
+
+      return x === nextX || y === nextY;
+    })
+  );
+};
+
 const isInsidePage = (rect: Rect): boolean =>
   rect.left >= 0 && rect.top >= 0 && rect.right <= 1 && rect.bottom <= 1;
 
@@ -149,24 +187,34 @@ const isGlyphVisible = (glyph: Glyph, covers: readonly Cover[]): boolean => {
     return false;
   }
 
-  if (
-    covers
-      .slice(glyph.coversBefore)
-      .some((cover) => overlaps(cover.rect, glyph.rect))
-  ) {
-    return false;
-  }
-
+  const isCoveredLater = covers
+    .slice(glyph.coversBefore)
+    .some(
+      (cover) =>
+        overlaps(cover.rect, glyph.rect) &&
+        !(cover.kind === 'glyph' && cover.color === glyph.color),
+    );
   const centerX = (glyph.rect.left + glyph.rect.right) / 2;
   const centerY = (glyph.rect.top + glyph.rect.bottom) / 2;
-  const background = covers
-    .slice(0, glyph.coversBefore)
-    .findLast((cover) => contains(cover.rect, centerX, centerY));
-  const backgroundColor = background ? background.color : WHITE;
+  const backgroundColors = [
+    WHITE,
+    ...covers
+      .slice(0, glyph.coversBefore)
+      .filter(
+        (cover) =>
+          (cover.kind === 'fill' || cover.kind === 'image') &&
+          contains(cover.rect, centerX, centerY),
+      )
+      .map((cover) => cover.color),
+  ];
 
   return (
-    backgroundColor !== undefined &&
-    contrastRatio(glyph.color, backgroundColor) >= MIN_CONTRAST_RATIO
+    !isCoveredLater &&
+    backgroundColors.every(
+      (color) =>
+        color !== undefined &&
+        contrastRatio(glyph.color, color) >= MIN_CONTRAST_RATIO,
+    )
   );
 };
 
@@ -242,6 +290,15 @@ const walkOperatorList = async (
     OPS.fillStroke,
   ]);
 
+  const STROKE_PATH_OPS = new Set<number>([
+    OPS.closeEOFillStroke,
+    OPS.closeFillStroke,
+    OPS.closeStroke,
+    OPS.eoFillStroke,
+    OPS.fillStroke,
+    OPS.stroke,
+  ]);
+
   const IMAGE_OPS = new Set<number>([
     OPS.paintImageMaskXObject,
     OPS.paintImageXObject,
@@ -252,7 +309,6 @@ const walkOperatorList = async (
   const NO_VISUAL_EFFECT_OPS = new Set<number>([
     OPS.beginCompat,
     OPS.beginMarkedContent,
-    OPS.beginMarkedContentProps,
     OPS.dependency,
     OPS.endCompat,
     OPS.endMarkedContent,
@@ -263,7 +319,6 @@ const walkOperatorList = async (
     OPS.setFlatness,
     OPS.setLineCap,
     OPS.setLineJoin,
-    OPS.setLineWidth,
     OPS.setMiterLimit,
     OPS.setRenderingIntent,
     OPS.setStrokeRGBColor,
@@ -284,17 +339,25 @@ const walkOperatorList = async (
       return [viewX / viewport.width, viewY / viewport.height] as const;
     });
 
-    return {
+    const rect = {
       bottom: Math.max(...points.map(([, y]) => y)),
       left: Math.min(...points.map(([x]) => x)),
       right: Math.max(...points.map(([x]) => x)),
       top: Math.min(...points.map(([, y]) => y)),
     };
+
+    assertModelled(
+      Object.values(rect).every((value) => Number.isFinite(value)),
+      'non-finite geometry',
+    );
+
+    return rect;
   };
 
   const covers: Cover[] = [];
   const glyphs: Array<Glyph | undefined> = [];
   const stack: State[] = [];
+  const formFloors: number[] = [];
   let state: State = {
     charSpacing: 0,
     clipped: false,
@@ -304,6 +367,7 @@ const walkOperatorList = async (
     fontSize: 0,
     hScale: 1,
     leading: 0,
+    lineWidth: 1,
     renderMode: 0,
     rise: 0,
     wordSpacing: 0,
@@ -337,22 +401,33 @@ const walkOperatorList = async (
         ),
         state.ctm,
       );
+      const width = Math.hypot(renderingMatrix[0], renderingMatrix[1]);
+      const height = Math.hypot(renderingMatrix[2], renderingMatrix[3]);
+      const isPainted = FILL_RENDER_MODES.has(state.renderMode);
+      const rect = toRect(renderingMatrix, [
+        0,
+        GLYPH_DESCENT,
+        advance,
+        GLYPH_ASCENT,
+      ]);
 
       glyphs.push(
-        FILL_RENDER_MODES.has(state.renderMode) && !state.clipped
+        isPainted &&
+          !state.clipped &&
+          height >= MIN_FONT_SIZE_POINTS &&
+          width >= height / 2
           ? {
               color: state.fillColor,
               coversBefore: covers.length,
-              rect: toRect(renderingMatrix, [
-                0,
-                GLYPH_DESCENT,
-                advance,
-                GLYPH_ASCENT,
-              ]),
+              rect,
               text: item.unicode,
             }
           : undefined,
       );
+
+      if (isPainted) {
+        covers.push({ color: state.fillColor, kind: 'glyph', rect });
+      }
 
       textMatrix = multiply(
         translate(
@@ -371,8 +446,19 @@ const walkOperatorList = async (
     stack.push({ ...state });
   };
   const restore = () => {
-    state = stack.pop() ?? state;
+    if (stack.length > (formFloors.at(-1) ?? 0)) {
+      state = stack.pop()!;
+    }
   };
+  const isPageCoveringRectangle = (
+    matrix: Matrix,
+    bounds: Bounds | null,
+    path: ArrayLike<number> | undefined,
+  ): boolean =>
+    bounds !== null &&
+    isAxisAligned(matrix) &&
+    isSingleRectangle(path) &&
+    coversPage(toRect(matrix, bounds));
   const nextLine = () => {
     moveText(0, -state.leading);
   };
@@ -383,12 +469,22 @@ const walkOperatorList = async (
     showText(items as Array<number | PdfGlyph>);
   };
   const paintImage = () => {
-    covers.push({ color: undefined, rect: toRect(state.ctm, UNIT_SQUARE) });
+    covers.push({
+      color: undefined,
+      kind: 'image',
+      rect: toRect(state.ctm, UNIT_SQUARE),
+    });
   };
 
   const handlers = new Map<number, (arguments_: readonly unknown[]) => void>([
     ...[...IMAGE_OPS].map((op) => [op, paintImage] as const),
     ...[...NO_VISUAL_EFFECT_OPS].map((op) => [op, ignore] as const),
+    [
+      OPS.beginMarkedContentProps,
+      (arguments_) => {
+        assertModelled(arguments_[0] !== 'OC', 'optional content');
+      },
+    ],
     [
       OPS.beginText,
       () => {
@@ -400,17 +496,56 @@ const walkOperatorList = async (
     [
       OPS.constructPath,
       (arguments_) => {
+        const paintOperator = arguments_[0] as number;
+        const paths = arguments_[1] as Array<ArrayLike<number>> | undefined;
         const bounds = arguments_[2] as Bounds | null;
-        const rect = bounds ? toRect(state.ctm, bounds) : undefined;
 
-        if (pendingClip && !(rect && coversPage(rect))) {
+        if (
+          pendingClip &&
+          !(
+            paths?.length === 1 &&
+            isPageCoveringRectangle(state.ctm, bounds, paths[0])
+          )
+        ) {
           state.clipped = true;
         }
 
         pendingClip = false;
 
-        if (rect && FILL_PATH_OPS.has(arguments_[0] as number)) {
-          covers.push({ color: state.fillColor, rect });
+        if (!bounds) {
+          return;
+        }
+
+        if (FILL_PATH_OPS.has(paintOperator)) {
+          covers.push({
+            color: state.clipped ? undefined : state.fillColor,
+            kind: 'fill',
+            rect: toRect(state.ctm, bounds),
+          });
+        }
+
+        const strokeWidth =
+          state.lineWidth *
+          Math.sqrt(
+            Math.abs(state.ctm[0] * state.ctm[3] - state.ctm[1] * state.ctm[2]),
+          );
+
+        if (
+          STROKE_PATH_OPS.has(paintOperator) &&
+          strokeWidth >= MIN_COVERING_STROKE_POINTS
+        ) {
+          const half = state.lineWidth / 2;
+
+          covers.push({
+            color: undefined,
+            kind: 'stroke',
+            rect: toRect(state.ctm, [
+              bounds[0] - half,
+              bounds[1] - half,
+              bounds[2] + half,
+              bounds[3] + half,
+            ]),
+          });
         }
       },
     ],
@@ -443,14 +578,39 @@ const walkOperatorList = async (
         const bounds = arguments_[1] as Bounds | null;
 
         save();
-        state.ctm = multiply(arguments_[0] as Matrix, state.ctm);
+        formFloors.push(stack.length);
+        state.ctm = multiply(
+          (arguments_[0] as Matrix | null) ?? IDENTITY,
+          state.ctm,
+        );
 
-        if (bounds && !coversPage(toRect(state.ctm, bounds))) {
-          state.clipped = true;
+        if (bounds) {
+          const [x0, y0, x1, y1] = bounds;
+
+          state.clipped ||= !isPageCoveringRectangle(state.ctm, bounds, [
+            PATH_MOVE_TO,
+            x0,
+            y0,
+            PATH_LINE_TO,
+            x1,
+            y0,
+            PATH_LINE_TO,
+            x1,
+            y1,
+            PATH_LINE_TO,
+            x0,
+            y1,
+          ]);
         }
       },
     ],
-    [OPS.paintFormXObjectEnd, restore],
+    [
+      OPS.paintFormXObjectEnd,
+      () => {
+        stack.length = formFloors.pop() ?? stack.length;
+        restore();
+      },
+    ],
     [OPS.restore, restore],
     [OPS.save, save],
     [
@@ -470,7 +630,10 @@ const walkOperatorList = async (
       (arguments_) => {
         const font = page.commonObjs.get(arguments_[0] as string) as PdfFont;
 
-        assertModelled(!font.isType3Font && !font.vertical);
+        assertModelled(
+          !font.isType3Font && !font.vertical,
+          'Type3 or vertical font',
+        );
         state.font = font;
         state.fontSize = arguments_[1] as number;
       },
@@ -478,11 +641,18 @@ const walkOperatorList = async (
     [
       OPS.setGState,
       (arguments_) => {
+        const entries = arguments_[0] as GStateEntry[];
+
         assertModelled(
-          (arguments_[0] as GStateEntry[]).every((entry) =>
-            isGStateEntryModelled(entry),
-          ),
+          entries.every((entry) => isGStateEntryModelled(entry)),
+          'graphics state',
         );
+
+        for (const [key, value] of entries) {
+          if (key === 'LW') {
+            state.lineWidth = value as number;
+          }
+        }
       },
     ],
     [
@@ -505,6 +675,12 @@ const walkOperatorList = async (
       },
     ],
     [
+      OPS.setLineWidth,
+      (arguments_) => {
+        state.lineWidth = arguments_[0] as number;
+      },
+    ],
+    [
       OPS.setTextMatrix,
       (arguments_) => {
         textMatrix = arguments_[0] as Matrix;
@@ -518,6 +694,7 @@ const walkOperatorList = async (
 
         assertModelled(
           FILL_RENDER_MODES.has(mode) || mode === INVISIBLE_RENDER_MODE,
+          'text render mode',
         );
         state.renderMode = mode;
       },
@@ -547,9 +724,12 @@ const walkOperatorList = async (
   for (const [index, operator] of fnArray.entries()) {
     const handler = handlers.get(operator);
 
-    assertModelled(handler !== undefined);
+    if (!handler) {
+      throw new UnmodelledContentError(`operator ${String(operator)}`);
+    }
+
     // eslint-disable-next-line security/detect-object-injection
-    handler!((argsArray[index] as null | unknown[]) ?? []);
+    handler((argsArray[index] as null | unknown[]) ?? []);
   }
 
   return joinGlyphsIntoWords(
@@ -568,6 +748,11 @@ export const extractVisibleWords = async (
     return await walkOperatorList(page, OPS);
   } catch (error) {
     if (error instanceof UnmodelledContentError) {
+      logger.debug(
+        { pageNumber: page.pageNumber, reason: error.message },
+        'PDF page uses unmodelled content; its text layer is not used',
+      );
+
       return [];
     }
 

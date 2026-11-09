@@ -1,13 +1,19 @@
 import type {
   BaseExtractedData,
   ExtractedField,
+  ExtractionOutput,
 } from './document-extractor.types';
 
 import {
   collectLowConfidenceFields,
   isExtractedEntityGroup,
   isExtractedField,
+  lowConfidenceReviewReason,
 } from './confidence.helpers';
+import {
+  DOCUMENT_EXTRACTION_COMMENTS,
+  type DocumentExtractionCommentKey,
+} from './document-extraction.constants';
 
 export type TextLayerMergeResult<T extends BaseExtractedData> =
   | { data: T; outcome: 'filled' }
@@ -87,11 +93,17 @@ export const mergeTextLayerFields = <T extends BaseExtractedData>(
   )) {
     const other = textLayerAnchors.get(path);
 
-    if (!isReadWithHighConfidence(field) || !isReadWithHighConfidence(other)) {
+    const anchor = normalizeAnchor(field.parsed);
+
+    if (
+      !isReadWithHighConfidence(field) ||
+      !isReadWithHighConfidence(other) ||
+      anchor.length === 0
+    ) {
       continue;
     }
 
-    if (normalizeAnchor(field.parsed) !== normalizeAnchor(other.parsed)) {
+    if (anchor !== normalizeAnchor(other.parsed)) {
       return { mismatchedField: path, outcome: 'disagreement' };
     }
 
@@ -121,5 +133,51 @@ export const mergeTextLayerFields = <T extends BaseExtractedData>(
       ],
     } as unknown as T,
     outcome: 'filled',
+  };
+};
+
+export const applyTextLayerMerge = <T extends BaseExtractedData>(
+  output: ExtractionOutput<T>,
+  merge: TextLayerMergeResult<T>,
+): ExtractionOutput<T> => {
+  if (merge.outcome === 'unverified') {
+    return output;
+  }
+
+  if (merge.outcome === 'disagreement') {
+    return {
+      ...output,
+      reviewReasons: [
+        ...output.reviewReasons,
+        {
+          code: 'TEXT_LAYER_MISMATCH' satisfies DocumentExtractionCommentKey,
+          description: DOCUMENT_EXTRACTION_COMMENTS.TEXT_LAYER_MISMATCH(
+            merge.mismatchedField,
+          ),
+        },
+      ],
+      reviewRequired: true,
+    };
+  }
+
+  const before = output.data.lowConfidenceFields;
+  const after = merge.data.lowConfidenceFields;
+  const clearedCodes = new Set(
+    before
+      .filter((field) => !after.includes(field))
+      .map((field) => lowConfidenceReviewReason(field).code),
+  );
+  const reviewReasons = [
+    ...output.reviewReasons.filter(({ code }) => !clearedCodes.has(code)),
+    ...after
+      .filter((field) => !before.includes(field))
+      .map((field) => lowConfidenceReviewReason(field)),
+  ];
+
+  return {
+    ...output,
+    data: merge.data,
+    reviewReasons,
+    reviewRequired: reviewReasons.length > 0,
   };
 };

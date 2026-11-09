@@ -5,7 +5,8 @@ import type {
   DocumentManifestEventSubject,
 } from './document-manifest-data.helpers';
 
-const { mockExtract } = vi.hoisted(() => ({
+const { createDocumentExtractorArguments, mockExtract } = vi.hoisted(() => ({
+  createDocumentExtractorArguments: [] as unknown[][],
   mockExtract: vi.fn(),
 }));
 
@@ -13,13 +14,20 @@ vi.mock('@carrot-fndn/shared/document-extractor', async (importOriginal) => ({
   ...(await importOriginal<
     typeof import('@carrot-fndn/shared/document-extractor')
   >()),
-  createDocumentExtractor: () => ({
-    extract: mockExtract,
-  }),
+  createDocumentExtractor: (...arguments_: unknown[]) => {
+    createDocumentExtractorArguments.push(arguments_);
+
+    return { extract: mockExtract };
+  },
 }));
 
 // eslint-disable-next-line import/first -- Must import after mock is set up
 import { NoMatchingLayoutError } from '@carrot-fndn/shared/document-extractor';
+// eslint-disable-next-line import/first -- Must import after mock is set up
+import {
+  pdfTextLayerExtractor,
+  textExtractor,
+} from '@carrot-fndn/shared/text-extractor';
 
 // eslint-disable-next-line import/first -- Must import after mock is set up
 import { crossValidateWithTextract } from './document-manifest-data.extractor';
@@ -45,6 +53,12 @@ const noRelatedEvents: {
 };
 
 describe('crossValidateWithTextract', () => {
+  it('should opt in to the PDF text-layer fallback', () => {
+    expect(createDocumentExtractorArguments).toEqual([
+      [textExtractor, pdfTextLayerExtractor],
+    ]);
+  });
+
   it('should return empty result when attachmentInfos is empty', async () => {
     const result = await crossValidateWithTextract({
       attachmentInfos: [],

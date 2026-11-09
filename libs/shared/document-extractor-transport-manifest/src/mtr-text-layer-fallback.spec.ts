@@ -27,16 +27,16 @@ const RECEIVER_TAX_ID = '11.222.333/0001-44';
 
 const mtrLines = ({
   generatorTaxId,
-  haulerTaxId = HAULER_TAX_ID,
+  haulerTaxId = { text: `CNPJ: ${HAULER_TAX_ID}` },
   receiverTaxId = { text: `CNPJ: ${RECEIVER_TAX_ID}` },
 }: {
   generatorTaxId: StubPdfLine;
-  haulerTaxId?: string;
+  haulerTaxId?: StubPdfLine;
   receiverTaxId?: StubPdfLine;
 }): StubPdfLine[] => [
   { text: 'Manifesto de Transporte de Residuos' },
   { text: 'Fundacao Estadual de Protecao Ambiental' },
-  { text: 'MTR no 0124048986' },
+  { text: 'MTR nº 0124048986' },
   { text: 'Data de Emissao: 15/03/2024' },
   { text: 'Gerador' },
   { text: 'EMPRESA GERADORA LTDA' },
@@ -46,7 +46,7 @@ const mtrLines = ({
   { text: 'UF: RS' },
   { text: 'Transportador' },
   { text: 'TRANSPORTES AMBIENTAIS S.A.' },
-  { text: `CNPJ: ${haulerTaxId}` },
+  haulerTaxId,
   { text: 'Endereco: Av. Brasil, 500' },
   { text: 'Municipio: Porto Alegre' },
   { text: 'UF: RS' },
@@ -114,29 +114,33 @@ describe('MTR PDF text-layer fallback', () => {
     );
   });
 
-  it.each(['white', 'off-page', 'invisible-mode', 'covered'] as const)(
-    'should not fill a tax id drawn %s',
-    async (concealment) => {
-      const result = await extract(
-        await stubPdfWithLines(
-          mtrLines({
-            generatorTaxId: { concealment, text: `CNPJ: ${GENERATOR_TAX_ID}` },
-          }),
-        ),
-      );
+  it.each([
+    'white',
+    'off-page',
+    'invisible-mode',
+    'covered',
+    'clipped',
+    'under-image',
+  ] as const)('should not fill a tax id drawn %s', async (concealment) => {
+    const result = await extract(
+      await stubPdfWithLines(
+        mtrLines({
+          generatorTaxId: { concealment, text: `CNPJ: ${GENERATOR_TAX_ID}` },
+        }),
+      ),
+    );
 
-      expect(result.data.generator?.taxId.parsed).toBe('');
-      expect(result.data.lowConfidenceFields).toContain('generator.taxId');
-      expect(result.data.receiver?.taxId.parsed).toBe(RECEIVER_TAX_ID);
-    },
-  );
+    expect(result.data.generator?.taxId.parsed).toBe('');
+    expect(result.data.lowConfidenceFields).toContain('generator.taxId');
+    expect(result.data.receiver?.taxId.parsed).toBe(RECEIVER_TAX_ID);
+  });
 
   it('should fill nothing and flag review when a high-confidence OCR field disagrees', async () => {
     const result = await extract(
       await stubPdfWithLines(
         mtrLines({
           generatorTaxId: { text: `CNPJ: ${GENERATOR_TAX_ID}` },
-          haulerTaxId: OTHER_HAULER_TAX_ID,
+          haulerTaxId: { text: `CNPJ: ${OTHER_HAULER_TAX_ID}` },
         }),
       ),
     );
@@ -147,6 +151,25 @@ describe('MTR PDF text-layer fallback', () => {
       code: 'TEXT_LAYER_MISMATCH',
       description: expect.stringContaining('hauler.taxId') as string,
     });
+  });
+
+  it('should ignore a disagreeing value that is not visible', async () => {
+    const result = await extract(
+      await stubPdfWithLines(
+        mtrLines({
+          generatorTaxId: { text: `CNPJ: ${GENERATOR_TAX_ID}` },
+          haulerTaxId: {
+            concealment: 'white',
+            text: `CNPJ: ${OTHER_HAULER_TAX_ID}`,
+          },
+        }),
+      ),
+    );
+
+    expect(result.data.generator?.taxId.parsed).toBe(GENERATOR_TAX_ID);
+    expect(result.reviewReasons.map(({ code }) => code)).not.toContain(
+      'TEXT_LAYER_MISMATCH',
+    );
   });
 
   it('should return the OCR-only output for an image-only PDF', async () => {

@@ -1,10 +1,13 @@
 import {
   beginText,
+  clip,
+  endPath,
   endText,
   moveText,
   PDFDocument,
   popGraphicsState,
   pushGraphicsState,
+  rectangle,
   rgb,
   setFontAndSize,
   setTextRenderingMode,
@@ -19,9 +22,11 @@ export interface StubPdfLine {
 }
 
 export type StubPdfLineConcealment =
+  | 'clipped'
   | 'covered'
   | 'invisible-mode'
   | 'off-page'
+  | 'under-image'
   | 'white';
 
 const PAGE_SIZE: [number, number] = [600, 800];
@@ -42,10 +47,23 @@ export const stubPdfWithLines = async (
   const document = await PDFDocument.create();
   const page = document.addPage(PAGE_SIZE);
   const font = await document.embedFont(StandardFonts.Helvetica);
+  const image = await document.embedPng(ONE_PIXEL_PNG);
 
   for (const [index, { concealment, text }] of lines.entries()) {
     const y = PAGE_SIZE[1] - MARGIN - index * LINE_HEIGHT;
     const x = concealment === 'off-page' ? PAGE_SIZE[0] + MARGIN : MARGIN;
+
+    if (concealment === 'clipped') {
+      page.pushOperators(
+        pushGraphicsState(),
+        rectangle(0, 0, 1, 1),
+        clip(),
+        endPath(),
+      );
+      page.drawText(text, { font, size: FONT_SIZE, x, y });
+      page.pushOperators(popGraphicsState());
+      continue;
+    }
 
     if (concealment === 'invisible-mode') {
       const fontKey = page.node.newFontDictionary(font.name, font.ref);
@@ -70,6 +88,15 @@ export const stubPdfWithLines = async (
       x,
       y,
     });
+
+    if (concealment === 'under-image') {
+      page.drawImage(image, {
+        height: LINE_HEIGHT,
+        width: PAGE_SIZE[0] - 2 * MARGIN,
+        x,
+        y: y - FONT_SIZE / 2,
+      });
+    }
 
     if (concealment === 'covered') {
       page.drawRectangle({

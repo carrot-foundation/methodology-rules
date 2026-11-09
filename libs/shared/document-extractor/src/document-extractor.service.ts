@@ -8,29 +8,24 @@ import { logger } from '@carrot-fndn/shared/helpers';
 
 import type {
   BaseExtractedData,
-  BoldDocumentType,
   DocumentExtractorConfig,
   DocumentParser,
   ExtractionOutput,
 } from './document-extractor.types';
 
-import { buildExtractionOutput } from './confidence.helpers';
-import {
-  DOCUMENT_EXTRACTION_COMMENTS,
-  type DocumentExtractionCommentKey,
-} from './document-extraction.constants';
 import {
   getParser,
   getRegisteredLayouts,
   selectBestParser,
   selectBestParserGlobal,
 } from './layout-registry.helpers';
-import { mergeTextLayerFields } from './text-layer-merge.helpers';
+import {
+  applyTextLayerMerge,
+  mergeTextLayerFields,
+} from './text-layer-merge.helpers';
 import { stripAccents } from './text-parsing.helpers';
 
-const TEXT_LAYER_DOCUMENT_TYPES = new Set<BoldDocumentType>([
-  'transportManifest',
-]);
+const EXPECTED_TEXT_LAYER_ERRORS = new Set(['InvalidPDFException', 'ZodError']);
 
 const normalizeAccents = (
   result: TextExtractionResult,
@@ -142,52 +137,45 @@ export class DocumentExtractor implements DocumentExtractorService {
 
     if (
       !this.textLayerExtractor ||
-      !TEXT_LAYER_DOCUMENT_TYPES.has(parser.documentType)
+      parser.documentType !== 'transportManifest' ||
+      output.data.lowConfidenceFields.length === 0
     ) {
       return output;
     }
 
-    let textLayerData: T;
-
     try {
-      textLayerData = parser.parse(
+      const textLayerData = parser.parse(
         normalizeAccents(await this.textLayerExtractor.extractText(input)),
       ).data;
+      const merge = mergeTextLayerFields(output.data, textLayerData);
+
+      logger.info(
+        {
+          mismatchedField:
+            merge.outcome === 'disagreement'
+              ? merge.mismatchedField
+              : undefined,
+          outcome: merge.outcome,
+        },
+        'PDF text layer compared with OCR',
+      );
+
+      return applyTextLayerMerge(output, merge);
     } catch (error) {
-      logger.info({ err: error }, 'No usable PDF text layer, using OCR only');
+      if (
+        error instanceof Error &&
+        EXPECTED_TEXT_LAYER_ERRORS.has(error.name)
+      ) {
+        logger.info({ err: error }, 'No usable PDF text layer, using OCR only');
+      } else {
+        logger.warn(
+          { err: error, input },
+          'PDF text layer failed, using OCR only',
+        );
+      }
 
       return output;
     }
-
-    const merge = mergeTextLayerFields(output.data, textLayerData);
-
-    if (merge.outcome === 'unverified') {
-      return output;
-    }
-
-    if (merge.outcome === 'disagreement') {
-      return {
-        ...output,
-        reviewReasons: [
-          ...output.reviewReasons,
-          {
-            code: 'TEXT_LAYER_MISMATCH' satisfies DocumentExtractionCommentKey,
-            description: DOCUMENT_EXTRACTION_COMMENTS.TEXT_LAYER_MISMATCH(
-              merge.mismatchedField,
-            ),
-          },
-        ],
-        reviewRequired: true,
-      };
-    }
-
-    return {
-      ...output,
-      ...buildExtractionOutput(
-        merge.data,
-        parser.getMatchScore(extractionResult),
-      ),
-    };
   }
 }
 
