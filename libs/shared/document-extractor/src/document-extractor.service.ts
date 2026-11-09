@@ -4,19 +4,33 @@ import type {
   TextExtractor,
 } from '@carrot-fndn/shared/text-extractor';
 
+import { logger } from '@carrot-fndn/shared/helpers';
+
 import type {
   BaseExtractedData,
+  BoldDocumentType,
   DocumentExtractorConfig,
+  DocumentParser,
   ExtractionOutput,
 } from './document-extractor.types';
 
+import { buildExtractionOutput } from './confidence.helpers';
+import {
+  DOCUMENT_EXTRACTION_COMMENTS,
+  type DocumentExtractionCommentKey,
+} from './document-extraction.constants';
 import {
   getParser,
   getRegisteredLayouts,
   selectBestParser,
   selectBestParserGlobal,
 } from './layout-registry.helpers';
+import { mergeTextLayerFields } from './text-layer-merge.helpers';
 import { stripAccents } from './text-parsing.helpers';
+
+const TEXT_LAYER_DOCUMENT_TYPES = new Set<BoldDocumentType>([
+  'transportManifest',
+]);
 
 const normalizeAccents = (
   result: TextExtractionResult,
@@ -36,7 +50,10 @@ export interface DocumentExtractorService {
 }
 
 export class DocumentExtractor implements DocumentExtractorService {
-  constructor(private readonly textExtractor: TextExtractor) {}
+  constructor(
+    private readonly textExtractor: TextExtractor,
+    private readonly textLayerExtractor?: TextExtractor,
+  ) {}
 
   async extract<T extends BaseExtractedData>(
     input: TextExtractionInput,
@@ -56,13 +73,7 @@ export class DocumentExtractor implements DocumentExtractorService {
         throw new Error('No matching parser found across any document type');
       }
 
-      const result = bestMatch.parser.parse(extractionResult);
-
-      return {
-        ...result,
-        layoutId: bestMatch.parser.layoutId,
-        textExtractionResult: extractionResult,
-      };
+      return this.parseWithTextLayer(bestMatch.parser, input, extractionResult);
     }
 
     const resolvedLayouts =
@@ -92,13 +103,7 @@ export class DocumentExtractor implements DocumentExtractorService {
         );
       }
 
-      const result = parser.parse(extractionResult);
-
-      return {
-        ...result,
-        layoutId: parser.layoutId,
-        textExtractionResult: extractionResult,
-      };
+      return this.parseWithTextLayer(parser, input, extractionResult);
     }
 
     const bestMatch = selectBestParser<T>(
@@ -121,12 +126,67 @@ export class DocumentExtractor implements DocumentExtractorService {
       throw new NoMatchingLayoutError(documentType, resolvedLayouts);
     }
 
-    const result = bestMatch.parser.parse(extractionResult);
+    return this.parseWithTextLayer(bestMatch.parser, input, extractionResult);
+  }
+
+  private async parseWithTextLayer<T extends BaseExtractedData>(
+    parser: DocumentParser<T>,
+    input: TextExtractionInput,
+    extractionResult: TextExtractionResult,
+  ): Promise<ExtractionOutput<T>> {
+    const output = {
+      ...parser.parse(extractionResult),
+      layoutId: parser.layoutId,
+      textExtractionResult: extractionResult,
+    };
+
+    if (
+      !this.textLayerExtractor ||
+      !TEXT_LAYER_DOCUMENT_TYPES.has(parser.documentType)
+    ) {
+      return output;
+    }
+
+    let textLayerData: T;
+
+    try {
+      textLayerData = parser.parse(
+        normalizeAccents(await this.textLayerExtractor.extractText(input)),
+      ).data;
+    } catch (error) {
+      logger.info({ err: error }, 'No usable PDF text layer, using OCR only');
+
+      return output;
+    }
+
+    const merge = mergeTextLayerFields(output.data, textLayerData);
+
+    if (merge.outcome === 'unverified') {
+      return output;
+    }
+
+    if (merge.outcome === 'disagreement') {
+      return {
+        ...output,
+        reviewReasons: [
+          ...output.reviewReasons,
+          {
+            code: 'TEXT_LAYER_MISMATCH' satisfies DocumentExtractionCommentKey,
+            description: DOCUMENT_EXTRACTION_COMMENTS.TEXT_LAYER_MISMATCH(
+              merge.mismatchedField,
+            ),
+          },
+        ],
+        reviewRequired: true,
+      };
+    }
 
     return {
-      ...result,
-      layoutId: bestMatch.parser.layoutId,
-      textExtractionResult: extractionResult,
+      ...output,
+      ...buildExtractionOutput(
+        merge.data,
+        parser.getMatchScore(extractionResult),
+      ),
     };
   }
 }
@@ -142,4 +202,6 @@ export class NoMatchingLayoutError extends Error {
 
 export const createDocumentExtractor = (
   textExtractor: TextExtractor,
-): DocumentExtractorService => new DocumentExtractor(textExtractor);
+  textLayerExtractor?: TextExtractor,
+): DocumentExtractorService =>
+  new DocumentExtractor(textExtractor, textLayerExtractor);

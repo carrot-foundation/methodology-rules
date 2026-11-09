@@ -89,13 +89,15 @@ export const calculateOverallConfidence = (
   return hasLowConfidence ? 'low' : 'high';
 };
 
-const isExtractedField = (value: unknown): value is ExtractedField<unknown> =>
+export const isExtractedField = (
+  value: unknown,
+): value is ExtractedField<unknown> =>
   typeof value === 'object' &&
   value !== null &&
   'parsed' in value &&
   'confidence' in value;
 
-const isExtractedEntityGroup = (
+export const isExtractedEntityGroup = (
   value: unknown,
 ): value is Record<string, ExtractedField<unknown>> =>
   typeof value === 'object' &&

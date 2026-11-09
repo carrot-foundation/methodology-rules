@@ -10,7 +10,10 @@ import {
 import '@carrot-fndn/shared/document-extractor-recycling-manifest';
 import '@carrot-fndn/shared/document-extractor-transport-manifest';
 import { logger } from '@carrot-fndn/shared/helpers';
-import { textExtractor } from '@carrot-fndn/shared/text-extractor';
+import {
+  pdfTextLayerExtractor,
+  textExtractor,
+} from '@carrot-fndn/shared/text-extractor';
 
 import {
   type AttachmentInfo,
@@ -28,7 +31,10 @@ import {
   validateMtrExtractedData,
 } from './transport-manifest-cross-validation.helpers';
 
-const documentExtractor = createDocumentExtractor(textExtractor);
+const documentExtractor = createDocumentExtractor(
+  textExtractor,
+  pdfTextLayerExtractor,
+);
 
 const isMtrEventData = (
   eventData: DocumentManifestEventSubject,

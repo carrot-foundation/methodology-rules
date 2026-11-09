@@ -1,0 +1,336 @@
+import type { PDFPageProxy } from 'unpdf/pdfjs';
+
+import { getResolvedPDFJS } from 'unpdf';
+
+import { extractVisibleWords } from './pdf-visible-text.helpers';
+
+const { OPS } = await getResolvedPDFJS();
+
+type Operation = [number, null | unknown[]];
+
+const PAGE_SIZE = 100;
+const PAGE_RECT = [0, 0, PAGE_SIZE, PAGE_SIZE];
+
+const glyph = (unicode: string) => ({
+  isSpace: unicode === ' ',
+  unicode,
+  width: 500,
+});
+
+const glyphs = (text: string) => [...text].map((character) => glyph(character));
+
+const fakePage = (
+  operations: readonly Operation[],
+  fonts: Record<string, object> = {},
+): PDFPageProxy =>
+  ({
+    commonObjs: {
+      get: (id: string) => fonts[id] ?? { isType3Font: false, vertical: false },
+    },
+    getOperatorList: () =>
+      Promise.resolve({
+        argsArray: operations.map(([, arguments_]) => arguments_),
+        fnArray: operations.map(([function_]) => function_),
+      }),
+    getViewport: () => ({
+      convertToViewportPoint: (x: number, y: number) => [x, PAGE_SIZE - y],
+      height: PAGE_SIZE,
+      width: PAGE_SIZE,
+    }),
+  }) as unknown as PDFPageProxy;
+
+const textAt = (text: string, x = 10, y = 50): Operation[] => [
+  [OPS.beginText, null],
+  [OPS.setFont, ['f1', 4]],
+  [OPS.setTextMatrix, [[1, 0, 0, 1, x, y]]],
+  [OPS.showText, [glyphs(text)]],
+  [OPS.endText, null],
+];
+
+const fillRect = (
+  color: string,
+  [x0, y0, x1, y1]: number[],
+  paintOp: number = OPS.fill,
+): Operation[] => [
+  [OPS.setFillRGBColor, [color]],
+  [OPS.constructPath, [paintOp, [], [x0, y0, x1, y1]]],
+  [OPS.setFillRGBColor, ['#000000']],
+];
+
+const wordsOf = async (operations: readonly Operation[]) => {
+  const words = await extractVisibleWords(fakePage(operations));
+
+  return words.map(({ text }) => text);
+};
+
+describe('extractVisibleWords', () => {
+  it('should place a visible word in 0-1 page space with a top-left origin', async () => {
+    expect(await extractVisibleWords(fakePage(textAt('AB')))).toEqual([
+      {
+        height: expect.closeTo(0.04, 5) as number,
+        left: expect.closeTo(0.1, 5) as number,
+        text: 'AB',
+        top: expect.closeTo(0.468, 5) as number,
+        width: expect.closeTo(0.04, 5) as number,
+      },
+    ]);
+  });
+
+  it('should follow the text positioning operators', async () => {
+    const words = await extractVisibleWords(
+      fakePage([
+        [OPS.save, null],
+        [OPS.transform, [1, 0, 0, 1, 0, 10]],
+        [OPS.beginText, null],
+        [OPS.setFont, ['f1', 4]],
+        [OPS.setCharSpacing, [0]],
+        [OPS.setWordSpacing, [2]],
+        [OPS.setHScale, [100]],
+        [OPS.setTextRise, [0]],
+        [OPS.setLeading, [10]],
+        [OPS.moveText, [10, 50]],
+        [OPS.showText, [glyphs('A B')]],
+        [OPS.nextLine, null],
+        [OPS.showSpacedText, [[glyph('C'), -5000, glyph('D')]]],
+        [OPS.nextLineShowText, [glyphs('E')]],
+        [OPS.nextLineSetSpacingShowText, [0, 0, glyphs('F')]],
+        [OPS.setLeadingMoveText, [0, -10]],
+        [OPS.showText, [glyphs('G')]],
+        [OPS.endText, null],
+        [OPS.restore, null],
+        [OPS.restore, null],
+      ]),
+    );
+
+    expect(words.map(({ text }) => text)).toEqual([
+      'A',
+      'B',
+      'C',
+      'D',
+      'E',
+      'F',
+      'G',
+    ]);
+    expect(words.map(({ top }) => top)).toEqual(
+      [0.368, 0.368, 0.468, 0.468, 0.568, 0.668, 0.768].map(
+        (top) => expect.closeTo(top, 5) as number,
+      ),
+    );
+  });
+
+  it('should honour a font matrix', async () => {
+    const [word] = await extractVisibleWords(
+      fakePage(textAt('AB'), {
+        f1: {
+          fontMatrix: [0.002, 0, 0, 0.002, 0, 0],
+          isType3Font: false,
+          vertical: false,
+        },
+      }),
+    );
+
+    expect(word?.width).toBeCloseTo(0.08, 5);
+  });
+
+  it('should split words on a horizontal gap and on a new line', async () => {
+    expect(
+      await wordsOf([
+        ...textAt('A', 10, 50),
+        ...textAt('B', 30, 50),
+        ...textAt('C', 12, 40),
+      ]),
+    ).toEqual(['A', 'B', 'C']);
+  });
+
+  it.each([
+    { description: 'outside the page', operations: textAt('A', 120, 50) },
+    {
+      description: 'in invisible render mode',
+      operations: [
+        [OPS.setTextRenderingMode, [3]],
+        ...textAt('A'),
+      ] as Operation[],
+    },
+    {
+      description: 'in a colour too close to white',
+      operations: [
+        [OPS.setFillRGBColor, ['#f5f5f5']],
+        ...textAt('A'),
+      ] as Operation[],
+    },
+    {
+      description: 'under a filled path drawn later',
+      operations: [...textAt('A'), ...fillRect('#ffffff', [0, 40, 50, 60])],
+    },
+    {
+      description: 'under an image drawn later',
+      operations: [
+        ...textAt('A'),
+        [OPS.transform, [100, 0, 0, 100, 0, 0]],
+        [OPS.paintImageXObject, ['img', 1, 1]],
+      ] as Operation[],
+    },
+    {
+      description: 'over an image',
+      operations: [
+        [OPS.save, null],
+        [OPS.transform, [100, 0, 0, 100, 0, 0]],
+        [OPS.paintImageXObject, ['img', 1, 1]],
+        [OPS.restore, null],
+        ...textAt('A'),
+      ] as Operation[],
+    },
+    {
+      description: 'over a fill of its own colour',
+      operations: [...fillRect('#000000', [0, 40, 50, 60]), ...textAt('A')],
+    },
+    {
+      description: 'inside a clip',
+      operations: [
+        [OPS.clip, null],
+        [OPS.constructPath, [OPS.endPath, [], [0, 0, 50, 50]]],
+        ...textAt('A'),
+      ] as Operation[],
+    },
+    {
+      description: 'inside a clip with no bounds',
+      operations: [
+        [OPS.eoClip, null],
+        [OPS.constructPath, [OPS.endPath, [], null]],
+        ...textAt('A'),
+      ] as Operation[],
+    },
+    {
+      description: 'inside a form with a bounding box',
+      operations: [
+        [
+          OPS.paintFormXObjectBegin,
+          [
+            [1, 0, 0, 1, 0, 0],
+            [0, 0, 50, 60],
+          ],
+        ],
+        ...textAt('A'),
+        [OPS.paintFormXObjectEnd, null],
+      ] as Operation[],
+    },
+  ])('should drop text drawn $description', async ({ operations }) => {
+    expect(await wordsOf(operations)).toEqual([]);
+  });
+
+  it.each([
+    {
+      description: 'after a clip covering the page is restored',
+      operations: [
+        [OPS.save, null],
+        [OPS.clip, null],
+        [OPS.constructPath, [OPS.endPath, [], [0, 0, 10, 10]]],
+        [OPS.restore, null],
+        [OPS.clip, null],
+        [OPS.constructPath, [OPS.endPath, [], PAGE_RECT]],
+        ...textAt('A'),
+      ] as Operation[],
+    },
+    {
+      description: 'inside a form covering the page or without bounds',
+      operations: [
+        [OPS.paintFormXObjectBegin, [[1, 0, 0, 1, 0, 0], PAGE_RECT]],
+        [OPS.paintFormXObjectBegin, [[1, 0, 0, 1, 0, 0], null]],
+        ...textAt('A'),
+        [OPS.paintFormXObjectEnd, null],
+        [OPS.paintFormXObjectEnd, null],
+        [OPS.paintFormXObjectEnd, null],
+      ] as Operation[],
+    },
+    {
+      description: 'in light colour over a dark fill',
+      operations: [
+        ...fillRect('#000000', [0, 40, 50, 60]),
+        [OPS.setFillRGBColor, ['#ffffff']],
+        ...textAt('A'),
+      ] as Operation[],
+    },
+    {
+      description: 'under a stroked path or a path without bounds',
+      operations: [
+        ...textAt('A'),
+        ...fillRect('#ffffff', [0, 40, 50, 60], OPS.stroke),
+        [OPS.constructPath, [OPS.fill, [], null]],
+      ] as Operation[],
+    },
+    {
+      description: 'in fill-and-stroke mode with modelled graphics state',
+      operations: [
+        [
+          OPS.setGState,
+          [
+            [
+              ['LW', 1],
+              ['SMask', false],
+              ['ca', 1],
+              ['BM', 'source-over'],
+              ['BM', 'Normal'],
+            ],
+          ],
+        ],
+        [OPS.setTextRenderingMode, [2]],
+        ...textAt('A'),
+      ] as Operation[],
+    },
+  ])('should keep text drawn $description', async ({ operations }) => {
+    expect(await wordsOf(operations)).toEqual(['A']);
+  });
+
+  it.each([
+    {
+      description: 'a soft mask',
+      operation: [OPS.setGState, [[['SMask', {}]]]],
+    },
+    {
+      description: 'transparency',
+      operation: [OPS.setGState, [[['ca', 0.5]]]],
+    },
+    {
+      description: 'a blend mode',
+      operation: [OPS.setGState, [[['BM', 'multiply']]]],
+    },
+    { description: 'a transparency group', operation: [OPS.beginGroup, [{}]] },
+    {
+      description: 'a pattern colour',
+      operation: [OPS.setFillColorN, ['pattern']],
+    },
+    { description: 'a shading', operation: [OPS.shadingFill, ['shading']] },
+    { description: 'an annotation', operation: [OPS.beginAnnotation, []] },
+    {
+      description: 'a clipping render mode',
+      operation: [OPS.setTextRenderingMode, [7]],
+    },
+    {
+      description: 'a stroke render mode',
+      operation: [OPS.setTextRenderingMode, [1]],
+    },
+  ] as Array<{ description: string; operation: Operation }>)(
+    'should drop the whole page when it uses $description',
+    async ({ operation }) => {
+      expect(await wordsOf([...textAt('A'), operation])).toEqual([]);
+    },
+  );
+
+  it.each([
+    { isType3Font: true, vertical: false },
+    { isType3Font: false, vertical: true },
+  ])('should drop the whole page for an unmodelled font %o', async (font) => {
+    expect(
+      await extractVisibleWords(fakePage(textAt('A'), { f1: font })),
+    ).toEqual([]);
+  });
+
+  it('should propagate unexpected operator list failures', async () => {
+    const page = {
+      getOperatorList: () => Promise.reject(new Error('broken page')),
+      getViewport: () => ({}),
+    } as unknown as PDFPageProxy;
+
+    await expect(extractVisibleWords(page)).rejects.toThrow('broken page');
+  });
+});

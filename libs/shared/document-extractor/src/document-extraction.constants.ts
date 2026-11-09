@@ -6,6 +6,8 @@ export const DOCUMENT_EXTRACTION_COMMENTS = {
   LOW_CONFIDENCE_FIELD: (field: string) => `Low confidence field: ${field}`,
   LOW_LAYOUT_MATCH_SCORE: (layoutMatchScore: number, reviewThreshold: number) =>
     `Layout match score (${layoutMatchScore.toFixed(2)}) below review threshold (${reviewThreshold})`,
+  TEXT_LAYER_MISMATCH: (field: string) =>
+    `PDF text layer disagrees with OCR on high-confidence field ${field}; text layer not used`,
   UNKNOWN_DOCUMENT_TYPE: (attachmentId: string) =>
     `Unknown document type, cannot perform cross-validation for attachment ${attachmentId}`,
 } as const;

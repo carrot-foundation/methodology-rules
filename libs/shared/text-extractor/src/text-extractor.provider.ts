@@ -4,6 +4,7 @@ import { TextractClient } from '@aws-sdk/client-textract';
 import type { TextExtractor } from './text-extractor.types';
 
 import { CachedTextExtractor } from './cached-text-extractor';
+import { PdfTextLayerExtractor } from './pdf-text-layer.extractor';
 import { TextractService } from './textract.service';
 
 const region = process.env['AWS_REGION'];
@@ -18,3 +19,7 @@ const cacheDirectory = process.env['TEXTRACT_CACHE_DIR'];
 export const textExtractor: TextExtractor = cacheDirectory
   ? new CachedTextExtractor(base, cacheDirectory)
   : base;
+
+export const pdfTextLayerExtractor: TextExtractor = new PdfTextLayerExtractor(
+  s3Client,
+);
