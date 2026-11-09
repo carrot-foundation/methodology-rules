@@ -224,9 +224,9 @@ export const MASS_ID_CATALOG: MassIDCatalog = {
       name: PICK_UP,
       responsibleParty: {
         conditions: {
-          en: 'Waste Generator for the first Pick-up; Processor for subsequent Pick-ups in the transport chain.',
+          en: 'Waste Generator for the first Pick-up with identified origin; Processor for subsequent Pick-ups. For unidentified origin, the framework refers to the First Identified Participant. The current geolocation check still treats the first Pick-up as Waste Generator.',
           'pt-BR':
-            'Waste Generator no primeiro Pick-up; Processor nos Pick-ups seguintes da cadeia de transporte.',
+            'Waste Generator no primeiro Pick-up com origem identificada; Processor nos Pick-ups seguintes. Para origem não identificada, o framework se refere ao First Identified Participant. A verificação atual de geolocalização ainda trata o primeiro Pick-up como Waste Generator.',
         },
         roles: [MassIDActorType.WASTE_GENERATOR, MassIDActorType.PROCESSOR],
       },
