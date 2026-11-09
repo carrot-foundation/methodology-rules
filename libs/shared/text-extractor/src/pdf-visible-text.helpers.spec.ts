@@ -263,6 +263,36 @@ describe('extractVisibleWords', () => {
       ],
     },
     {
+      description: 'inside a page-sized clip with no area',
+      operations: [
+        ...pageClip([0, 0, 0, 1, 100, 0, 1, 0, 0, 1, 0, 100, 4]),
+        ...textAt('A'),
+      ],
+    },
+    {
+      description: 'inside a page-sized clip whose edges do not alternate',
+      operations: [
+        ...pageClip([0, 0, 0, 1, 0, 100, 1, 100, 0, 1, 100, 100]),
+        ...textAt('A'),
+      ],
+    },
+    {
+      description: 'sheared flat',
+      operations: [
+        [OPS.beginText, null],
+        [OPS.setFont, ['f1', 1]],
+        [OPS.setTextMatrix, [[12, 0, 11.9, 0.3, 10, 50]]],
+        [OPS.showText, [glyphs('A')]],
+      ] as Operation[],
+    },
+    {
+      description: 'under a thin stroke through its core',
+      operations: [
+        ...textAt('A'),
+        ...fillRect('#ffffff', [0, 51, 50, 51], OPS.stroke),
+      ],
+    },
+    {
       description: 'inside a page-sized clip with a trailing curve',
       operations: [...pageClip([...PAGE_PATH, 2]), ...textAt('A')],
     },
@@ -333,6 +363,7 @@ describe('extractVisibleWords', () => {
         [OPS.restore, null],
         ...pageClip(),
         ...pageClip([...PAGE_PATH, 4]),
+        ...pageClip([0, 0, 0, 1, 0, 100, 1, 100, 100, 1, 100, 0]),
         ...textAt('A'),
       ] as Operation[],
     },
@@ -364,10 +395,10 @@ describe('extractVisibleWords', () => {
       ] as Operation[],
     },
     {
-      description: 'under a thin stroke, a path without bounds',
+      description: 'over a stroke below its core, a path without bounds',
       operations: [
         ...textAt('A'),
-        ...fillRect('#ffffff', [0, 40, 50, 60], OPS.stroke),
+        ...fillRect('#ffffff', [0, 49, 50, 49.5], OPS.stroke),
         [OPS.constructPath, [OPS.fill, [], null]],
       ] as Operation[],
     },
@@ -409,18 +440,12 @@ describe('extractVisibleWords', () => {
     ).toEqual(['A', 'C']);
   });
 
-  it('should hide a glyph under a later glyph of another colour only', async () => {
-    expect(
-      await wordsOf([
-        ...textAt('A'),
-        ...textAt('B'),
-        [OPS.setFillRGBColor, ['#ff0000']],
-        ...textAt('C'),
-      ] as Operation[]),
-    ).toEqual(['C']);
-    const sameColour = await wordsOf([...textAt('A'), ...textAt('B')]);
+  it('should hide a glyph under a later different glyph but keep an overprint', async () => {
+    expect(await wordsOf([...textAt('A'), ...textAt('B')])).toEqual(['B']);
 
-    expect(sameColour.join('')).toBe('AB');
+    const overprint = await wordsOf([...textAt('A'), ...textAt('A')]);
+
+    expect(overprint.join('')).toBe('AA');
   });
 
   it('should drop the whole page on non-finite geometry', async () => {

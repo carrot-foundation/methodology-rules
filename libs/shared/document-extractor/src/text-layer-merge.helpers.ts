@@ -1,3 +1,5 @@
+import { isDeepStrictEqual } from 'node:util';
+
 import type {
   BaseExtractedData,
   ExtractedField,
@@ -85,6 +87,15 @@ export const mergeTextLayerFields = <T extends BaseExtractedData>(
   primary: T,
   textLayer: T,
 ): TextLayerMergeResult<T> => {
+  const merged = fillGroup(
+    primary as unknown as FieldGroup,
+    textLayer as unknown as FieldGroup,
+  );
+
+  if (isDeepStrictEqual(merged, primary)) {
+    return { outcome: 'unverified' };
+  }
+
   const textLayerAnchors = collectAnchors(textLayer as unknown as FieldGroup);
   let agreedAnchors = 0;
 
@@ -114,10 +125,6 @@ export const mergeTextLayerFields = <T extends BaseExtractedData>(
     return { outcome: 'unverified' };
   }
 
-  const merged = fillGroup(
-    primary as unknown as FieldGroup,
-    textLayer as unknown as FieldGroup,
-  );
   const stillLow = new Set(
     collectLowConfidenceFields(merged, Object.keys(merged)),
   );

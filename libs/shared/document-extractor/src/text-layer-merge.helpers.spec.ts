@@ -85,9 +85,17 @@ describe('mergeTextLayerFields', () => {
     });
 
     expect(mergeTextLayerFields(primary, textLayer)).toEqual({
-      data: primary,
-      outcome: 'filled',
+      outcome: 'unverified',
     });
+  });
+
+  it('should leave the output unverified when nothing would be filled, even on a disagreement', () => {
+    expect(
+      mergeTextLayerFields(
+        stubData({ documentNumber: createHighConfidenceField('MTR-001') }),
+        stubData({ documentNumber: createHighConfidenceField('MTR-002') }),
+      ),
+    ).toEqual({ outcome: 'unverified' });
   });
 
   it('should keep a primary value that is not an entity group', () => {
@@ -97,6 +105,7 @@ describe('mergeTextLayerFields', () => {
     });
     const textLayer = stubData({
       documentNumber: createHighConfidenceField('MTR-001'),
+      driverName: createHighConfidenceField('JOHN DOE'),
       generator: entity('12.345.678/0001-90'),
     });
 
@@ -113,6 +122,7 @@ describe('mergeTextLayerFields', () => {
     });
     const textLayer = stubData({
       documentNumber: createHighConfidenceField('MTR-001'),
+      driverName: createHighConfidenceField('JOHN DOE'),
       generator: entity('99.345.678/0001-90'),
     });
 
@@ -133,12 +143,18 @@ describe('mergeTextLayerFields', () => {
     {
       description: 'the only anchors hold no letters or digits',
       primary: stubData({ documentNumber: createHighConfidenceField('-') }),
-      textLayer: stubData({ documentNumber: createHighConfidenceField('.') }),
+      textLayer: stubData({
+        documentNumber: createHighConfidenceField('.'),
+        driverName: createHighConfidenceField('JOHN DOE'),
+      }),
     },
     {
       description: 'the text layer lacks the anchor OCR read',
       primary: stubData({ generator: entity('12.345.678/0001-90') }),
-      textLayer: stubData({ generator: entity('') }),
+      textLayer: stubData({
+        driverName: createHighConfidenceField('JOHN DOE'),
+        generator: entity(''),
+      }),
     },
   ])(
     'should leave the output unverified when $description',

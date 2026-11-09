@@ -483,23 +483,22 @@ describe('DocumentExtractor', () => {
       },
     );
 
-    it('should not read the text layer when OCR left nothing for review', async () => {
-      const textLayerExtractor = { extractText: vi.fn() };
+    it('should keep the OCR-only output when the text layer would fill nothing', async () => {
+      const config = {
+        ...mtrConfig,
+        textExtractionResult: mtrData({
+          documentNumber: createHighConfidenceField('MTR-1'),
+        }),
+      };
 
-      await new DocumentExtractor(
-        mockTextExtractor,
-        textLayerExtractor,
-      ).extract(
-        { filePath: 'mtr.pdf' },
-        {
-          ...mtrConfig,
-          textExtractionResult: mtrData({
-            documentNumber: createHighConfidenceField('MTR-1'),
-          }),
-        },
-      );
-
-      expect(textLayerExtractor.extractText).not.toHaveBeenCalled();
+      expect(
+        await extractWithTextLayer(
+          Promise.resolve(
+            mtrData({ documentNumber: createHighConfidenceField('MTR-2') }),
+          ),
+          config,
+        ),
+      ).toEqual(await extractor.extract({ filePath: 'mtr.pdf' }, config));
     });
 
     it('should not read the text layer for other document types', async () => {

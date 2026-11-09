@@ -17,10 +17,12 @@ interface Cover {
   color: string | undefined;
   kind: 'fill' | 'glyph' | 'image' | 'stroke';
   rect: Rect;
+  text?: string;
 }
 
 interface Glyph {
   color: string;
+  core: Rect;
   coversBefore: number;
   rect: Rect;
   text: string;
@@ -78,7 +80,9 @@ const WHITE = '#ffffff';
 const FILL_RENDER_MODES = new Set([0, 2]);
 const INVISIBLE_RENDER_MODE = 3;
 const MIN_FONT_SIZE_POINTS = 4;
-const MIN_COVERING_STROKE_POINTS = 2;
+const GLYPH_CORE_INSET = 0.1;
+const GLYPH_CORE_TOP = 0.6;
+const OVERPRINT_TOLERANCE = 0.25;
 const AXIS_EPSILON = 1e-6;
 const PATH_MOVE_TO = 0;
 const PATH_LINE_TO = 1;
@@ -154,28 +158,24 @@ const isAxisAligned = (matrix: Matrix): boolean =>
   (Math.abs(matrix[1]) < AXIS_EPSILON && Math.abs(matrix[2]) < AXIS_EPSILON) ||
   (Math.abs(matrix[0]) < AXIS_EPSILON && Math.abs(matrix[3]) < AXIS_EPSILON);
 
-const isSingleRectangle = (path: ArrayLike<number> | undefined): boolean => {
-  if (
-    path?.length !== 12 &&
-    !(path?.length === 13 && path[12] === PATH_CLOSE)
-  ) {
+const isSingleRectangle = (path: ArrayLike<number>): boolean => {
+  if (path.length !== 12 && !(path.length === 13 && path[12] === PATH_CLOSE)) {
     return false;
   }
 
-  const points = [0, 3, 6, 9].map((offset) => [
-    path[offset + 1]!,
-    path[offset + 2]!,
-  ]);
+  const [x0, y0, x1, y1, x2, y2, x3, y3] = [1, 2, 4, 5, 7, 8, 10, 11].map(
+    // eslint-disable-next-line security/detect-object-injection
+    (offset) => path[offset]!,
+  );
 
   return (
     path[0] === PATH_MOVE_TO &&
     // eslint-disable-next-line security/detect-object-injection
     [3, 6, 9].every((offset) => path[offset] === PATH_LINE_TO) &&
-    points.every(([x, y], index) => {
-      const [nextX, nextY] = points[(index + 1) % points.length]!;
-
-      return x === nextX || y === nextY;
-    })
+    x0 !== x2 &&
+    y0 !== y2 &&
+    ((x0 === x1 && y1 === y2 && x2 === x3 && y3 === y0) ||
+      (y0 === y1 && x1 === x2 && y2 === y3 && x3 === x0))
   );
 };
 
@@ -187,13 +187,16 @@ const isGlyphVisible = (glyph: Glyph, covers: readonly Cover[]): boolean => {
     return false;
   }
 
+  const height = glyph.rect.bottom - glyph.rect.top;
+  const isOverprint = (cover: Cover) =>
+    cover.kind === 'glyph' &&
+    cover.text === glyph.text &&
+    Math.abs(cover.rect.left - glyph.rect.left) +
+      Math.abs(cover.rect.top - glyph.rect.top) <
+      height * OVERPRINT_TOLERANCE;
   const isCoveredLater = covers
     .slice(glyph.coversBefore)
-    .some(
-      (cover) =>
-        overlaps(cover.rect, glyph.rect) &&
-        !(cover.kind === 'glyph' && cover.color === glyph.color),
-    );
+    .some((cover) => overlaps(cover.rect, glyph.core) && !isOverprint(cover));
   const centerX = (glyph.rect.left + glyph.rect.right) / 2;
   const centerY = (glyph.rect.top + glyph.rect.bottom) / 2;
   const backgroundColors = [
@@ -402,7 +405,11 @@ const walkOperatorList = async (
         state.ctm,
       );
       const width = Math.hypot(renderingMatrix[0], renderingMatrix[1]);
-      const height = Math.hypot(renderingMatrix[2], renderingMatrix[3]);
+      const height =
+        Math.abs(
+          renderingMatrix[0] * renderingMatrix[3] -
+            renderingMatrix[1] * renderingMatrix[2],
+        ) / width;
       const isPainted = FILL_RENDER_MODES.has(state.renderMode);
       const rect = toRect(renderingMatrix, [
         0,
@@ -418,6 +425,12 @@ const walkOperatorList = async (
           width >= height / 2
           ? {
               color: state.fillColor,
+              core: toRect(renderingMatrix, [
+                advance * GLYPH_CORE_INSET,
+                GLYPH_CORE_INSET,
+                advance * (1 - GLYPH_CORE_INSET),
+                GLYPH_CORE_TOP,
+              ]),
               coversBefore: covers.length,
               rect,
               text: item.unicode,
@@ -426,7 +439,12 @@ const walkOperatorList = async (
       );
 
       if (isPainted) {
-        covers.push({ color: state.fillColor, kind: 'glyph', rect });
+        covers.push({
+          color: state.fillColor,
+          kind: 'glyph',
+          rect,
+          text: item.unicode,
+        });
       }
 
       textMatrix = multiply(
@@ -453,7 +471,7 @@ const walkOperatorList = async (
   const isPageCoveringRectangle = (
     matrix: Matrix,
     bounds: Bounds | null,
-    path: ArrayLike<number> | undefined,
+    path: ArrayLike<number>,
   ): boolean =>
     bounds !== null &&
     isAxisAligned(matrix) &&
@@ -524,16 +542,7 @@ const walkOperatorList = async (
           });
         }
 
-        const strokeWidth =
-          state.lineWidth *
-          Math.sqrt(
-            Math.abs(state.ctm[0] * state.ctm[3] - state.ctm[1] * state.ctm[2]),
-          );
-
-        if (
-          STROKE_PATH_OPS.has(paintOperator) &&
-          strokeWidth >= MIN_COVERING_STROKE_POINTS
-        ) {
+        if (STROKE_PATH_OPS.has(paintOperator)) {
           const half = state.lineWidth / 2;
 
           covers.push({

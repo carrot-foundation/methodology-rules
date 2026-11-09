@@ -137,8 +137,7 @@ export class DocumentExtractor implements DocumentExtractorService {
 
     if (
       !this.textLayerExtractor ||
-      parser.documentType !== 'transportManifest' ||
-      output.data.lowConfidenceFields.length === 0
+      parser.documentType !== 'transportManifest'
     ) {
       return output;
     }
