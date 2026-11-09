@@ -515,14 +515,15 @@ const walkOperatorList = async (
       OPS.constructPath,
       (arguments_) => {
         const paintOperator = arguments_[0] as number;
-        const paths = arguments_[1] as Array<ArrayLike<number>> | undefined;
+        const [path, ...otherPaths] = arguments_[1] as Array<ArrayLike<number>>;
         const bounds = arguments_[2] as Bounds | null;
 
         if (
           pendingClip &&
           !(
-            paths?.length === 1 &&
-            isPageCoveringRectangle(state.ctm, bounds, paths[0])
+            path !== undefined &&
+            otherPaths.length === 0 &&
+            isPageCoveringRectangle(state.ctm, bounds, path)
           )
         ) {
           state.clipped = true;
