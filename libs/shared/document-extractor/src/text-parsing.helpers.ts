@@ -116,10 +116,9 @@ export const createExtractedEntity = (
           extracted.value.name,
           extracted.rawMatch,
         ),
-        taxId: createHighConfidenceField(
-          extracted.value.taxId,
-          extracted.rawMatch,
-        ),
+        taxId: extracted.value.taxId
+          ? createHighConfidenceField(extracted.value.taxId, extracted.rawMatch)
+          : createLowConfidenceField('' as NonEmptyString),
       }
     : {
         name: createLowConfidenceField('' as NonEmptyString),
@@ -157,6 +156,8 @@ export const createExtractedEntityWithAddress = (
   };
 };
 
+const TAX_ID_LABEL = /CNPJ/i;
+
 export const extractEntityFromSection = (
   text: string,
   sectionPattern: RegExp,
@@ -176,11 +177,11 @@ export const extractEntityFromSection = (
 
   const rawCnpj = cnpjMatch?.[1];
 
-  if (!rawCnpj) {
+  if (!rawCnpj && !TAX_ID_LABEL.test(section)) {
     return undefined;
   }
 
-  const normalizedCnpj = rawCnpj.replaceAll(' ', '').replaceAll(',', '.');
+  const normalizedCnpj = rawCnpj?.replaceAll(' ', '').replaceAll(',', '.');
 
   const lines = section
     .split('\n')
@@ -193,7 +194,7 @@ export const extractEntityFromSection = (
       continue;
     }
 
-    if (/CNPJ/i.test(line)) {
+    if (TAX_ID_LABEL.test(line)) {
       continue;
     }
 
@@ -220,7 +221,7 @@ export const extractEntityFromSection = (
     rawMatch: section,
     value: {
       name,
-      taxId: normalizedCnpj,
+      ...(normalizedCnpj && { taxId: normalizedCnpj }),
     },
   };
 };

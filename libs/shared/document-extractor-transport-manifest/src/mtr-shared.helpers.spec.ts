@@ -625,6 +625,54 @@ describe('MTR shared helpers', () => {
       expect(result.address.confidence).toBe('low');
     });
 
+    it('should keep the name and address when the CNPJ label has no number', () => {
+      const text = [
+        'Identificacao do Gerador',
+        'Razao Social: EMPRESA GERADORA LTDA 12345',
+        'CPF/CNPJ:',
+        'Endereco: Rua Test, 100',
+        'Municipio: Cidade Interior',
+        'Estado: MG',
+        'Identificacao do Transportador',
+      ].join('\n');
+
+      const result = extractMtrEntityWithAddress(
+        text,
+        sectionPatterns.generator,
+        allSectionPatterns,
+        brazilianTaxIdPattern,
+      );
+
+      expect(result).toMatchObject({
+        address: { confidence: 'high', parsed: 'Rua Test, 100' },
+        city: { confidence: 'high', parsed: 'Cidade Interior' },
+        name: { confidence: 'high', parsed: 'EMPRESA GERADORA LTDA' },
+        state: { confidence: 'high', parsed: 'MG' },
+        taxId: { confidence: 'low', parsed: '' },
+      });
+    });
+
+    it('should not read an entity from a section without a CNPJ label', () => {
+      const text = [
+        'Gerador',
+        'Nome e assinatura do responsavel',
+        'Endereco: Rua Test, 100',
+        'Municipio: Cidade Interior',
+        'Transportador',
+      ].join('\n');
+
+      const result = extractMtrEntityWithAddress(
+        text,
+        sectionPatterns.generator,
+        allSectionPatterns,
+        brazilianTaxIdPattern,
+      );
+
+      for (const field of Object.values(result)) {
+        expect(field).toMatchObject({ confidence: 'low', parsed: '' });
+      }
+    });
+
     it('should normalize CNPJ with OCR-inserted spaces', () => {
       const text = [
         'Gerador',

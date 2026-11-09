@@ -4,7 +4,7 @@ import type { ExtractedField } from './document-extractor.types';
 
 export interface EntityInfo {
   name: NonEmptyString;
-  taxId: NonEmptyString;
+  taxId?: NonEmptyString;
 }
 
 export interface EntityWithAddressInfo extends EntityInfo {
