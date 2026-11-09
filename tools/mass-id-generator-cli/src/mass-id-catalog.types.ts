@@ -70,6 +70,7 @@ export interface CatalogEvent {
   externalCreatedAt: string;
   name: BoldDocumentEventName;
   participantId: string;
+  responsibleParty: EventResponsibleParty;
   slug: string;
   value?: number;
 }
@@ -94,6 +95,11 @@ export interface EventPayload {
   value?: number;
 }
 
+export interface EventResponsibleParty {
+  conditions?: { en: string; 'pt-BR': string };
+  roles: readonly MassIDActorType[];
+}
+
 export interface EventsManifest {
   events: ManifestEvent[];
   schemaVersion: 1;
@@ -110,12 +116,14 @@ export interface ManifestEvent {
   artifacts: { attributes?: string; payload: string };
   name: string;
   order: number;
+  responsibleParty: EventResponsibleParty;
   slug: string;
 }
 
 export interface MassIDCatalog {
   actors: readonly CatalogActor[];
   document: CatalogDocument;
+  documentResponsibleParty: EventResponsibleParty;
   events: readonly CatalogEvent[];
 }
 

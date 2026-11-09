@@ -288,8 +288,75 @@ describe('mass-id-catalog projections', () => {
   });
 
   describe('toEventsManifest', () => {
+    it.each([
+      [WEIGHING, MassIDActorType.RECYCLER],
+      [SORTING, MassIDActorType.RECYCLER],
+      [RECYCLING_MANIFEST, MassIDActorType.RECYCLER],
+      [TRANSPORT_MANIFEST, MassIDActorType.WASTE_GENERATOR],
+    ])(
+      'should document %s responsibility and use that actor in the example',
+      (name, role) => {
+        const event = findEvent(name);
+        const manifestEvent = toEventsManifest(MASS_ID_CATALOG).events.find(
+          (entry) => entry.name === name,
+        );
+
+        expect(manifestEvent?.responsibleParty.roles).toStrictEqual([role]);
+        expect(toEventPayload(event).participantId).toBe(
+          findActor(role).participantId,
+        );
+        expect(toEventPayload(event)).not.toHaveProperty('responsibleParty');
+      },
+    );
+
+    it('should include Processor for later Pick-ups', () => {
+      const pickUp = toEventsManifest(MASS_ID_CATALOG).events.find(
+        ({ slug }) => slug === 'pick-up',
+      );
+
+      expect(pickUp?.responsibleParty.roles).toStrictEqual([
+        MassIDActorType.WASTE_GENERATOR,
+        MassIDActorType.PROCESSOR,
+      ]);
+      expect(pickUp?.responsibleParty.conditions?.en).toContain(
+        'subsequent Pick-ups',
+      );
+    });
+
+    it('should retain conditional Processor drop-offs independently of example identifiers', () => {
+      const manifest = toEventsManifest({
+        ...MASS_ID_CATALOG,
+        events: MASS_ID_CATALOG.events.map((event) => ({
+          ...event,
+          participantId: 'example-participant',
+        })),
+      });
+      const dropOff = manifest.events.find(({ slug }) => slug === 'drop-off');
+
+      expect(dropOff?.responsibleParty.roles).toStrictEqual([
+        MassIDActorType.RECYCLER,
+        MassIDActorType.PROCESSOR,
+      ]);
+      expect(dropOff?.responsibleParty.conditions?.en).toContain(
+        'subsequent Drop-off',
+      );
+      expect(dropOff?.responsibleParty.conditions?.['pt-BR']).toContain(
+        'Drop-off posterior',
+      );
+      expect(manifest).toStrictEqual(toEventsManifest(MASS_ID_CATALOG));
+    });
+
     it('should list the thirteen entries in order, with an attributes artifact on the custom events only', () => {
-      expect(toEventsManifest(MASS_ID_CATALOG)).toStrictEqual({
+      const manifest = toEventsManifest(MASS_ID_CATALOG);
+
+      expect({
+        ...manifest,
+        events: manifest.events.map(({ responsibleParty, ...event }) => {
+          expect(responsibleParty.roles.length).toBeGreaterThan(0);
+
+          return event;
+        }),
+      }).toStrictEqual({
         events: MANIFEST_ROWS.map(([name, slug], order) => ({
           artifacts: {
             ...(CUSTOM_EVENT_SLUGS.has(slug) && {
