@@ -1,6 +1,7 @@
 import type { NonEmptyString } from '@carrot-fndn/shared/types';
 import type { Mocked } from 'vitest';
 
+import { logger } from '@carrot-fndn/shared/helpers';
 import {
   stubTextExtractionResult,
   type TextExtractionResult,
@@ -9,10 +10,16 @@ import {
 
 import type {
   BaseExtractedData,
+  DocumentExtractorConfig,
   DocumentParser,
   ExtractionOutput,
 } from './document-extractor.types';
 
+import {
+  buildExtractionOutput,
+  createHighConfidenceField,
+  createLowConfidenceField,
+} from './confidence.helpers';
 import {
   createDocumentExtractor,
   DocumentExtractor,
@@ -34,6 +41,22 @@ const buildMockOutput = (
   reviewReasons: [],
   reviewRequired: false,
 });
+
+class JsonMtrParser implements DocumentParser<BaseExtractedData> {
+  readonly documentType = 'transportManifest' as const;
+  readonly layoutId = 'json-mtr' as NonEmptyString;
+
+  getMatchScore(): number {
+    return 0.95;
+  }
+
+  parse(result: TextExtractionResult): ExtractionOutput<BaseExtractedData> {
+    return buildExtractionOutput(
+      JSON.parse(result.rawText) as BaseExtractedData,
+      this.getMatchScore(),
+    );
+  }
+}
 
 class LowScoreParser implements DocumentParser<BaseExtractedData> {
   readonly documentType = 'scaleTicket' as const;
@@ -73,6 +96,17 @@ class StubParser2 implements DocumentParser<BaseExtractedData> {
     return buildMockOutput();
   }
 }
+
+const mtrData = (fields: Record<string, unknown>, low: string[] = []) =>
+  stubTextExtractionResult(
+    JSON.stringify({
+      documentType: 'transportManifest',
+      extractionConfidence: 'low',
+      lowConfidenceFields: low,
+      rawText: STUB_TEXT,
+      ...fields,
+    }),
+  );
 
 describe('DocumentExtractor', () => {
   let mockTextExtractor: Mocked<TextExtractor>;
@@ -306,6 +340,182 @@ describe('DocumentExtractor', () => {
       expect(result.textExtractionResult?.blocks[0]?.text).toBe('Residuo');
       expect(result.textExtractionResult?.blocks[1]?.text).toBe('Periodo');
       expect(result.textExtractionResult?.rawText).toBe('Residuo Periodo');
+    });
+  });
+
+  describe('PDF text-layer fallback', () => {
+    const ocrResult = mtrData(
+      {
+        documentNumber: createHighConfidenceField('MTR-1'),
+        generator: { taxId: createLowConfidenceField('') },
+      },
+      ['generator.taxId'],
+    );
+    const mtrConfig = {
+      documentType: 'transportManifest' as const,
+      layouts: ['json-mtr'] as NonEmptyString[],
+      textExtractionResult: ocrResult,
+    };
+    const extractWithTextLayer = (
+      textLayer: Promise<TextExtractionResult>,
+      config: DocumentExtractorConfig = mtrConfig,
+    ) =>
+      new DocumentExtractor(mockTextExtractor, {
+        extractText: () => textLayer,
+      }).extract({ filePath: 'mtr.pdf' }, config);
+    const extractOcrOnly = () =>
+      extractor.extract({ filePath: 'mtr.pdf' }, mtrConfig);
+
+    beforeEach(() => {
+      registerParser('transportManifest', 'json-mtr', JsonMtrParser);
+    });
+
+    it.each([
+      { config: mtrConfig, path: 'a single layout' },
+      {
+        config: {
+          ...mtrConfig,
+          layouts: ['json-mtr', 'stub-layout'] as NonEmptyString[],
+        },
+        path: 'several layouts',
+      },
+      { config: { textExtractionResult: ocrResult }, path: 'auto-detection' },
+    ])(
+      'should fill a low-confidence field through $path',
+      async ({ config }) => {
+        const result = await extractWithTextLayer(
+          Promise.resolve(
+            mtrData({
+              documentNumber: createHighConfidenceField('MTR-1'),
+              generator: {
+                taxId: createHighConfidenceField('12.345.678/0001-90'),
+              },
+            }),
+          ),
+          config,
+        );
+
+        expect(result).toMatchObject({
+          data: {
+            generator: {
+              taxId: createHighConfidenceField('12.345.678/0001-90'),
+            },
+            lowConfidenceFields: [],
+          },
+          layoutId: 'json-mtr',
+          reviewReasons: [],
+          reviewRequired: false,
+          textExtractionResult: ocrResult,
+        });
+      },
+    );
+
+    it('should flag a disagreement without filling', async () => {
+      const ocrOnly = await extractOcrOnly();
+      const result = await extractWithTextLayer(
+        Promise.resolve(
+          mtrData({
+            documentNumber: createHighConfidenceField('MTR-2'),
+            generator: {
+              taxId: createHighConfidenceField('12.345.678/0001-90'),
+            },
+          }),
+        ),
+      );
+
+      expect(result).toEqual({
+        ...ocrOnly,
+        reviewReasons: [
+          ...ocrOnly.reviewReasons,
+          {
+            code: 'TEXT_LAYER_MISMATCH',
+            description: expect.stringContaining('documentNumber') as string,
+          },
+        ],
+        reviewRequired: true,
+      });
+    });
+
+    it.each([
+      {
+        description: 'no anchor agrees',
+        textLayer: () =>
+          Promise.resolve(
+            mtrData({
+              generator: {
+                taxId: createHighConfidenceField('12.345.678/0001-90'),
+              },
+            }),
+          ),
+      },
+    ])(
+      'should return the OCR-only output when $description',
+      async ({ textLayer }) => {
+        expect(await extractWithTextLayer(textLayer())).toEqual(
+          await extractOcrOnly(),
+        );
+      },
+    );
+
+    it.each([
+      {
+        error: Object.assign(new Error('no text'), { name: 'ZodError' }),
+        level: 'info',
+      },
+      {
+        error: Object.assign(new Error('not a PDF'), {
+          name: 'InvalidPDFException',
+        }),
+        level: 'info',
+      },
+      { error: new Error('access denied'), level: 'warn' },
+      { error: 'not an error', level: 'warn' },
+    ] as const)(
+      'should log a text-layer failure at $level and keep the OCR-only output',
+      async ({ error, level }) => {
+        const warn = vi.spyOn(logger, 'warn');
+
+        // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors -- a non-Error rejection must be handled too
+        expect(await extractWithTextLayer(Promise.reject(error))).toEqual(
+          await extractOcrOnly(),
+        );
+        expect(warn).toHaveBeenCalledTimes(level === 'warn' ? 1 : 0);
+      },
+    );
+
+    it('should keep the OCR-only output when the text layer would fill nothing', async () => {
+      const config = {
+        ...mtrConfig,
+        textExtractionResult: mtrData({
+          documentNumber: createHighConfidenceField('MTR-1'),
+        }),
+      };
+
+      expect(
+        await extractWithTextLayer(
+          Promise.resolve(
+            mtrData({ documentNumber: createHighConfidenceField('MTR-2') }),
+          ),
+          config,
+        ),
+      ).toEqual(await extractor.extract({ filePath: 'mtr.pdf' }, config));
+    });
+
+    it('should not read the text layer for other document types', async () => {
+      const textLayerExtractor = { extractText: vi.fn() };
+
+      await new DocumentExtractor(
+        mockTextExtractor,
+        textLayerExtractor,
+      ).extract(
+        { filePath: 'ticket.pdf' },
+        {
+          documentType: 'scaleTicket',
+          layouts: ['stub-layout'] as NonEmptyString[],
+        },
+      );
+
+      expect(textLayerExtractor.extractText).not.toHaveBeenCalled();
     });
   });
 

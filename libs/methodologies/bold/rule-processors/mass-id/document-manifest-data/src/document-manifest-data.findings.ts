@@ -272,6 +272,15 @@ export const DOCUMENT_MANIFEST_DATA_FINDINGS = defineRuleFindings(
         'Nenhuma ação do integrador é necessária: a Carrot revisa o documento manualmente.',
       title: 'Layout do documento com baixa correspondência',
     },
+    'DOCUMENT_EXTRACTION.TEXT_LAYER_MISMATCH': {
+      category: 'DOCUMENT_READING',
+      defaultOwner: 'CARROT',
+      description:
+        'O texto embutido no PDF anexado diverge da leitura automática em um campo lido com alta confiança; o texto embutido não foi usado e o documento exige revisão manual.',
+      guidance:
+        'Nenhuma ação do integrador é necessária: a Carrot revisa o documento manualmente.',
+      title: 'Texto do PDF diverge da leitura do documento',
+    },
     'DOCUMENT_EXTRACTION.UNKNOWN_DOCUMENT_TYPE': {
       category: 'DOCUMENT_READING',
       defaultOwner: 'CARROT',

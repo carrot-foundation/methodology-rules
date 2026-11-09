@@ -85,9 +85,9 @@ const buildColumnRanges = (
     };
   });
 
-const clusterBlocksByY = (
+export const clusterBlocksByY = (
   blocks: readonly TextBlock[],
-  yTolerance: number,
+  yTolerance = DEFAULT_Y_TOLERANCE,
 ): TextBlock[][] => {
   const clusters: TextBlock[][] = [];
   let currentCluster: TextBlock[] = [];
@@ -166,7 +166,7 @@ const findLineWords = (
 };
 
 // Words closer than the line height belong to one cell; wider gaps separate cells.
-const groupWordsIntoCells = (
+export const groupWordsIntoCells = (
   words: readonly TextBlock[],
   maxWordGap: number,
 ): TextBlock[][] => {

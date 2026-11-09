@@ -89,13 +89,15 @@ export const calculateOverallConfidence = (
   return hasLowConfidence ? 'low' : 'high';
 };
 
-const isExtractedField = (value: unknown): value is ExtractedField<unknown> =>
+export const isExtractedField = (
+  value: unknown,
+): value is ExtractedField<unknown> =>
   typeof value === 'object' &&
   value !== null &&
   'parsed' in value &&
   'confidence' in value;
 
-const isExtractedEntityGroup = (
+export const isExtractedEntityGroup = (
   value: unknown,
 ): value is Record<string, ExtractedField<unknown>> =>
   typeof value === 'object' &&
@@ -196,18 +198,18 @@ const toUpperSnakeCase = (fieldName: string): string =>
     .toUpperCase()
     .replace(/^_/, '');
 
+export const lowConfidenceReviewReason = (field: string): ReviewReason => ({
+  code: `${LOW_CONFIDENCE_REASON_CODE_PREFIX}${toUpperSnakeCase(field)}`,
+  description: DOCUMENT_EXTRACTION_COMMENTS.LOW_CONFIDENCE_FIELD(field),
+});
+
 export const buildExtractionOutput = <T extends BaseExtractedData>(
   data: T,
   layoutMatchScore: number,
 ): ExtractionOutput<T> => {
-  const reviewReasons: ReviewReason[] = [];
-
-  for (const field of data.lowConfidenceFields) {
-    reviewReasons.push({
-      code: `${LOW_CONFIDENCE_REASON_CODE_PREFIX}${toUpperSnakeCase(field)}`,
-      description: DOCUMENT_EXTRACTION_COMMENTS.LOW_CONFIDENCE_FIELD(field),
-    });
-  }
+  const reviewReasons: ReviewReason[] = data.lowConfidenceFields.map((field) =>
+    lowConfidenceReviewReason(field),
+  );
 
   if (layoutMatchScore < LAYOUT_REVIEW_THRESHOLD) {
     reviewReasons.push({

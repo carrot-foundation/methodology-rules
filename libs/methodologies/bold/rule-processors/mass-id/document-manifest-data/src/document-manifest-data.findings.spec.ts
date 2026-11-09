@@ -33,6 +33,12 @@ describe('toCrossValidationFinding', () => {
       ),
     },
     {
+      code: 'TEXT_LAYER_MISMATCH',
+      expectedFinding: DOCUMENT_MANIFEST_DATA_FINDINGS.finding(
+        'DOCUMENT_EXTRACTION.TEXT_LAYER_MISMATCH',
+      ),
+    },
+    {
       code: 'UNKNOWN_DOCUMENT_TYPE',
       expectedFinding: DOCUMENT_MANIFEST_DATA_FINDINGS.finding(
         'DOCUMENT_EXTRACTION.UNKNOWN_DOCUMENT_TYPE',

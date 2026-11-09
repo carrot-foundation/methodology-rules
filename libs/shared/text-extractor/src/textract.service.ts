@@ -1,4 +1,4 @@
-import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { S3Client } from '@aws-sdk/client-s3';
 import {
   type Block,
   DetectDocumentTextCommand,
@@ -13,6 +13,7 @@ import type {
 } from './text-extractor.types';
 
 import { splitPdfPages } from './pdf-splitter.helpers';
+import { downloadS3Object } from './s3-object.helpers';
 import {
   assertTextExtractionInput,
   assertTextExtractionResultRawText,
@@ -61,20 +62,6 @@ export class TextractService {
         `Text extraction completed in ${(durationMs / 1000).toFixed(1)}s for ${source}`,
       );
     }
-  }
-
-  private async downloadFromS3(
-    bucket: string,
-    key: string,
-  ): Promise<Uint8Array> {
-    const command = new GetObjectCommand({ Bucket: bucket, Key: key });
-    const response = await this.s3Client.send(command);
-
-    if (!response.Body) {
-      throw new Error(`Empty response body from S3 for s3://${bucket}/${key}`);
-    }
-
-    return response.Body.transformToByteArray();
   }
 
   private async extractFromLocalFile(
@@ -167,7 +154,7 @@ export class TextractService {
           `Sync extraction unsupported for s3://${bucket}/${key}, falling back to page splitting`,
         );
 
-        const pdfBytes = await this.downloadFromS3(bucket, key);
+        const pdfBytes = await downloadS3Object(this.s3Client, bucket, key);
 
         return this.extractWithPageSplitting(pdfBytes);
       }

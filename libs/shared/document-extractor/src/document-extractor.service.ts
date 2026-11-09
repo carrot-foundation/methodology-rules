@@ -4,9 +4,12 @@ import type {
   TextExtractor,
 } from '@carrot-fndn/shared/text-extractor';
 
+import { logger } from '@carrot-fndn/shared/helpers';
+
 import type {
   BaseExtractedData,
   DocumentExtractorConfig,
+  DocumentParser,
   ExtractionOutput,
 } from './document-extractor.types';
 
@@ -16,7 +19,13 @@ import {
   selectBestParser,
   selectBestParserGlobal,
 } from './layout-registry.helpers';
+import {
+  applyTextLayerMerge,
+  mergeTextLayerFields,
+} from './text-layer-merge.helpers';
 import { stripAccents } from './text-parsing.helpers';
+
+const EXPECTED_TEXT_LAYER_ERRORS = new Set(['InvalidPDFException', 'ZodError']);
 
 const normalizeAccents = (
   result: TextExtractionResult,
@@ -36,7 +45,10 @@ export interface DocumentExtractorService {
 }
 
 export class DocumentExtractor implements DocumentExtractorService {
-  constructor(private readonly textExtractor: TextExtractor) {}
+  constructor(
+    private readonly textExtractor: TextExtractor,
+    private readonly textLayerExtractor?: TextExtractor,
+  ) {}
 
   async extract<T extends BaseExtractedData>(
     input: TextExtractionInput,
@@ -56,13 +68,7 @@ export class DocumentExtractor implements DocumentExtractorService {
         throw new Error('No matching parser found across any document type');
       }
 
-      const result = bestMatch.parser.parse(extractionResult);
-
-      return {
-        ...result,
-        layoutId: bestMatch.parser.layoutId,
-        textExtractionResult: extractionResult,
-      };
+      return this.parseWithTextLayer(bestMatch.parser, input, extractionResult);
     }
 
     const resolvedLayouts =
@@ -92,13 +98,7 @@ export class DocumentExtractor implements DocumentExtractorService {
         );
       }
 
-      const result = parser.parse(extractionResult);
-
-      return {
-        ...result,
-        layoutId: parser.layoutId,
-        textExtractionResult: extractionResult,
-      };
+      return this.parseWithTextLayer(parser, input, extractionResult);
     }
 
     const bestMatch = selectBestParser<T>(
@@ -121,13 +121,63 @@ export class DocumentExtractor implements DocumentExtractorService {
       throw new NoMatchingLayoutError(documentType, resolvedLayouts);
     }
 
-    const result = bestMatch.parser.parse(extractionResult);
+    return this.parseWithTextLayer(bestMatch.parser, input, extractionResult);
+  }
 
-    return {
-      ...result,
-      layoutId: bestMatch.parser.layoutId,
+  private async parseWithTextLayer<T extends BaseExtractedData>(
+    parser: DocumentParser<T>,
+    input: TextExtractionInput,
+    extractionResult: TextExtractionResult,
+  ): Promise<ExtractionOutput<T>> {
+    const output = {
+      ...parser.parse(extractionResult),
+      layoutId: parser.layoutId,
       textExtractionResult: extractionResult,
     };
+
+    if (
+      !this.textLayerExtractor ||
+      parser.documentType !== 'transportManifest'
+    ) {
+      return output;
+    }
+
+    try {
+      const textLayerData = parser.parse(
+        normalizeAccents(await this.textLayerExtractor.extractText(input)),
+      ).data;
+      const merge = mergeTextLayerFields(output.data, textLayerData);
+
+      logger.info(
+        {
+          mismatchedField:
+            merge.outcome === 'disagreement'
+              ? merge.mismatchedField
+              : undefined,
+          outcome: merge.outcome,
+        },
+        'PDF text layer compared with OCR',
+      );
+
+      return applyTextLayerMerge(output, merge);
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        EXPECTED_TEXT_LAYER_ERRORS.has(error.name)
+      ) {
+        logger.info(
+          { err: error, input },
+          'No usable PDF text layer, using OCR only',
+        );
+      } else {
+        logger.warn(
+          { err: error, input },
+          'PDF text layer failed, using OCR only',
+        );
+      }
+
+      return output;
+    }
   }
 }
 
@@ -142,4 +192,6 @@ export class NoMatchingLayoutError extends Error {
 
 export const createDocumentExtractor = (
   textExtractor: TextExtractor,
-): DocumentExtractorService => new DocumentExtractor(textExtractor);
+  textLayerExtractor?: TextExtractor,
+): DocumentExtractorService =>
+  new DocumentExtractor(textExtractor, textLayerExtractor);
