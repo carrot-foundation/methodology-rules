@@ -257,6 +257,19 @@ describe('text-parsing.helpers', () => {
       expect(result.taxId.parsed).toBe('12.345.678/0001-90');
     });
 
+    it('should keep the name and mark only the tax ID low when the tax ID is missing', () => {
+      const result = createExtractedEntity({
+        rawMatch: 'raw section text',
+        value: { name: 'Company Name' as NonEmptyString },
+      });
+
+      expect(result.name).toMatchObject({
+        confidence: 'high',
+        parsed: 'Company Name',
+      });
+      expect(result.taxId).toMatchObject({ confidence: 'low', parsed: '' });
+    });
+
     it('should return low confidence empty fields when extraction is undefined', () => {
       const result = createExtractedEntity(undefined);
 
@@ -371,6 +384,20 @@ describe('text-parsing.helpers', () => {
       );
 
       expect(result).toBeUndefined();
+    });
+
+    it('should extract the name without a tax ID when the CNPJ label has no number', () => {
+      const text =
+        'Gerador\nRazao Social: Company ABC LTDA\nCPF/CNPJ:\nDestinador\nOther';
+
+      const result = extractEntityFromSection(
+        text,
+        /^\s*Gerador\s*$/i,
+        sectionPatterns,
+        cnpjPattern,
+      );
+
+      expect(result?.value).toEqual({ name: 'Company ABC LTDA' });
     });
 
     it('should return undefined when no valid name is found', () => {
