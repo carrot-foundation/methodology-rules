@@ -83,6 +83,7 @@ const GLYPH_DESCENT = -0.2;
 const GLYPH_ASCENT = 0.8;
 const MIN_CONTRAST_RATIO = 2;
 const MIN_FONT_SIZE_POINTS = 4;
+const MIN_COVERING_STROKE_POINTS = 2;
 const OVERLAP_EPSILON = 1e-6;
 const WHITE = '#ffffff';
 const FILL_RENDER_MODES = new Set([0, 2]);
@@ -498,7 +499,17 @@ const walkOperatorList = async (
           });
         }
 
-        if (STROKE_PATH_OPS.has(paintOperator)) {
+        const strokeWidth =
+          state.lineWidth *
+          Math.max(
+            Math.hypot(state.ctm[0], state.ctm[1]),
+            Math.hypot(state.ctm[2], state.ctm[3]),
+          );
+
+        if (
+          STROKE_PATH_OPS.has(paintOperator) &&
+          strokeWidth >= MIN_COVERING_STROKE_POINTS
+        ) {
           const pad =
             (state.lineWidth * Math.max(state.miterLimit, Math.SQRT2)) / 2;
           const [x0, y0, x1, y1] = bounds;

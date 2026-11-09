@@ -65,6 +65,7 @@ const wordsOf = async (operations: readonly Operation[]) => {
 const strokeAfterText = (setup: Operation[]) =>
   wordsOf([
     ...textAt('A'),
+    [OPS.setLineWidth, [3]],
     ...setup,
     ...paintRect('#ffffff', [0, 47, 9.5, 47], OPS.stroke),
   ]);
@@ -208,7 +209,7 @@ describe('extractVisibleWords', () => {
           OPS.setGState,
           [
             [
-              ['LW', 1],
+              ['LW', 5],
               ['ML', 10],
             ],
           ],
@@ -257,7 +258,7 @@ describe('extractVisibleWords', () => {
     },
   );
 
-  it('should keep text after a form ends, beside a stroke, and in modelled state', async () => {
+  it('should keep text after a form ends, beside a stroke, under a thin stroke, and in modelled state', async () => {
     expect(
       await wordsOf([
         [
@@ -285,6 +286,7 @@ describe('extractVisibleWords', () => {
         [OPS.setTextRenderingMode, [2]],
         ...textAt('A'),
         ...paintRect('#000000', [80, 80, 90, 90], OPS.stroke),
+        ...paintRect('#ffffff', [0, 51, 50, 51], OPS.stroke),
         [OPS.constructPath, [OPS.fill, [[]], null]],
       ]),
     ).toEqual(['A']);
