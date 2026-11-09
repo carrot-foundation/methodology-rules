@@ -153,6 +153,7 @@ export const MASS_ID_CATALOG: MassIDCatalog = {
     title: 'MassID',
     type: BoldDocumentType.ORGANIC,
   },
+  documentResponsibleParty: { roles: [MassIDActorType.WASTE_GENERATOR] },
   events: [
     {
       ...WASTE_GENERATOR,
@@ -221,6 +222,14 @@ export const MASS_ID_CATALOG: MassIDCatalog = {
       ],
       externalCreatedAt: CREATED_AT,
       name: PICK_UP,
+      responsibleParty: {
+        conditions: {
+          en: 'Waste Generator for the first Pick-up with identified origin; Processor for subsequent Pick-ups. For unidentified origin, the framework refers to the First Identified Participant. The current geolocation check still treats the first Pick-up as Waste Generator.',
+          'pt-BR':
+            'Waste Generator no primeiro Pick-up com origem identificada; Processor nos Pick-ups seguintes. Para origem não identificada, o framework se refere ao First Identified Participant. A verificação atual de geolocalização ainda trata o primeiro Pick-up como Waste Generator.',
+        },
+        roles: [MassIDActorType.WASTE_GENERATOR, MassIDActorType.PROCESSOR],
+      },
       slug: 'pick-up',
     },
     {
@@ -260,14 +269,15 @@ export const MASS_ID_CATALOG: MassIDCatalog = {
       ],
       externalCreatedAt: CREATED_AT,
       name: TRANSPORT_MANIFEST,
+      responsibleParty: { roles: [MassIDActorType.WASTE_GENERATOR] },
       slug: 'transport-manifest',
       value: WEIGHED_MASS,
     },
     {
-      ...WASTE_GENERATOR,
+      ...RECYCLER,
       attributes: [
         {
-          example: 'Weighing captured at waste generator site',
+          example: 'Weighing captured at recycler site',
           name: DESCRIPTION,
           required: 'yes',
           valueType: 'string',
@@ -337,6 +347,7 @@ export const MASS_ID_CATALOG: MassIDCatalog = {
       ],
       externalCreatedAt: CREATED_AT,
       name: WEIGHING,
+      responsibleParty: { roles: [MassIDActorType.RECYCLER] },
       slug: 'weighing',
       value: WEIGHED_MASS,
     },
@@ -359,10 +370,18 @@ export const MASS_ID_CATALOG: MassIDCatalog = {
       ],
       externalCreatedAt: CREATED_AT,
       name: DROP_OFF,
+      responsibleParty: {
+        conditions: {
+          en: 'Recycler for the final Drop-off; Processor for intermediate Drop-offs. If a Drop-off identifies a Processor, the framework requires a subsequent Drop-off identifying the Recycler. The current audit checks the last Drop-off address against the Recycler actor address.',
+          'pt-BR':
+            'Recycler no último Drop-off; Processor nos Drop-offs intermediários. Se um Drop-off identificar um Processor, o framework exige um Drop-off posterior identificando o Recycler. A auditoria atual compara o endereço do último Drop-off com o endereço do ator Recycler.',
+        },
+        roles: [MassIDActorType.RECYCLER, MassIDActorType.PROCESSOR],
+      },
       slug: 'drop-off',
     },
     {
-      ...PROCESSOR,
+      ...RECYCLER,
       attributes: [
         {
           example: 'Sorting factor determined by a third-party audit',
@@ -389,6 +408,7 @@ export const MASS_ID_CATALOG: MassIDCatalog = {
       ],
       externalCreatedAt: CREATED_AT,
       name: SORTING,
+      responsibleParty: { roles: [MassIDActorType.RECYCLER] },
       slug: 'sorting',
       value: 1189.906,
     },
@@ -405,6 +425,7 @@ export const MASS_ID_CATALOG: MassIDCatalog = {
       ],
       externalCreatedAt: RECYCLED_AT,
       name: RECYCLED,
+      responsibleParty: { roles: [MassIDActorType.RECYCLER] },
       slug: 'recycled',
     },
     {
@@ -444,6 +465,7 @@ export const MASS_ID_CATALOG: MassIDCatalog = {
       ],
       externalCreatedAt: CREATED_AT,
       name: RECYCLING_MANIFEST,
+      responsibleParty: { roles: [MassIDActorType.RECYCLER] },
       slug: 'recycling-manifest',
       value: WEIGHED_MASS,
     },

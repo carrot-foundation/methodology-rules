@@ -174,23 +174,31 @@ export const toActorPayload = (actor: CatalogActor): EventPayload =>
 
 export const toEventsManifest = ({
   actors,
+  documentResponsibleParty,
   events,
 }: MassIDCatalog): EventsManifest => ({
   events: [
-    { name: CREATE_MASS_ID_NAME, slug: CREATE_MASS_ID_SLUG },
+    {
+      name: CREATE_MASS_ID_NAME,
+      responsibleParty: documentResponsibleParty,
+      slug: CREATE_MASS_ID_SLUG,
+    },
     ...actors.map(({ label, slug }) => ({
       name: `${BoldDocumentEventName.ACTOR}:${label}`,
+      responsibleParty: { roles: [label] },
       slug,
     })),
-    ...events.map(({ name, slug }) => ({
+    ...events.map(({ name, responsibleParty, slug }) => ({
       attributes: attributesPath(slug),
       name,
+      responsibleParty,
       slug,
     })),
-  ].map(({ name, slug, ...artifacts }, order) => ({
+  ].map(({ name, responsibleParty, slug, ...artifacts }, order) => ({
     artifacts: { ...artifacts, payload: payloadPath(slug) },
     name,
     order,
+    responsibleParty,
     slug,
   })),
   schemaVersion: 1,
