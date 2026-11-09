@@ -165,7 +165,10 @@ export class DocumentExtractor implements DocumentExtractorService {
         error instanceof Error &&
         EXPECTED_TEXT_LAYER_ERRORS.has(error.name)
       ) {
-        logger.info({ err: error }, 'No usable PDF text layer, using OCR only');
+        logger.info(
+          { err: error, input },
+          'No usable PDF text layer, using OCR only',
+        );
       } else {
         logger.warn(
           { err: error, input },

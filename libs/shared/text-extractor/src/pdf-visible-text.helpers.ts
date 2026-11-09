@@ -34,10 +34,12 @@ type Operators = Awaited<ReturnType<typeof getResolvedPDFJS>>['OPS'];
 interface PdfFont {
   fontMatrix?: number[];
   isType3Font: boolean;
+  missingFile?: boolean;
   vertical: boolean;
 }
 
 interface PdfGlyph {
+  isInFont: boolean;
   isSpace: boolean;
   unicode: string;
   width: number;
@@ -68,6 +70,7 @@ interface State {
 
 type StateSetting =
   | 'charSpacing'
+  | 'fillColor'
   | 'leading'
   | 'lineWidth'
   | 'rise'
@@ -85,7 +88,8 @@ const MIN_FONT_SIZE_POINTS = 4;
 const MIN_COVERING_STROKE_POINTS = 2;
 const OVERLAP_EPSILON = 1e-6;
 const WHITE = '#ffffff';
-const FILL_RENDER_MODES = new Set([0, 2]);
+const FILL_RENDER_MODE = 0;
+const FILL_STROKE_RENDER_MODE = 2;
 const INVISIBLE_RENDER_MODE = 3;
 
 const NO_VISUAL_EFFECT_GSTATE_KEYS = new Set([
@@ -139,17 +143,17 @@ const relativeLuminance = (hex: string): number => {
 
 const contrastRatio = (first: string, second: string): number => {
   const [light, dark] = [relativeLuminance(first), relativeLuminance(second)]
-    .sort((a, b) => b - a)
+    .sort((higher, lower) => lower - higher)
     .map((luminance) => luminance + 0.05);
 
   return light! / dark!;
 };
 
-const overlaps = (a: Rect, b: Rect): boolean =>
-  a.left + OVERLAP_EPSILON < b.right &&
-  b.left + OVERLAP_EPSILON < a.right &&
-  a.top + OVERLAP_EPSILON < b.bottom &&
-  b.top + OVERLAP_EPSILON < a.bottom;
+const overlaps = (first: Rect, second: Rect): boolean =>
+  first.left + OVERLAP_EPSILON < second.right &&
+  second.left + OVERLAP_EPSILON < first.right &&
+  first.top + OVERLAP_EPSILON < second.bottom &&
+  second.top + OVERLAP_EPSILON < first.bottom;
 
 const contains = (rect: Rect, x: number, y: number): boolean =>
   x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
@@ -288,6 +292,7 @@ const walkOperatorList = async (
 
   const STATE_SETTINGS: Array<[number, StateSetting]> = [
     [OPS.setCharSpacing, 'charSpacing'],
+    [OPS.setFillRGBColor, 'fillColor'],
     [OPS.setLeading, 'leading'],
     [OPS.setLineWidth, 'lineWidth'],
     [OPS.setTextRise, 'rise'],
@@ -378,7 +383,10 @@ const walkOperatorList = async (
           renderingMatrix[0] * renderingMatrix[3] -
             renderingMatrix[1] * renderingMatrix[2],
         ) / width;
-      const isPainted = FILL_RENDER_MODES.has(state.renderMode);
+      const isPainted =
+        (state.renderMode === FILL_RENDER_MODE ||
+          state.renderMode === FILL_STROKE_RENDER_MODE) &&
+        (item.isInFont || state.font?.missingFile === true);
       const rect = toRect(renderingMatrix, [
         0,
         GLYPH_DESCENT,
@@ -388,6 +396,7 @@ const walkOperatorList = async (
 
       glyphs.push(
         isPainted &&
+          state.renderMode === FILL_RENDER_MODE &&
           !state.clipped &&
           height >= MIN_FONT_SIZE_POINTS &&
           width >= height / 2
@@ -456,7 +465,7 @@ const walkOperatorList = async (
         [
           op,
           (arguments_: readonly unknown[]) => {
-            Object.assign(state, { [setting]: arguments_[0] as number });
+            Object.assign(state, { [setting]: arguments_[0] });
           },
         ] as const,
     ),
@@ -563,12 +572,6 @@ const walkOperatorList = async (
     [OPS.restore, restore],
     [OPS.save, save],
     [
-      OPS.setFillRGBColor,
-      (arguments_) => {
-        state.fillColor = arguments_[0] as string;
-      },
-    ],
-    [
       OPS.setFont,
       (arguments_) => {
         const font = page.commonObjs.get(arguments_[0] as string) as PdfFont;
@@ -627,7 +630,11 @@ const walkOperatorList = async (
         const mode = arguments_[0] as number;
 
         assertModelled(
-          FILL_RENDER_MODES.has(mode) || mode === INVISIBLE_RENDER_MODE,
+          [
+            FILL_RENDER_MODE,
+            FILL_STROKE_RENDER_MODE,
+            INVISIBLE_RENDER_MODE,
+          ].includes(mode),
           'text render mode',
         );
         state.renderMode = mode;

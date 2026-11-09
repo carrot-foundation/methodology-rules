@@ -78,11 +78,11 @@ const toPageBlocks = (
       id: id('word', index),
       text,
     }))
-    .sort((a, b) => a.boundingBox.top - b.boundingBox.top);
+    .sort((first, second) => first.boundingBox.top - second.boundingBox.top);
 
   const lineBlocks = clusterBlocksByY(wordBlocks).flatMap((row) => {
     const rowWords = row.toSorted(
-      (a, b) => a.boundingBox!.left - b.boundingBox!.left,
+      (first, second) => first.boundingBox!.left - second.boundingBox!.left,
     );
 
     return groupWordsIntoCells(rowWords, mergeBoxes(rowWords).height);

@@ -10,7 +10,8 @@ type Operation = [number, null | unknown[]];
 
 const PAGE_SIZE = 100;
 
-const glyph = (unicode: string) => ({
+const glyph = (unicode: string, isInFont = true) => ({
+  isInFont,
   isSpace: unicode === ' ',
   unicode,
   width: 500,
@@ -157,6 +158,19 @@ describe('extractVisibleWords', () => {
     {
       operations: [[OPS.setTextRenderingMode, [3]], ...textAt('A')],
       rule: 'in invisible render mode',
+    },
+    {
+      operations: [[OPS.setTextRenderingMode, [2]], ...textAt('A')],
+      rule: 'in fill-then-stroke render mode',
+    },
+    {
+      operations: [
+        [OPS.beginText, null],
+        [OPS.setFont, ['f1', 4]],
+        [OPS.setTextMatrix, [[1, 0, 0, 1, 10, 50]]],
+        [OPS.showText, [[glyph('A', false)]]],
+      ],
+      rule: 'with a glyph missing from its font',
     },
     {
       operations: [[OPS.setFillRGBColor, ['#f5f5f5']], ...textAt('A')],
@@ -312,7 +326,7 @@ describe('extractVisibleWords', () => {
             ],
           ],
         ],
-        [OPS.setTextRenderingMode, [2]],
+        [OPS.setTextRenderingMode, [0]],
         ...textAt('A'),
         ...paintRect('#000000', [80, 80, 90, 90], OPS.stroke),
         ...paintRect('#ffffff', [0, 51, 50, 51], OPS.stroke),
@@ -376,13 +390,55 @@ describe('extractVisibleWords', () => {
   });
 
   it('should keep the previous miter limit when a new one is invalid', async () => {
-    expect(await strokeAfterText([[OPS.setMiterLimit, [1]]])).toEqual(['A']);
+    expect(await strokeAfterText([[OPS.setMiterLimit, [-1]]])).toEqual([]);
+    expect(await strokeAfterText([[OPS.setMiterLimit, [Number.NaN]]])).toEqual(
+      [],
+    );
     expect(
       await strokeAfterText([
         [OPS.setMiterLimit, [1]],
         [OPS.setMiterLimit, [-1]],
       ]),
     ).toEqual(['A']);
+  });
+
+  it('should pad a thick stroke by at least half its width times the square root of two', async () => {
+    expect(
+      await wordsOf([
+        ...textAt('A'),
+        [OPS.setLineWidth, [3]],
+        [OPS.setMiterLimit, [1]],
+        ...paintRect('#ffffff', [0, 47.5, 9.5, 47.5], OPS.stroke),
+      ]),
+    ).toEqual([]);
+  });
+
+  it('should drop the page on a restore inside a form that would pop the form', async () => {
+    expect(
+      await wordsOf([
+        [OPS.save, null],
+        [OPS.paintFormXObjectBegin, [null, null]],
+        [OPS.restore, null],
+        [OPS.paintFormXObjectEnd, null],
+        ...textAt('A'),
+      ]),
+    ).toEqual([]);
+  });
+
+  it('should keep a glyph missing from a font whose file is missing', async () => {
+    const words = await extractVisibleWords(
+      fakePage(
+        [
+          [OPS.beginText, null],
+          [OPS.setFont, ['f1', 4]],
+          [OPS.setTextMatrix, [[1, 0, 0, 1, 10, 50]]],
+          [OPS.showText, [[glyph('A', false)]]],
+        ],
+        { f1: { isType3Font: false, missingFile: true, vertical: false } },
+      ),
+    );
+
+    expect(words.map(({ text }) => text)).toEqual(['A']);
   });
 
   it('should propagate unexpected operator list failures', async () => {

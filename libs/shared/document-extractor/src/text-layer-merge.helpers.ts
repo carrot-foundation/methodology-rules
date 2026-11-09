@@ -15,6 +15,7 @@ import {
 import {
   DOCUMENT_EXTRACTION_COMMENTS,
   type DocumentExtractionCommentKey,
+  LOW_CONFIDENCE_REASON_CODE_PREFIX,
 } from './document-extraction.constants';
 
 export type TextLayerMergeResult<T extends BaseExtractedData> =
@@ -125,19 +126,13 @@ export const mergeTextLayerFields = <T extends BaseExtractedData>(
     return { outcome: 'unverified' };
   }
 
-  const stillLow = new Set(
-    collectLowConfidenceFields(merged, Object.keys(merged)),
-  );
-
   return {
     data: {
       ...merged,
-      lowConfidenceFields: [
-        ...primary.lowConfidenceFields.filter((field) => stillLow.has(field)),
-        ...[...stillLow].filter(
-          (field) => !primary.lowConfidenceFields.includes(field),
-        ),
-      ],
+      lowConfidenceFields: collectLowConfidenceFields(
+        merged,
+        Object.keys(merged),
+      ),
     } as unknown as T,
     outcome: 'filled',
   };
@@ -167,18 +162,13 @@ export const applyTextLayerMerge = <T extends BaseExtractedData>(
     };
   }
 
-  const before = output.data.lowConfidenceFields;
-  const after = merge.data.lowConfidenceFields;
-  const clearedCodes = new Set(
-    before
-      .filter((field) => !after.includes(field))
-      .map((field) => lowConfidenceReviewReason(field).code),
-  );
   const reviewReasons = [
-    ...output.reviewReasons.filter(({ code }) => !clearedCodes.has(code)),
-    ...after
-      .filter((field) => !before.includes(field))
-      .map((field) => lowConfidenceReviewReason(field)),
+    ...output.reviewReasons.filter(
+      ({ code }) => !code.startsWith(LOW_CONFIDENCE_REASON_CODE_PREFIX),
+    ),
+    ...merge.data.lowConfidenceFields.map((field) =>
+      lowConfidenceReviewReason(field),
+    ),
   ];
 
   return {

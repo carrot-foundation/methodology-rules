@@ -26,10 +26,12 @@ const OTHER_HAULER_TAX_ID = '55.666.777/0001-88';
 const RECEIVER_TAX_ID = '11.222.333/0001-44';
 
 const mtrLines = ({
+  generatorCity = { text: 'Município: São Gabriel' },
   generatorTaxId,
   haulerTaxId = { text: `CNPJ: ${HAULER_TAX_ID}` },
   receiverTaxId = { text: `CNPJ: ${RECEIVER_TAX_ID}` },
 }: {
+  generatorCity?: StubPdfLine;
   generatorTaxId: StubPdfLine;
   haulerTaxId?: StubPdfLine;
   receiverTaxId?: StubPdfLine;
@@ -42,7 +44,7 @@ const mtrLines = ({
   { text: 'EMPRESA GERADORA LTDA' },
   generatorTaxId,
   { text: 'Endereco: Rua Industrial, 100' },
-  { text: 'Municipio: Cidade Interior' },
+  generatorCity,
   { text: 'UF: RS' },
   { text: 'Transportador' },
   { text: 'TRANSPORTES AMBIENTAIS S.A.' },
@@ -62,6 +64,7 @@ const toText = (lines: readonly StubPdfLine[]): NonEmptyString =>
   lines.map((line) => line.text).join('\n');
 
 const ocrLines = mtrLines({
+  generatorCity: { text: '' },
   generatorTaxId: { text: 'CNPJ:' },
   receiverTaxId: { text: 'CNPJ:' },
 });
@@ -97,7 +100,7 @@ describe('MTR PDF text-layer fallback', () => {
     await rm(directory, { force: true, recursive: true });
   });
 
-  it('should fill a tax id OCR missed from the visible text layer', async () => {
+  it('should fill a tax id and an accented-label city OCR missed from the visible text layer', async () => {
     const result = await extract(
       await stubPdfWithLines(
         mtrLines({ generatorTaxId: { text: `CNPJ: ${GENERATOR_TAX_ID}` } }),
@@ -107,6 +110,10 @@ describe('MTR PDF text-layer fallback', () => {
     expect(result.data.generator?.taxId).toMatchObject({
       confidence: 'high',
       parsed: GENERATOR_TAX_ID,
+    });
+    expect(result.data.generator?.city).toMatchObject({
+      confidence: 'high',
+      parsed: 'Sao Gabriel',
     });
     expect(result.data.lowConfidenceFields).not.toContain('generator.taxId');
     expect(result.reviewReasons.map(({ code }) => code)).not.toContain(
