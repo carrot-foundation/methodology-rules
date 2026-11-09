@@ -13,7 +13,9 @@ reviews:
   request_changes_workflow: false
 
   auto_review:
-    enabled: true
+    # The reviewer ladder requests CodeRabbit with a marked `@coderabbitai review` comment when it
+    # picks it. A PR nobody requested gets no CodeRabbit review.
+    enabled: false
     # Defer review until ready so unfinished changes do not consume the author's allowance.
     drafts: false
     # Every run counts against the PR author's review allowance, and a run on each push used it up
