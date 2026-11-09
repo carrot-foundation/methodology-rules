@@ -489,6 +489,8 @@ describe('extractVisibleWords', () => {
         ]),
       ),
     ).toEqual(['A']);
+    expect(await wordsOf(spike([[OPS.setLineJoin, [5]]]))).toEqual([]);
+    expect(await wordsOf(spike([[OPS.setMiterLimit, [0]]]))).toEqual([]);
   });
 
   it('should hide text under a closed path join, curves and quadratic curves', async () => {
@@ -499,6 +501,19 @@ describe('extractVisibleWords', () => {
       await wordsOf(strokeOver([0, 0, 0, 2, 11, 51, 11, 51, 0, 100])),
     ).toEqual([]);
     expect(await wordsOf(strokeOver([0, 0, 0, 3, 11, 51, 0, 100]))).toEqual([]);
+  });
+
+  it('should hide text under the square cap of a diagonal stroke', async () => {
+    expect(
+      await wordsOf([
+        ...textAt('A', 5, 52.8),
+        [OPS.setLineWidth, [10]],
+        [
+          OPS.constructPath,
+          [OPS.stroke, [[0, -2, 40, 1, 6, 48]], [-2, 40, 6, 48]],
+        ],
+      ]),
+    ).toEqual([]);
   });
 
   it('should drop the whole page on an unknown path command', async () => {

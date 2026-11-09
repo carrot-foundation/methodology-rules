@@ -92,6 +92,8 @@ const PATH_CURVE_TO = 2;
 const PATH_QUADRATIC_CURVE_TO = 3;
 const PATH_CLOSE = 4;
 const MITER_JOIN = 0;
+const NON_MITER_JOINS = new Set([1, 2]);
+const DEFAULT_MITER_LIMIT = 10;
 
 const NO_VISUAL_EFFECT_GSTATE_KEYS = new Set([
   'D',
@@ -117,6 +119,9 @@ const assertModelled = (isModelled: boolean, reason: string): void => {
 };
 
 const ignore = (): void => undefined;
+
+const effectiveMiterLimit = (limit: number): number =>
+  Number.isFinite(limit) && limit > 0 ? limit : DEFAULT_MITER_LIMIT;
 
 const multiply = (m1: Matrix, m2: Matrix): Matrix => [
   m1[0] * m2[0] + m1[1] * m2[2],
@@ -236,7 +241,7 @@ const strokeBounds = (
 
     join(startDirection);
     first ??= startDirection;
-    result.push(boundsAround([current, ...points], half));
+    result.push(boundsAround([current, ...points], half * Math.SQRT2));
     incoming =
       [current, ...points]
         .reverse()
@@ -485,7 +490,7 @@ const walkOperatorList = async (
     leading: 0,
     lineJoin: MITER_JOIN,
     lineWidth: 1,
-    miterLimit: 10,
+    miterLimit: DEFAULT_MITER_LIMIT,
     renderMode: 0,
     rise: 0,
     wordSpacing: 0,
@@ -662,8 +667,9 @@ const walkOperatorList = async (
         }
 
         if (STROKE_PATH_OPS.has(paintOperator)) {
-          const miterLimit =
-            state.lineJoin === MITER_JOIN ? state.miterLimit : undefined;
+          const miterLimit = NON_MITER_JOINS.has(state.lineJoin)
+            ? undefined
+            : effectiveMiterLimit(state.miterLimit);
 
           covers.push(
             ...[firstPath!, ...otherPaths]
