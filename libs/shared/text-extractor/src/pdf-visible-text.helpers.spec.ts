@@ -82,9 +82,10 @@ describe('extractVisibleWords', () => {
     ).toEqual([]);
   });
 
-  it('should drop a word split by a hidden space rather than emit its halves', async () => {
+  it('should drop the page rather than emit a word that mixes painted and hidden glyphs', async () => {
     expect(
       await wordsOf([
+        ...textAt('B', 60, 20),
         [OPS.beginText, null],
         [OPS.setFont, ['f1', 4]],
         [OPS.setTextMatrix, [[1, 0, 0, 1, 10, 50]]],
@@ -228,7 +229,7 @@ describe('extractVisibleWords', () => {
       rule: 'overlapped by the next line through tight leading',
     },
   ] as Array<{ operations: Operation[]; rule: string }>)(
-    'should drop a whole word when one of its glyphs is $rule',
+    'should never emit a word when one of its glyphs is $rule',
     async ({ operations }) => {
       const words = await wordsOf(operations);
 
@@ -346,32 +347,12 @@ describe('extractVisibleWords', () => {
     },
     {
       operations: [
-        [OPS.eoClip, null],
-        [OPS.constructPath, [OPS.endPath, [[]], null]],
-        ...textAt('A'),
-      ],
-      rule: 'inside any clip',
-    },
-    {
-      operations: [
-        [OPS.paintFormXObjectBegin, [null, null]],
-        ...textAt('A'),
-        [OPS.paintFormXObjectEnd, null],
-      ],
-      rule: 'inside a form XObject',
-    },
-    {
-      operations: [
         [OPS.beginText, null],
         [OPS.setFont, ['f1', 1]],
         [OPS.setTextMatrix, [[12, 0, 11.9, 0.3, 10, 50]]],
         [OPS.showText, [glyphs('A')]],
       ],
       rule: 'below the minimum rendered size',
-    },
-    {
-      operations: [[OPS.setHScale, [10]], ...textAt('A')],
-      rule: 'squeezed horizontally',
     },
   ] as Array<{ operations: Operation[]; rule: string }>)(
     'should drop text drawn $rule',
@@ -451,6 +432,36 @@ describe('extractVisibleWords', () => {
     'should drop the whole page when it uses $rule',
     async ({ operation }) => {
       expect(await wordsOf([...textAt('A'), operation])).toEqual([]);
+    },
+  );
+
+  it.each([
+    {
+      operations: [
+        [OPS.eoClip, null],
+        [OPS.constructPath, [OPS.endPath, [[]], null]],
+        ...textAt('A'),
+      ],
+      rule: 'inside any clip',
+    },
+    {
+      operations: [
+        [OPS.paintFormXObjectBegin, [null, null]],
+        ...textAt('A'),
+        [OPS.paintFormXObjectEnd, null],
+      ],
+      rule: 'inside a form XObject',
+    },
+    {
+      operations: [[OPS.setHScale, [10]], ...textAt('A')],
+      rule: 'squeezed horizontally',
+    },
+  ] as Array<{ operations: Operation[]; rule: string }>)(
+    'should drop the whole page when painted text is $rule',
+    async ({ operations }) => {
+      expect(await wordsOf([...textAt('B', 60, 20), ...operations])).toEqual(
+        [],
+      );
     },
   );
 

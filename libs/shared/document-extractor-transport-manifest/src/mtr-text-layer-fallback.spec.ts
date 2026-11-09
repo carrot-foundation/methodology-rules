@@ -133,24 +133,24 @@ describe('MTR PDF text-layer fallback', () => {
     );
   });
 
-  it.each(['invisible-mode', 'clipped'] as const)(
-    'should drop only a tax id drawn %s',
-    async (concealment) => {
-      const result = await extract(
-        await stubPdfWithLines(
-          mtrLines({
-            generatorTaxId: { concealment, text: `CNPJ: ${GENERATOR_TAX_ID}` },
-          }),
-        ),
-      );
+  it('should drop only a tax id drawn in invisible mode', async () => {
+    const result = await extract(
+      await stubPdfWithLines(
+        mtrLines({
+          generatorTaxId: {
+            concealment: 'invisible-mode',
+            text: `CNPJ: ${GENERATOR_TAX_ID}`,
+          },
+        }),
+      ),
+    );
 
-      expect(result.data.generator?.taxId.parsed).toBe('');
-      expect(result.data.lowConfidenceFields).toContain('generator.taxId');
-      expect(result.data.receiver?.taxId.parsed).toBe(RECEIVER_TAX_ID);
-    },
-  );
+    expect(result.data.generator?.taxId.parsed).toBe('');
+    expect(result.data.lowConfidenceFields).toContain('generator.taxId');
+    expect(result.data.receiver?.taxId.parsed).toBe(RECEIVER_TAX_ID);
+  });
 
-  it.each(['white', 'off-page', 'covered', 'under-image'] as const)(
+  it.each(['clipped', 'white', 'off-page', 'covered', 'under-image'] as const)(
     'should drop the whole text layer when a tax id is painted %s',
     async (concealment) => {
       const textLayerSpy = vi.spyOn(pdfTextLayerExtractor, 'extractText');

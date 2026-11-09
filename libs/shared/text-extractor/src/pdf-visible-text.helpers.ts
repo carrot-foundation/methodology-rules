@@ -21,7 +21,7 @@ interface Cover {
 interface Glyph {
   color: string;
   coversBefore: number;
-  isLegible: boolean;
+  isPainted: boolean;
   rect: Rect;
   text: string;
 }
@@ -189,10 +189,16 @@ const joinGlyphsIntoWords = (glyphs: readonly Glyph[]): VisibleWord[] => {
   const words: VisibleWord[] = [];
   let current: Rect | undefined;
   let text = '';
-  let isEveryGlyphVisible = true;
+  let hasPainted = false;
+  let hasHidden = false;
 
   const flush = () => {
-    if (current && isEveryGlyphVisible) {
+    assertModelled(
+      !(hasPainted && hasHidden),
+      'word mixing painted and hidden glyphs',
+    );
+
+    if (current && !hasHidden) {
       words.push({
         height: current.bottom - current.top,
         left: current.left,
@@ -204,11 +210,12 @@ const joinGlyphsIntoWords = (glyphs: readonly Glyph[]): VisibleWord[] => {
 
     current = undefined;
     text = '';
-    isEveryGlyphVisible = true;
+    hasPainted = false;
+    hasHidden = false;
   };
 
   for (const glyph of glyphs) {
-    if (glyph.isLegible && glyph.text.trim().length === 0) {
+    if (glyph.isPainted && glyph.text.trim().length === 0) {
       flush();
       continue;
     }
@@ -234,7 +241,8 @@ const joinGlyphsIntoWords = (glyphs: readonly Glyph[]): VisibleWord[] => {
         }
       : rect;
     text += glyph.text;
-    isEveryGlyphVisible &&= glyph.isLegible;
+    hasPainted ||= glyph.isPainted;
+    hasHidden ||= !glyph.isPainted;
   }
 
   flush();
@@ -390,6 +398,12 @@ const walkOperatorList = async (
       const isPainted =
         state.renderMode === FILL_RENDER_MODE &&
         (item.isInFont || state.font?.missingFile === true);
+
+      assertModelled(
+        !isPainted || (!state.clipped && width >= height / 2),
+        'painted text clipped or squeezed',
+      );
+
       const rect = toRect(renderingMatrix, [
         0,
         GLYPH_DESCENT,
@@ -400,7 +414,7 @@ const walkOperatorList = async (
       glyphs.push({
         color: state.fillColor,
         coversBefore: covers.length,
-        isLegible: isPainted && !state.clipped && width >= height / 2,
+        isPainted,
         rect,
         text: item.unicode,
       });
@@ -654,7 +668,7 @@ const walkOperatorList = async (
   }
 
   assertModelled(
-    glyphs.every((glyph) => !glyph.isLegible || isGlyphVisible(glyph, covers)),
+    glyphs.every((glyph) => !glyph.isPainted || isGlyphVisible(glyph, covers)),
     'painted text that is not visible',
   );
 
