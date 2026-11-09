@@ -160,10 +160,6 @@ describe('extractVisibleWords', () => {
       rule: 'in invisible render mode',
     },
     {
-      operations: [[OPS.setTextRenderingMode, [2]], ...textAt('A')],
-      rule: 'in fill-then-stroke render mode',
-    },
-    {
       operations: [
         [OPS.beginText, null],
         [OPS.setFont, ['f1', 4]],
@@ -358,6 +354,10 @@ describe('extractVisibleWords', () => {
     {
       operation: [OPS.setTextRenderingMode, [1]],
       rule: 'a stroke render mode',
+    },
+    {
+      operation: [OPS.setTextRenderingMode, [2]],
+      rule: 'a fill-then-stroke render mode',
     },
     { operation: [OPS.restore, null], rule: 'an unbalanced restore' },
     {

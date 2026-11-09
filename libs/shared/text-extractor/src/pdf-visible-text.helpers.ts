@@ -89,7 +89,6 @@ const MIN_COVERING_STROKE_POINTS = 2;
 const OVERLAP_EPSILON = 1e-6;
 const WHITE = '#ffffff';
 const FILL_RENDER_MODE = 0;
-const FILL_STROKE_RENDER_MODE = 2;
 const INVISIBLE_RENDER_MODE = 3;
 
 const NO_VISUAL_EFFECT_GSTATE_KEYS = new Set([
@@ -384,8 +383,7 @@ const walkOperatorList = async (
             renderingMatrix[1] * renderingMatrix[2],
         ) / width;
       const isPainted =
-        (state.renderMode === FILL_RENDER_MODE ||
-          state.renderMode === FILL_STROKE_RENDER_MODE) &&
+        state.renderMode === FILL_RENDER_MODE &&
         (item.isInFont || state.font?.missingFile === true);
       const rect = toRect(renderingMatrix, [
         0,
@@ -396,7 +394,6 @@ const walkOperatorList = async (
 
       glyphs.push(
         isPainted &&
-          state.renderMode === FILL_RENDER_MODE &&
           !state.clipped &&
           height >= MIN_FONT_SIZE_POINTS &&
           width >= height / 2
@@ -630,11 +627,7 @@ const walkOperatorList = async (
         const mode = arguments_[0] as number;
 
         assertModelled(
-          [
-            FILL_RENDER_MODE,
-            FILL_STROKE_RENDER_MODE,
-            INVISIBLE_RENDER_MODE,
-          ].includes(mode),
+          mode === FILL_RENDER_MODE || mode === INVISIBLE_RENDER_MODE,
           'text render mode',
         );
         state.renderMode = mode;
