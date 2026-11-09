@@ -69,6 +69,18 @@ const ocrLines = mtrLines({
   receiverTaxId: { text: 'CNPJ:' },
 });
 
+const extractOcrOnly = () =>
+  createDocumentExtractor({
+    extractText: () => Promise.reject(new Error('not used')),
+  }).extract<MtrExtractedData>(
+    { filePath: 'unused' },
+    {
+      documentType: 'transportManifest',
+      layouts: ['mtr-sinfat' as NonEmptyString],
+      textExtractionResult: stubTextExtractionResult(toText(ocrLines)),
+    },
+  );
+
 describe('MTR PDF text-layer fallback', () => {
   let directory: string;
 
@@ -121,26 +133,39 @@ describe('MTR PDF text-layer fallback', () => {
     );
   });
 
-  it.each([
-    'white',
-    'off-page',
-    'invisible-mode',
-    'covered',
-    'clipped',
-    'under-image',
-  ] as const)('should not fill a tax id drawn %s', async (concealment) => {
-    const result = await extract(
-      await stubPdfWithLines(
-        mtrLines({
-          generatorTaxId: { concealment, text: `CNPJ: ${GENERATOR_TAX_ID}` },
-        }),
-      ),
-    );
+  it.each(['invisible-mode', 'clipped'] as const)(
+    'should drop only a tax id drawn %s',
+    async (concealment) => {
+      const result = await extract(
+        await stubPdfWithLines(
+          mtrLines({
+            generatorTaxId: { concealment, text: `CNPJ: ${GENERATOR_TAX_ID}` },
+          }),
+        ),
+      );
 
-    expect(result.data.generator?.taxId.parsed).toBe('');
-    expect(result.data.lowConfidenceFields).toContain('generator.taxId');
-    expect(result.data.receiver?.taxId.parsed).toBe(RECEIVER_TAX_ID);
-  });
+      expect(result.data.generator?.taxId.parsed).toBe('');
+      expect(result.data.lowConfidenceFields).toContain('generator.taxId');
+      expect(result.data.receiver?.taxId.parsed).toBe(RECEIVER_TAX_ID);
+    },
+  );
+
+  it.each(['white', 'off-page', 'covered', 'under-image'] as const)(
+    'should drop the whole text layer when a tax id is painted %s',
+    async (concealment) => {
+      const textLayerSpy = vi.spyOn(pdfTextLayerExtractor, 'extractText');
+      const result = await extract(
+        await stubPdfWithLines(
+          mtrLines({
+            generatorTaxId: { concealment, text: `CNPJ: ${GENERATOR_TAX_ID}` },
+          }),
+        ),
+      );
+
+      expect(result).toEqual(await extractOcrOnly());
+      await expect(textLayerSpy.mock.results[0]?.value).rejects.toThrow();
+    },
+  );
 
   it('should fill nothing and flag review when a high-confidence OCR field disagrees', async () => {
     const result = await extract(
@@ -166,7 +191,7 @@ describe('MTR PDF text-layer fallback', () => {
         mtrLines({
           generatorTaxId: { text: `CNPJ: ${GENERATOR_TAX_ID}` },
           haulerTaxId: {
-            concealment: 'white',
+            concealment: 'invisible-mode',
             text: `CNPJ: ${OTHER_HAULER_TAX_ID}`,
           },
         }),
@@ -181,18 +206,10 @@ describe('MTR PDF text-layer fallback', () => {
 
   it('should return the OCR-only output for an image-only PDF', async () => {
     const textLayerSpy = vi.spyOn(pdfTextLayerExtractor, 'extractText');
-    const ocrOnly = await createDocumentExtractor({
-      extractText: () => Promise.reject(new Error('not used')),
-    }).extract<MtrExtractedData>(
-      { filePath: 'unused' },
-      {
-        documentType: 'transportManifest',
-        layouts: ['mtr-sinfat' as NonEmptyString],
-        textExtractionResult: stubTextExtractionResult(toText(ocrLines)),
-      },
-    );
 
-    expect(await extract(await stubImageOnlyPdf())).toEqual(ocrOnly);
+    expect(await extract(await stubImageOnlyPdf())).toEqual(
+      await extractOcrOnly(),
+    );
     await expect(textLayerSpy.mock.results[0]?.value).rejects.toThrow();
   });
 });
