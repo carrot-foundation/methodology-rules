@@ -15,7 +15,6 @@ type Bounds = [number, number, number, number];
 
 interface Cover {
   color: string | undefined;
-  isBackground: boolean;
   rect: Rect;
 }
 
@@ -165,16 +164,14 @@ const isGlyphVisible = (glyph: Glyph, covers: readonly Cover[]): boolean => {
     WHITE,
     ...covers
       .slice(0, glyph.coversBefore)
-      .filter(
-        (cover) => cover.isBackground && contains(cover.rect, centerX, centerY),
-      )
+      .filter((cover) => contains(cover.rect, centerX, centerY))
       .map((cover) => cover.color),
   ];
 
   return (
     isInsidePage(glyph.rect) &&
     !covers
-      .slice(glyph.coversBefore)
+      .slice(glyph.coversBefore + 1)
       .some((cover) => overlaps(cover.rect, glyph.rect)) &&
     backgroundColors.every(
       (color) =>
@@ -389,10 +386,6 @@ const walkOperatorList = async (
         GLYPH_ASCENT,
       ]);
 
-      if (isPainted) {
-        covers.push({ color: state.fillColor, isBackground: false, rect });
-      }
-
       glyphs.push(
         isPainted &&
           !state.clipped &&
@@ -406,6 +399,10 @@ const walkOperatorList = async (
             }
           : undefined,
       );
+
+      if (isPainted) {
+        covers.push({ color: state.fillColor, rect });
+      }
 
       textMatrix = multiply(
         translate(
@@ -447,7 +444,6 @@ const walkOperatorList = async (
   const paintImage = () => {
     covers.push({
       color: undefined,
-      isBackground: true,
       rect: toRect(state.ctm, UNIT_SQUARE),
     });
   };
@@ -494,17 +490,18 @@ const walkOperatorList = async (
         if (FILL_PATH_OPS.has(paintOperator)) {
           covers.push({
             color: state.clipped ? undefined : state.fillColor,
-            isBackground: true,
             rect: toRect(state.ctm, bounds),
           });
         }
 
-        const strokeWidth =
-          state.lineWidth *
-          Math.max(
-            Math.hypot(state.ctm[0], state.ctm[1]),
-            Math.hypot(state.ctm[2], state.ctm[3]),
-          );
+        const [a, b, c, d] = state.ctm;
+        const squares = a * a + b * b + c * c + d * d;
+        const largestScale = Math.sqrt(
+          (squares +
+            Math.sqrt(Math.max(0, squares ** 2 - 4 * (a * d - b * c) ** 2))) /
+            2,
+        );
+        const strokeWidth = state.lineWidth * largestScale;
 
         if (
           STROKE_PATH_OPS.has(paintOperator) &&
@@ -516,7 +513,6 @@ const walkOperatorList = async (
 
           covers.push({
             color: undefined,
-            isBackground: false,
             rect: toRect(state.ctm, [x0 - pad, y0 - pad, x1 + pad, y1 + pad]),
           });
         }

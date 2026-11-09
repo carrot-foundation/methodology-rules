@@ -224,6 +224,35 @@ describe('extractVisibleWords', () => {
     },
     {
       operations: [
+        [OPS.setLineWidth, [5]],
+        ...paintRect('#ffffff', [0, 40, 50, 60], OPS.stroke),
+        ...textAt('A'),
+      ],
+      rule: 'over an earlier thick stroke',
+    },
+    {
+      operations: [
+        [OPS.beginText, null],
+        [OPS.setFont, ['f1', 20]],
+        [OPS.setTextMatrix, [[1, 0, 0, 1, 8, 45]]],
+        [OPS.showText, [glyphs('Q')]],
+        ...textAt('A'),
+      ],
+      rule: 'over an earlier glyph of its own colour',
+    },
+    {
+      operations: [
+        ...textAt('A'),
+        [OPS.save, null],
+        [OPS.transform, [1, 1, 0, 1, 0, 0]],
+        [OPS.setLineWidth, [1.3]],
+        ...paintRect('#ffffff', [5, 45, 15, 45], OPS.stroke),
+        [OPS.restore, null],
+      ],
+      rule: 'under a stroke that a shear makes thick',
+    },
+    {
+      operations: [
         [OPS.eoClip, null],
         [OPS.constructPath, [OPS.endPath, [[]], null]],
         ...textAt('A'),
