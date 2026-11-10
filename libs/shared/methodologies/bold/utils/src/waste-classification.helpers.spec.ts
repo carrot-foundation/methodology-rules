@@ -23,6 +23,34 @@ describe('findBrWasteClassification', () => {
       ).toBeUndefined();
     },
   );
+
+  it.each([
+    '04 01 04',
+    '04 01 05',
+    '04 01 06',
+    '19 07 02',
+    '19 12 10',
+    '19 13 02',
+    '19 13 04',
+    '19 13 06',
+    '19 13 08',
+  ])(
+    'should not accept the ineligible code %s',
+    (localWasteClassificationId) => {
+      expect(
+        findBrWasteClassification(localWasteClassificationId),
+      ).toBeUndefined();
+    },
+  );
+
+  it.each(['04 02 21', '04 02 22'])(
+    'should classify the textile fibre code %s as Textiles (8.4)',
+    (localWasteClassificationId) => {
+      expect(
+        findBrWasteClassification(localWasteClassificationId),
+      ).toMatchObject({ CDM_CODE: '8.4' });
+    },
+  );
 });
 
 describe('getSubtypesByCdmCode', () => {
