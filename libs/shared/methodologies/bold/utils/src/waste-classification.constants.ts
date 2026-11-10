@@ -190,19 +190,6 @@ export const WASTE_CLASSIFICATION_CODES = {
       CDM_CODE: '8.7D',
       description: 'Resíduos das operações de descarga e divisão de tripa',
     },
-    '04 01 04': {
-      CDM_CODE: '8.7D',
-      description: 'Licores de curtimenta contendo cromo',
-    },
-    '04 01 05': {
-      CDM_CODE: '8.7D',
-      description: 'Licores de curtimenta sem cromo',
-    },
-    '04 01 06': {
-      CDM_CODE: '8.7B',
-      description:
-        'Lodos, em especial do tratamento local de efluentes, contendo cromo',
-    },
     '04 01 07': {
       CDM_CODE: '8.7B',
       description:
@@ -245,11 +232,11 @@ export const WASTE_CLASSIFICATION_CODES = {
         'Lodos do tratamento local de efluentes não abrangidas em 04 02 19',
     },
     '04 02 21': {
-      CDM_CODE: '8.2',
+      CDM_CODE: '8.4',
       description: 'Resíduos de fibras têxteis não processadas',
     },
     '04 02 22': {
-      CDM_CODE: '8.2',
+      CDM_CODE: '8.4',
       description: 'Resíduos de fibras têxteis processadas',
     },
     '04 02 99': {
@@ -698,11 +685,6 @@ export const WASTE_CLASSIFICATION_CODES = {
       CDM_CODE: '8.7B',
       description: OTHER_WASTE,
     },
-    '19 07 02': {
-      CDM_CODE: '8.7D',
-      description:
-        '(*) Lixiviados ou líquidos percolados de aterros contendo substâncias perigosas',
-    },
     '19 07 03': {
       CDM_CODE: '8.7D',
       description:
@@ -812,10 +794,6 @@ export const WASTE_CLASSIFICATION_CODES = {
       CDM_CODE: '8.6',
       description: 'Substâncias minerais (por exemplo, areia, rochas)',
     },
-    '19 12 10': {
-      CDM_CODE: '8.7D',
-      description: 'Resíduos combustíveis (combustíveis derivados de resíduos)',
-    },
     '19 12 11': {
       CDM_CODE: '8.6',
       description: 'Borrachas',
@@ -824,26 +802,6 @@ export const WASTE_CLASSIFICATION_CODES = {
       CDM_CODE: '8.7D',
       description:
         'Outros resíduos (incluindo misturas de materiais) do tratamento mecânico de resíduos não abrangidos em 19 12 12',
-    },
-    '19 13 02': {
-      CDM_CODE: '8.7D',
-      description:
-        'Resíduos sólidos da descontaminação de solos não abrangidos em 19 13 01',
-    },
-    '19 13 04': {
-      CDM_CODE: '8.7D',
-      description:
-        'Lodos da descontaminação de solos não abrangidas em 19 13 03',
-    },
-    '19 13 06': {
-      CDM_CODE: '8.7D',
-      description:
-        'Lodos da descontaminação de águas freáticas não abrangidas em 19 13 05',
-    },
-    '19 13 08': {
-      CDM_CODE: '8.7D',
-      description:
-        'Resíduos líquidos aquosos e concentrados aquosos da descontaminação de águas freáticas não abrangidos em 19 13 07',
     },
     '20 01 01': {
       CDM_CODE: '8.2',
