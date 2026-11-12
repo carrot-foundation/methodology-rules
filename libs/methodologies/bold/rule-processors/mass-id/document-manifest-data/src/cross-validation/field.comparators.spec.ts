@@ -497,6 +497,45 @@ describe('cross-validation field comparators', () => {
       },
     );
 
+    it.each([
+      {
+        eventStreet: 'ROD ZZ-999',
+        extractedAddress: 'Rod ZZ 999 Km2, n° S/N',
+      },
+      {
+        eventStreet: 'RODOVIA ZZ 999, 5000',
+        extractedAddress: 'Rodovia ZZ 999, n° 5000 Km 05',
+      },
+    ])(
+      'should match the generator address when the event street number is 0 and the document prints S/N ($eventStreet)',
+      ({ eventStreet, extractedAddress }) => {
+        const entity = stubMtrEntityWithHighAddress(
+          'Fictional Generator',
+          '11.111.111/0001-11',
+          extractedAddress,
+          'Vila Inventada',
+          'RS',
+        );
+        const result = compareEntity(
+          entity,
+          ['Fictional Generator'],
+          '11.111.111/0001-11',
+          entityReasonsWithAddress,
+          stubEventAddress({
+            city: 'VILA INVENTADA',
+            countryState: 'RS',
+            number: '0',
+            street: eventStreet,
+          }),
+        );
+
+        expect(result.validation).toEqual([]);
+        expect(result.debug?.address?.event).toBe(
+          `${eventStreet}, VILA INVENTADA, RS`,
+        );
+      },
+    );
+
     it('should include address in debug for entity with address fields', () => {
       const entity = stubEntityWithAddress(
         'Generator Co',
