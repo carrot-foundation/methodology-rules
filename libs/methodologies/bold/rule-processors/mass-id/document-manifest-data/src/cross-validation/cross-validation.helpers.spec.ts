@@ -24,7 +24,7 @@ describe('cross-validation.helpers', () => {
       },
     );
 
-    it.each(['105', '1000', 'S/N'])(
+    it.each(['105', '1000', '05', 'S/N'])(
       'should keep a non-zero street number (%j)',
       (number) => {
         expect(buildAddressString(stubAddress({ ...address, number }))).toBe(
