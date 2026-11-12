@@ -85,7 +85,13 @@ export const normalizeTaxId = (taxId: string): string =>
   taxId.replaceAll(/[\s./-]/g, '').toLowerCase();
 
 export const buildAddressString = (address: DocumentAddress): string =>
-  [address.street, address.number, address.city, address.countryState]
+  [
+    address.street,
+    // A participant registered without a street number carries "0"; documents print "S/N".
+    /^0+$/.test(address.number.trim()) ? undefined : address.number,
+    address.city,
+    address.countryState,
+  ]
     .filter(Boolean)
     .join(', ');
 

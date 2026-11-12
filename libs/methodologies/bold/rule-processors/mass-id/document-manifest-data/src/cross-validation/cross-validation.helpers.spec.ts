@@ -1,10 +1,39 @@
+import { stubAddress } from '@carrot-fndn/shared/methodologies/bold/testing';
+
 import {
+  buildAddressString,
   matchWasteTypeEntry,
   normalizeQuantityToKg,
   parsePeriodRange,
 } from './cross-validation.helpers';
 
 describe('cross-validation.helpers', () => {
+  describe('buildAddressString', () => {
+    const address = {
+      city: 'Vila Inventada',
+      countryState: 'RS',
+      street: 'Rua Ficticia',
+    };
+
+    it.each(['0', '000', ' 0 '])(
+      'should omit an all-zero street number (%j)',
+      (number) => {
+        expect(buildAddressString(stubAddress({ ...address, number }))).toBe(
+          'Rua Ficticia, Vila Inventada, RS',
+        );
+      },
+    );
+
+    it.each(['105', '1000', '05', 'S/N'])(
+      'should keep a non-zero street number (%j)',
+      (number) => {
+        expect(buildAddressString(stubAddress({ ...address, number }))).toBe(
+          `Rua Ficticia, ${number}, Vila Inventada, RS`,
+        );
+      },
+    );
+  });
+
   describe('matchWasteTypeEntry', () => {
     it('should match when code and description both match', () => {
       const result = matchWasteTypeEntry(
