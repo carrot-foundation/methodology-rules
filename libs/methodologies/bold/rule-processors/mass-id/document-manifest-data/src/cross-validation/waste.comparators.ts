@@ -163,20 +163,22 @@ type WeighingPosition = 'above' | 'far-below' | 'within';
 const getWeighingPosition = (
   extractedKg: number,
   weighingValue: number,
+  checkLowerBound: boolean,
 ): WeighingPosition => {
   if (weighingValue > extractedKg + WEIGHT_TOLERANCE_KG) {
     return 'above';
   }
 
-  return weighingValue + WEIGHT_TOLERANCE_KG <
-    extractedKg * (1 - WEIGHT_LOWER_BOUND_FRACTION)
+  return checkLowerBound &&
+    weighingValue + WEIGHT_TOLERANCE_KG <
+      extractedKg * (1 - WEIGHT_LOWER_BOUND_FRACTION)
     ? 'far-below'
     : 'within';
 };
 
 type WeightReasonOptions = {
   notExtractedReason?: ReviewReason;
-  // Omit when the extracted quantity can cover more than this weighing (e.g. a CDF totalling several deliveries).
+  // Opt-in lower bound: set only when the extracted quantity belongs to this weighing (MTR). A CDF quantity is a batch total over many masses.
   onFarBelow?: (parameters: {
     extractedQuantityKg: string;
     weighingWeight: string;
@@ -207,18 +209,19 @@ const buildWeightValidation = (
     return [];
   }
 
-  const position = getWeighingPosition(extractedKg, weighingValue);
+  const position = getWeighingPosition(
+    extractedKg,
+    weighingValue,
+    options.onFarBelow !== undefined,
+  );
 
   if (position === 'within') {
     return [];
   }
 
+  // 'far-below' is only reported when onFarBelow is set
   const onReason =
-    position === 'above' ? options.onMismatch : options.onFarBelow;
-
-  if (onReason === undefined) {
-    return [];
-  }
+    position === 'above' ? options.onMismatch : options.onFarBelow!;
 
   return [
     {
@@ -246,6 +249,7 @@ const findMatchedEntry = (
   eventCode: string | undefined,
   eventDescription: string | undefined,
   weighingValue: number | undefined,
+  checkLowerBound: boolean,
 ): undefined | WasteTypeEntryData => {
   let largestEntry: undefined | WasteTypeEntryData;
   let largestKg = Number.NEGATIVE_INFINITY;
@@ -269,10 +273,11 @@ const findMatchedEntry = (
     }
 
     if (
+      checkLowerBound &&
       coveringEntry === undefined &&
       weighingValue !== undefined &&
       Number.isFinite(quantityKg) &&
-      getWeighingPosition(quantityKg, weighingValue) === 'within'
+      getWeighingPosition(quantityKg, weighingValue, true) === 'within'
     ) {
       coveringEntry = entry;
     }
@@ -306,6 +311,7 @@ export const compareWasteQuantity = (
     trimmedEventCode,
     trimmedEventDescription,
     weighingValue,
+    options.onFarBelow !== undefined,
   );
 
   if (matchedEntry?.quantity !== undefined) {
@@ -315,7 +321,11 @@ export const compareWasteQuantity = (
     );
     const isMatch =
       normalizedKg !== undefined && weighingValue !== undefined
-        ? getWeighingPosition(normalizedKg, weighingValue) === 'within'
+        ? getWeighingPosition(
+            normalizedKg,
+            weighingValue,
+            options.onFarBelow !== undefined,
+          ) === 'within'
         : null;
 
     return {
@@ -337,7 +347,11 @@ export const compareWasteQuantity = (
   const extractedKg = hasValidQuantity ? totalKg : undefined;
   const isMatch =
     extractedKg !== undefined && weighingValue !== undefined
-      ? getWeighingPosition(extractedKg, weighingValue) === 'within'
+      ? getWeighingPosition(
+          extractedKg,
+          weighingValue,
+          options.onFarBelow !== undefined,
+        ) === 'within'
       : null;
 
   return {

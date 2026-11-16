@@ -440,6 +440,40 @@ describe('cross-validation waste comparators', () => {
         expect(result.validation).toEqual([]);
       });
 
+      it.each([
+        ['matched entry', [manifestEntry]],
+        [
+          'total weight',
+          [{ description: 'Plastico', quantity: 1000, unit: 'kg' }],
+        ],
+      ])(
+        'should leave a quantity far above the weighing untouched when no lower bound is requested (%s)',
+        (_label, entries) => {
+          const result = compareWasteQuantity(
+            entries,
+            '01 01 01',
+            'Papel',
+            [{ value: 200 }],
+            { onMismatch: onQuantityMismatch },
+          );
+
+          expect(result.debug?.isMatch).toBe(true);
+          expect(result.validation).toEqual([]);
+        },
+      );
+
+      it('should keep the largest matching row when no lower bound is requested', () => {
+        const result = compareWasteQuantity(
+          [{ ...manifestEntry, quantity: 200 }, manifestEntry],
+          '01 01 01',
+          'Papel',
+          [{ value: 200 }],
+          { onMismatch: onQuantityMismatch },
+        );
+
+        expect(result.debug?.extracted).toBe(1000);
+      });
+
       it('should apply the lower bound to the total-weight fallback', () => {
         const result = run(10, [
           { description: 'Plastico', quantity: 1000, unit: 'kg' },
