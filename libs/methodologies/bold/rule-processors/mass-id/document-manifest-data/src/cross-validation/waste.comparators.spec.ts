@@ -429,6 +429,17 @@ describe('cross-validation waste comparators', () => {
         );
       });
 
+      it('should pass when any matching row covers the weighing within the bounds', () => {
+        const result = run(200, [
+          { ...manifestEntry, quantity: 200 },
+          manifestEntry,
+        ]);
+
+        expect(result.debug?.extracted).toBe(200);
+        expect(result.debug?.isMatch).toBe(true);
+        expect(result.validation).toEqual([]);
+      });
+
       it('should apply the lower bound to the total-weight fallback', () => {
         const result = run(10, [
           { description: 'Plastico', quantity: 1000, unit: 'kg' },

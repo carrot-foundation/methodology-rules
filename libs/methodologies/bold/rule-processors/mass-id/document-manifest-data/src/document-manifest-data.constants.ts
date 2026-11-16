@@ -116,14 +116,6 @@ export const CROSS_VALIDATION_COMMENTS = {
   }) =>
     `The receiving date extracted from the document ("${extractedDate}") differs from the Drop-off event date ("${eventDate}") by ${daysDiff} day(s).`,
   RECYCLER_TAX_ID_MISMATCH: `The recycler tax ID extracted from the recycling manifest does not match the "${RECYCLER}" participant tax ID.`,
-  RECYCLING_MANIFEST_WASTE_QUANTITY_FAR_BELOW_WEIGHING: ({
-    extractedQuantityKg,
-    weighingWeight,
-  }: {
-    extractedQuantityKg: string;
-    weighingWeight: string;
-  }) =>
-    `The weighing event weight (${weighingWeight} ${MeasurementUnit.KG}) is more than 20% below the waste quantity extracted from the recycling manifest (${extractedQuantityKg} ${MeasurementUnit.KG}). Check the unit of the weighing.`,
   RECYCLING_MANIFEST_WASTE_QUANTITY_WEIGHT_MISMATCH: ({
     extractedQuantityKg,
     weighingWeight,
@@ -230,9 +222,6 @@ export const REVIEW_REASONS = {
   RECEIVER_TAX_ID_MISMATCH: staticReviewReason('RECEIVER_TAX_ID_MISMATCH'),
   RECEIVING_DATE_MISMATCH: reviewReason('RECEIVING_DATE_MISMATCH'),
   RECYCLER_TAX_ID_MISMATCH: staticReviewReason('RECYCLER_TAX_ID_MISMATCH'),
-  RECYCLING_MANIFEST_WASTE_QUANTITY_FAR_BELOW_WEIGHING: reviewReason(
-    'RECYCLING_MANIFEST_WASTE_QUANTITY_FAR_BELOW_WEIGHING',
-  ),
   RECYCLING_MANIFEST_WASTE_QUANTITY_WEIGHT_MISMATCH: reviewReason(
     'RECYCLING_MANIFEST_WASTE_QUANTITY_WEIGHT_MISMATCH',
   ),

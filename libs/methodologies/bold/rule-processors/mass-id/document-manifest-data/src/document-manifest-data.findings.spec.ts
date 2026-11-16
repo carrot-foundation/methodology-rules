@@ -171,10 +171,6 @@ describe('DOCUMENT_MANIFEST_DATA_FINDINGS catalog', () => {
     },
     {
       expected: [BoldReportType.CDF],
-      key: 'CROSS_VALIDATION.RECYCLING_MANIFEST_WASTE_QUANTITY_FAR_BELOW_WEIGHING',
-    },
-    {
-      expected: [BoldReportType.CDF],
       key: 'CROSS_VALIDATION.RECYCLING_MANIFEST_WASTE_QUANTITY_WEIGHT_MISMATCH',
     },
     {
@@ -202,7 +198,7 @@ describe('DOCUMENT_MANIFEST_DATA_FINDINGS catalog', () => {
       catalog.entries
         .filter(({ contexts }) => contexts.length === 1)
         .map(({ code }) => code),
-    ).toHaveLength(16);
+    ).toHaveLength(15);
   });
 
   it('should cover every declared finding code', () => {

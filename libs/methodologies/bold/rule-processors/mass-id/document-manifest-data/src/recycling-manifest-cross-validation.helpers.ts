@@ -256,8 +256,6 @@ export const validateCdfExtractedData = (
       notExtractedReason: REVIEW_REASONS.FIELD_NOT_EXTRACTED({
         field: 'waste quantity',
       }),
-      onFarBelow:
-        REVIEW_REASONS.RECYCLING_MANIFEST_WASTE_QUANTITY_FAR_BELOW_WEIGHING,
       onMismatch:
         REVIEW_REASONS.RECYCLING_MANIFEST_WASTE_QUANTITY_WEIGHT_MISMATCH,
       skipValidation:

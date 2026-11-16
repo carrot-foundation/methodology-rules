@@ -171,17 +171,6 @@ export const DOCUMENT_MANIFEST_DATA_FINDINGS = defineRuleFindings(
         'Confira o reciclador enviado e o CDF anexado, confirme qual está correto e corrija na origem.',
       title: 'Documento fiscal do reciclador diverge do CDF',
     },
-    'CROSS_VALIDATION.RECYCLING_MANIFEST_WASTE_QUANTITY_FAR_BELOW_WEIGHING': {
-      category: 'DOCUMENT_DIVERGENCE',
-      defaultOwner: 'INTEGRATOR',
-      description:
-        'O peso do evento "Weighing" está mais de 20% abaixo da quantidade de resíduo lida no CDF.',
-      documentKinds: [BoldReportType.CDF],
-      evidence: [crossValidationEvidence('wasteQuantityWeight')],
-      guidance:
-        'Confira a unidade da pesagem (kg ou toneladas) e o CDF anexado, e corrija o peso na origem.',
-      title: 'Pesagem muito abaixo da quantidade do CDF',
-    },
     'CROSS_VALIDATION.RECYCLING_MANIFEST_WASTE_QUANTITY_WEIGHT_MISMATCH': {
       category: 'DOCUMENT_DIVERGENCE',
       defaultOwner: 'TO_CONFIRM',

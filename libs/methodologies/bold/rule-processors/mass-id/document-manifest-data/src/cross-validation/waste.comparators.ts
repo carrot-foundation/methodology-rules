@@ -176,7 +176,8 @@ const getWeighingPosition = (
 
 type WeightReasonOptions = {
   notExtractedReason?: ReviewReason;
-  onFarBelow: (parameters: {
+  // Omit when the extracted quantity can cover more than this weighing (e.g. a CDF totalling several deliveries).
+  onFarBelow?: (parameters: {
     extractedQuantityKg: string;
     weighingWeight: string;
   }) => ReviewReason;
@@ -215,6 +216,10 @@ const buildWeightValidation = (
   const onReason =
     position === 'above' ? options.onMismatch : options.onFarBelow;
 
+  if (onReason === undefined) {
+    return [];
+  }
+
   return [
     {
       reviewReason: {
@@ -234,14 +239,17 @@ const buildWeightValidation = (
   ];
 };
 
-// A manifest can repeat a waste type across rows (e.g. one at 0 kg); one row must cover the weighing.
-const findLargestMatchedEntry = (
+// A manifest can repeat a waste type across rows (e.g. one at 0 kg); one row must cover the weighing,
+// so prefer a row whose bounds hold it and otherwise fall back to the largest.
+const findMatchedEntry = (
   entries: WasteTypeEntryData[],
   eventCode: string | undefined,
   eventDescription: string | undefined,
+  weighingValue: number | undefined,
 ): undefined | WasteTypeEntryData => {
   let largestEntry: undefined | WasteTypeEntryData;
   let largestKg = Number.NEGATIVE_INFINITY;
+  let coveringEntry: undefined | WasteTypeEntryData;
 
   for (const entry of entries) {
     if (
@@ -259,9 +267,18 @@ const findLargestMatchedEntry = (
       largestEntry = entry;
       largestKg = quantityKg;
     }
+
+    if (
+      coveringEntry === undefined &&
+      weighingValue !== undefined &&
+      Number.isFinite(quantityKg) &&
+      getWeighingPosition(quantityKg, weighingValue) === 'within'
+    ) {
+      coveringEntry = entry;
+    }
   }
 
-  return largestEntry;
+  return coveringEntry ?? largestEntry;
 };
 
 export const compareWasteQuantity = (
@@ -284,10 +301,11 @@ export const compareWasteQuantity = (
   const trimmedEventCode = eventCode?.trim() || undefined;
   const trimmedEventDescription = eventDescription?.trim() || undefined;
 
-  const matchedEntry = findLargestMatchedEntry(
+  const matchedEntry = findMatchedEntry(
     entries,
     trimmedEventCode,
     trimmedEventDescription,
+    weighingValue,
   );
 
   if (matchedEntry?.quantity !== undefined) {
