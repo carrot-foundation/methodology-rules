@@ -215,6 +215,17 @@ export const DOCUMENT_MANIFEST_DATA_FINDINGS = defineRuleFindings(
         'Envie a placa do veículo exatamente como consta no MTR anexado.',
       title: 'Placa do veículo diverge do MTR',
     },
+    'CROSS_VALIDATION.WASTE_QUANTITY_FAR_BELOW_WEIGHING': {
+      category: 'DOCUMENT_DIVERGENCE',
+      defaultOwner: 'INTEGRATOR',
+      description:
+        'O peso do evento "Weighing" está mais de 20% abaixo da quantidade de resíduo lida no MTR.',
+      documentKinds: [BoldReportType.MTR],
+      evidence: [crossValidationEvidence('wasteQuantityWeight')],
+      guidance:
+        'Confira a unidade da pesagem (kg ou toneladas) e o MTR anexado, e corrija o peso na origem.',
+      title: 'Pesagem muito abaixo da quantidade do MTR',
+    },
     'CROSS_VALIDATION.WASTE_QUANTITY_WEIGHT_MISMATCH': {
       category: 'DOCUMENT_DIVERGENCE',
       defaultOwner: 'TO_CONFIRM',

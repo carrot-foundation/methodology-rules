@@ -1187,6 +1187,40 @@ describe('recycling-manifest-cross-validation.helpers', () => {
         // 1 ton = 1000 kg + 500 kg = 1500 kg total; 1400 <= 1500 → no issues
         expect(result.failMessages).toHaveLength(0);
       });
+
+      it('should not flag a weighing far below a CDF quantity that can cover several deliveries', () => {
+        const extractionResult = createExtractionResult({
+          wasteEntries: {
+            confidence: 'high',
+            parsed: [
+              {
+                code: '190812',
+                description: 'Lodos',
+                quantity: 1000,
+                unit: 'kg',
+              },
+            ],
+            rawMatch: '190812-Lodos',
+          },
+        });
+
+        const eventData: CdfCrossValidationEventData = {
+          ...baseEventData,
+          pickUpEvent: makeEventWithClassification(
+            '190812',
+            'Lodos de tratamento',
+          ),
+          weighingEvents: [makeWeighingEvent(200)],
+        };
+
+        const result = validateCdfExtractedData(extractionResult, eventData);
+
+        expect(
+          result.reviewReasons?.some((r) =>
+            r.description.includes('waste quantity'),
+          ) ?? false,
+        ).toBe(false);
+      });
     });
 
     describe('pass message generation', () => {

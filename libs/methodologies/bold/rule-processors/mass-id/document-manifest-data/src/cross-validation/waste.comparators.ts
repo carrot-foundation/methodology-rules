@@ -156,18 +156,44 @@ const getWeighingValueKg = (
   weighingEvents.find((e) => e.value !== undefined && e.value > 0)?.value;
 
 const WEIGHT_TOLERANCE_KG = 0.01;
+const WEIGHT_LOWER_BOUND_FRACTION = 0.2;
+
+type WeighingPosition = 'above' | 'far-below' | 'within';
+
+const getWeighingPosition = (
+  extractedKg: number,
+  weighingValue: number,
+  checkLowerBound: boolean,
+): WeighingPosition => {
+  if (weighingValue > extractedKg + WEIGHT_TOLERANCE_KG) {
+    return 'above';
+  }
+
+  return checkLowerBound &&
+    weighingValue + WEIGHT_TOLERANCE_KG <
+      extractedKg * (1 - WEIGHT_LOWER_BOUND_FRACTION)
+    ? 'far-below'
+    : 'within';
+};
+
+type WeightReasonOptions = {
+  notExtractedReason?: ReviewReason;
+  // Opt-in lower bound: set only when the extracted quantity belongs to this weighing (MTR). A CDF quantity is a batch total over many masses.
+  onFarBelow?: (parameters: {
+    extractedQuantityKg: string;
+    weighingWeight: string;
+  }) => ReviewReason;
+  onMismatch: (parameters: {
+    extractedQuantityKg: string;
+    weighingWeight: string;
+  }) => ReviewReason;
+  skipValidation?: boolean;
+};
 
 const buildWeightValidation = (
   extractedKg: number | undefined,
   weighingValue: number | undefined,
-  options: {
-    notExtractedReason?: ReviewReason;
-    onMismatch: (parameters: {
-      extractedQuantityKg: string;
-      weighingWeight: string;
-    }) => ReviewReason;
-    skipValidation?: boolean;
-  },
+  options: WeightReasonOptions,
 ): FieldValidationResult[] => {
   if (options.skipValidation === true) {
     return [];
@@ -179,17 +205,28 @@ const buildWeightValidation = (
       : [];
   }
 
-  if (
-    weighingValue === undefined ||
-    weighingValue <= extractedKg + WEIGHT_TOLERANCE_KG
-  ) {
+  if (weighingValue === undefined) {
     return [];
   }
+
+  const position = getWeighingPosition(
+    extractedKg,
+    weighingValue,
+    options.onFarBelow !== undefined,
+  );
+
+  if (position === 'within') {
+    return [];
+  }
+
+  // 'far-below' is only reported when onFarBelow is set
+  const onReason =
+    position === 'above' ? options.onMismatch : options.onFarBelow!;
 
   return [
     {
       reviewReason: {
-        ...options.onMismatch({
+        ...onReason({
           extractedQuantityKg: extractedKg.toString(),
           weighingWeight: weighingValue.toString(),
         }),
@@ -205,14 +242,18 @@ const buildWeightValidation = (
   ];
 };
 
-// A manifest can repeat a waste type across rows (e.g. one at 0 kg); one row must cover the weighing.
-const findLargestMatchedEntry = (
+// A manifest can repeat a waste type across rows (e.g. one at 0 kg); one row must cover the weighing,
+// so prefer a row whose bounds hold it and otherwise fall back to the largest.
+const findMatchedEntry = (
   entries: WasteTypeEntryData[],
   eventCode: string | undefined,
   eventDescription: string | undefined,
+  weighingValue: number | undefined,
+  checkLowerBound: boolean,
 ): undefined | WasteTypeEntryData => {
   let largestEntry: undefined | WasteTypeEntryData;
   let largestKg = Number.NEGATIVE_INFINITY;
+  let coveringEntry: undefined | WasteTypeEntryData;
 
   for (const entry of entries) {
     if (
@@ -230,9 +271,19 @@ const findLargestMatchedEntry = (
       largestEntry = entry;
       largestKg = quantityKg;
     }
+
+    if (
+      checkLowerBound &&
+      coveringEntry === undefined &&
+      weighingValue !== undefined &&
+      Number.isFinite(quantityKg) &&
+      getWeighingPosition(quantityKg, weighingValue, true) === 'within'
+    ) {
+      coveringEntry = entry;
+    }
   }
 
-  return largestEntry;
+  return coveringEntry ?? largestEntry;
 };
 
 export const compareWasteQuantity = (
@@ -240,15 +291,7 @@ export const compareWasteQuantity = (
   eventCode: string | undefined,
   eventDescription: string | undefined,
   weighingEvents: Pick<BoldDocumentEvent, 'value'>[],
-  options: {
-    confidence?: ExtractionConfidence | null;
-    notExtractedReason?: ReviewReason;
-    onMismatch: (parameters: {
-      extractedQuantityKg: string;
-      weighingWeight: string;
-    }) => ReviewReason;
-    skipValidation?: boolean;
-  },
+  options: WeightReasonOptions & { confidence?: ExtractionConfidence | null },
 ): ComparisonOutput<null | WasteQuantityComparison> => {
   const weighingValue = getWeighingValueKg(weighingEvents);
 
@@ -263,10 +306,12 @@ export const compareWasteQuantity = (
   const trimmedEventCode = eventCode?.trim() || undefined;
   const trimmedEventDescription = eventDescription?.trim() || undefined;
 
-  const matchedEntry = findLargestMatchedEntry(
+  const matchedEntry = findMatchedEntry(
     entries,
     trimmedEventCode,
     trimmedEventDescription,
+    weighingValue,
+    options.onFarBelow !== undefined,
   );
 
   if (matchedEntry?.quantity !== undefined) {
@@ -276,7 +321,11 @@ export const compareWasteQuantity = (
     );
     const isMatch =
       normalizedKg !== undefined && weighingValue !== undefined
-        ? weighingValue <= normalizedKg + WEIGHT_TOLERANCE_KG
+        ? getWeighingPosition(
+            normalizedKg,
+            weighingValue,
+            options.onFarBelow !== undefined,
+          ) === 'within'
         : null;
 
     return {
@@ -298,7 +347,11 @@ export const compareWasteQuantity = (
   const extractedKg = hasValidQuantity ? totalKg : undefined;
   const isMatch =
     extractedKg !== undefined && weighingValue !== undefined
-      ? weighingValue <= extractedKg + WEIGHT_TOLERANCE_KG
+      ? getWeighingPosition(
+          extractedKg,
+          weighingValue,
+          options.onFarBelow !== undefined,
+        ) === 'within'
       : null;
 
   return {

@@ -143,6 +143,14 @@ export const CROSS_VALIDATION_COMMENTS = {
   }) =>
     `The transport date extracted from the document ("${extractedDate}") differs from the Pick-up event date ("${eventDate}") by ${daysDiff} day(s).`,
   VEHICLE_PLATE_MISMATCH: `The vehicle plate extracted from the document does not match the Pick-up event value.`,
+  WASTE_QUANTITY_FAR_BELOW_WEIGHING: ({
+    extractedQuantityKg,
+    weighingWeight,
+  }: {
+    extractedQuantityKg: string;
+    weighingWeight: string;
+  }) =>
+    `The weighing event weight (${weighingWeight} ${MeasurementUnit.KG}) is more than 20% below the waste quantity extracted from the document (${extractedQuantityKg} ${MeasurementUnit.KG}). Check the unit of the weighing.`,
   WASTE_QUANTITY_WEIGHT_MISMATCH: ({
     extractedQuantityKg,
     weighingWeight,
@@ -222,6 +230,9 @@ export const REVIEW_REASONS = {
   ),
   TRANSPORT_DATE_MISMATCH: reviewReason('TRANSPORT_DATE_MISMATCH'),
   VEHICLE_PLATE_MISMATCH: staticReviewReason('VEHICLE_PLATE_MISMATCH'),
+  WASTE_QUANTITY_FAR_BELOW_WEIGHING: reviewReason(
+    'WASTE_QUANTITY_FAR_BELOW_WEIGHING',
+  ),
   WASTE_QUANTITY_WEIGHT_MISMATCH: reviewReason(
     'WASTE_QUANTITY_WEIGHT_MISMATCH',
   ),
