@@ -30,6 +30,22 @@ const onQuantityMismatch = ({
   description: `Extracted ${extractedQuantityKg} kg < weighing ${weighingWeight} kg`,
 });
 
+const onQuantityFarBelow = ({
+  extractedQuantityKg,
+  weighingWeight,
+}: {
+  extractedQuantityKg: string;
+  weighingWeight: string;
+}): ReviewReason => ({
+  code: 'WEIGHT_FAR_BELOW_DOCUMENT',
+  description: `Weighing ${weighingWeight} kg far below extracted ${extractedQuantityKg} kg`,
+});
+
+const quantityOptions = {
+  onFarBelow: onQuantityFarBelow,
+  onMismatch: onQuantityMismatch,
+};
+
 const matchingWasteEntry: WasteTypeEntryData = {
   code: '01 01 01',
   description: 'Residuos de papel',
@@ -173,8 +189,8 @@ describe('cross-validation waste comparators', () => {
           entries,
           '01 01 01',
           'Papel',
-          [{ value: 105 }],
-          { onMismatch: onQuantityMismatch },
+          [{ value: 190 }],
+          quantityOptions,
         );
 
         expect(result.debug).not.toBeNull();
@@ -194,7 +210,7 @@ describe('cross-validation waste comparators', () => {
           '01 01 01',
           'Papel',
           [{ value: 480 }],
-          { onMismatch: onQuantityMismatch },
+          quantityOptions,
         );
 
         expect(result.debug?.source).toBe('matched-entry');
@@ -215,7 +231,7 @@ describe('cross-validation waste comparators', () => {
           '01 01 01',
           'Papel',
           [{ value: 480 }],
-          { onMismatch: onQuantityMismatch },
+          quantityOptions,
         );
 
         expect(result.debug?.extracted).toBe(300);
@@ -237,7 +253,7 @@ describe('cross-validation waste comparators', () => {
           '01 01 01',
           'Papel',
           [{ value: 480 }],
-          { onMismatch: onQuantityMismatch },
+          quantityOptions,
         );
 
         expect(result.debug?.source).toBe('matched-entry');
@@ -255,7 +271,7 @@ describe('cross-validation waste comparators', () => {
           '01 01 01',
           'Papel',
           [{ value: 480 }],
-          { onMismatch: onQuantityMismatch },
+          quantityOptions,
         );
 
         expect(result.debug?.extracted).toBe(500);
@@ -277,7 +293,7 @@ describe('cross-validation waste comparators', () => {
           '01 01 01',
           'Papel',
           [{ value: 100 }],
-          { onMismatch: onQuantityMismatch },
+          quantityOptions,
         );
 
         expect(result.debug?.isMatch).toBe(true);
@@ -300,7 +316,7 @@ describe('cross-validation waste comparators', () => {
           '01 01 01',
           'Papel',
           [{ value: 100 }],
-          { onMismatch: onQuantityMismatch },
+          quantityOptions,
         );
 
         expect(result.debug?.isMatch).toBe(false);
@@ -322,7 +338,7 @@ describe('cross-validation waste comparators', () => {
         ];
 
         const result = compareWasteQuantity(entries, '01 01 01', 'Papel', [], {
-          onMismatch: onQuantityMismatch,
+          ...quantityOptions,
         });
 
         expect(result.debug?.event).toBeNull();
@@ -345,12 +361,89 @@ describe('cross-validation waste comparators', () => {
           '01 01 01',
           'Papel',
           [{ value: 1000 }],
-          { onMismatch: onQuantityMismatch },
+          quantityOptions,
         );
 
         expect(result.debug?.extracted).toBe(1000);
         expect(result.debug?.isMatch).toBe(true);
         expect(result.debug?.source).toBe('matched-entry');
+      });
+    });
+
+    describe('lower bound', () => {
+      const manifestEntry: WasteTypeEntryData = {
+        code: '01 01 01',
+        description: 'Papel',
+        quantity: 1000,
+        unit: 'kg',
+      };
+      const run = (
+        weighing: number,
+        entries: WasteTypeEntryData[] = [manifestEntry],
+        extra: { skipValidation?: boolean } = {},
+      ) =>
+        compareWasteQuantity(
+          entries,
+          '01 01 01',
+          'Papel',
+          [{ value: weighing }],
+          { ...quantityOptions, ...extra },
+        );
+
+      it('should fail a weighing sent in kg when the manifest is in tonnes (~1000x below)', () => {
+        const result = run(4.35, [
+          { ...manifestEntry, quantity: 4.35, unit: 't' },
+        ]);
+
+        expect(result.debug?.isMatch).toBe(false);
+        expect(result.validation).toHaveLength(1);
+        expect(result.validation[0]?.reviewReason).toMatchObject({
+          code: 'WEIGHT_FAR_BELOW_DOCUMENT',
+          comparedFields: [
+            { event: '4.35 kg', extracted: '4350 kg', field: 'wasteQuantity' },
+          ],
+        });
+      });
+
+      it('should pass a weighing exactly 20% below the manifest quantity', () => {
+        const result = run(800);
+
+        expect(result.debug?.isMatch).toBe(true);
+        expect(result.validation).toEqual([]);
+      });
+
+      it('should fail a weighing just past 20% below the manifest quantity', () => {
+        const result = run(799.9);
+
+        expect(result.debug?.isMatch).toBe(false);
+        expect(result.validation[0]?.reviewReason?.code).toBe(
+          'WEIGHT_FAR_BELOW_DOCUMENT',
+        );
+      });
+
+      it('should still fail a weighing above the manifest quantity with the existing reason', () => {
+        const result = run(1000.02);
+
+        expect(result.validation[0]?.reviewReason?.code).toBe(
+          'WEIGHT_BELOW_WEIGHING',
+        );
+      });
+
+      it('should apply the lower bound to the total-weight fallback', () => {
+        const result = run(10, [
+          { description: 'Plastico', quantity: 1000, unit: 'kg' },
+        ]);
+
+        expect(result.debug?.source).toBe('total-weight');
+        expect(result.validation[0]?.reviewReason?.code).toBe(
+          'WEIGHT_FAR_BELOW_DOCUMENT',
+        );
+      });
+
+      it('should not fail when validation is skipped', () => {
+        expect(
+          run(10, [manifestEntry], { skipValidation: true }).validation,
+        ).toEqual([]);
       });
     });
 
@@ -366,7 +459,7 @@ describe('cross-validation waste comparators', () => {
           '01 01 01',
           'Papel',
           [{ value: 700 }],
-          { onMismatch: onQuantityMismatch },
+          quantityOptions,
         );
 
         expect(result.debug?.source).toBe('total-weight');
@@ -385,7 +478,7 @@ describe('cross-validation waste comparators', () => {
           '01 01 01',
           'Papel',
           [{ value: 500 }],
-          { onMismatch: onQuantityMismatch },
+          quantityOptions,
         );
 
         expect(result.debug?.source).toBe('total-weight');
@@ -407,7 +500,7 @@ describe('cross-validation waste comparators', () => {
           '01 01 01',
           'Papel',
           [{ value: 400 }],
-          { onMismatch: onQuantityMismatch },
+          quantityOptions,
         );
 
         expect(result.debug?.source).toBe('total-weight');
@@ -426,7 +519,7 @@ describe('cross-validation waste comparators', () => {
           '01 01 01',
           'Papel',
           [{ value: 100 }],
-          { notExtractedReason, onMismatch: onQuantityMismatch },
+          { ...quantityOptions, notExtractedReason },
         );
 
         expect(result.debug?.source).toBe('total-weight');
@@ -446,7 +539,7 @@ describe('cross-validation waste comparators', () => {
           '99 99 99',
           'No match',
           [{ value: 1400 }],
-          { onMismatch: onQuantityMismatch },
+          quantityOptions,
         );
 
         expect(result.debug?.source).toBe('total-weight');
@@ -462,7 +555,7 @@ describe('cross-validation waste comparators', () => {
           '01 01 01',
           'Papel',
           [{ value: 100 }],
-          { onMismatch: onQuantityMismatch },
+          quantityOptions,
         );
 
         expect(result.debug).toBeNull();
@@ -474,7 +567,7 @@ describe('cross-validation waste comparators', () => {
           '01 01 01',
           'Papel',
           [{ value: 100 }],
-          { notExtractedReason, onMismatch: onQuantityMismatch },
+          { ...quantityOptions, notExtractedReason },
         );
 
         expect(result.debug).toBeNull();
@@ -488,7 +581,7 @@ describe('cross-validation waste comparators', () => {
           '01 01 01',
           'Papel',
           [],
-          { notExtractedReason, onMismatch: onQuantityMismatch },
+          { ...quantityOptions, notExtractedReason },
         );
 
         expect(result.debug).toBeNull();
@@ -497,7 +590,7 @@ describe('cross-validation waste comparators', () => {
 
       it('should return null debug for empty entries array', () => {
         const result = compareWasteQuantity([], '01 01 01', 'Papel', [], {
-          onMismatch: onQuantityMismatch,
+          ...quantityOptions,
         });
 
         expect(result.debug).toBeNull();
@@ -522,7 +615,7 @@ describe('cross-validation waste comparators', () => {
           '01 01 01',
           'Papel',
           [{ value: 39.2 }],
-          { onMismatch: onQuantityMismatch },
+          quantityOptions,
         );
 
         expect(result.debug?.isMatch).toBe(true);
@@ -546,7 +639,7 @@ describe('cross-validation waste comparators', () => {
           '01 01 01',
           'Papel',
           [{ value: 369.6 }],
-          { onMismatch: onQuantityMismatch },
+          quantityOptions,
         );
 
         expect(result.debug?.isMatch).toBe(true);
@@ -568,7 +661,7 @@ describe('cross-validation waste comparators', () => {
           '01 01 01',
           'Papel',
           [{ value: 80 }],
-          { onMismatch: onQuantityMismatch },
+          quantityOptions,
         );
 
         expect(result.debug?.isMatch).toBe(false);
@@ -592,7 +685,7 @@ describe('cross-validation waste comparators', () => {
           '99 99 99',
           'No match',
           [{ value: 39.2 }],
-          { onMismatch: onQuantityMismatch },
+          quantityOptions,
         );
 
         expect(result.debug?.source).toBe('total-weight');
@@ -615,7 +708,7 @@ describe('cross-validation waste comparators', () => {
           '01 01 01',
           'Papel',
           [{ value: 100 }],
-          { onMismatch: onQuantityMismatch },
+          quantityOptions,
         );
 
         expect(result.debug?.isMatch).toBe(false);
@@ -639,7 +732,7 @@ describe('cross-validation waste comparators', () => {
           '01 01 01',
           'Papel',
           [{ value: 100 }],
-          { onMismatch: onQuantityMismatch, skipValidation: true },
+          { ...quantityOptions, skipValidation: true },
         );
 
         expect(result.debug?.isMatch).toBe(false);
@@ -654,7 +747,7 @@ describe('cross-validation waste comparators', () => {
           [{ value: 100 }],
           {
             notExtractedReason,
-            onMismatch: onQuantityMismatch,
+            ...quantityOptions,
             skipValidation: true,
           },
         );

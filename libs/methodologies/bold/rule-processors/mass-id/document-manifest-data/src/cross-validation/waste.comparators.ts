@@ -156,18 +156,41 @@ const getWeighingValueKg = (
   weighingEvents.find((e) => e.value !== undefined && e.value > 0)?.value;
 
 const WEIGHT_TOLERANCE_KG = 0.01;
+const WEIGHT_LOWER_BOUND_FRACTION = 0.2;
+
+type WeighingPosition = 'above' | 'far-below' | 'within';
+
+const getWeighingPosition = (
+  extractedKg: number,
+  weighingValue: number,
+): WeighingPosition => {
+  if (weighingValue > extractedKg + WEIGHT_TOLERANCE_KG) {
+    return 'above';
+  }
+
+  return weighingValue + WEIGHT_TOLERANCE_KG <
+    extractedKg * (1 - WEIGHT_LOWER_BOUND_FRACTION)
+    ? 'far-below'
+    : 'within';
+};
+
+type WeightReasonOptions = {
+  notExtractedReason?: ReviewReason;
+  onFarBelow: (parameters: {
+    extractedQuantityKg: string;
+    weighingWeight: string;
+  }) => ReviewReason;
+  onMismatch: (parameters: {
+    extractedQuantityKg: string;
+    weighingWeight: string;
+  }) => ReviewReason;
+  skipValidation?: boolean;
+};
 
 const buildWeightValidation = (
   extractedKg: number | undefined,
   weighingValue: number | undefined,
-  options: {
-    notExtractedReason?: ReviewReason;
-    onMismatch: (parameters: {
-      extractedQuantityKg: string;
-      weighingWeight: string;
-    }) => ReviewReason;
-    skipValidation?: boolean;
-  },
+  options: WeightReasonOptions,
 ): FieldValidationResult[] => {
   if (options.skipValidation === true) {
     return [];
@@ -179,17 +202,23 @@ const buildWeightValidation = (
       : [];
   }
 
-  if (
-    weighingValue === undefined ||
-    weighingValue <= extractedKg + WEIGHT_TOLERANCE_KG
-  ) {
+  if (weighingValue === undefined) {
     return [];
   }
+
+  const position = getWeighingPosition(extractedKg, weighingValue);
+
+  if (position === 'within') {
+    return [];
+  }
+
+  const onReason =
+    position === 'above' ? options.onMismatch : options.onFarBelow;
 
   return [
     {
       reviewReason: {
-        ...options.onMismatch({
+        ...onReason({
           extractedQuantityKg: extractedKg.toString(),
           weighingWeight: weighingValue.toString(),
         }),
@@ -240,15 +269,7 @@ export const compareWasteQuantity = (
   eventCode: string | undefined,
   eventDescription: string | undefined,
   weighingEvents: Pick<BoldDocumentEvent, 'value'>[],
-  options: {
-    confidence?: ExtractionConfidence | null;
-    notExtractedReason?: ReviewReason;
-    onMismatch: (parameters: {
-      extractedQuantityKg: string;
-      weighingWeight: string;
-    }) => ReviewReason;
-    skipValidation?: boolean;
-  },
+  options: WeightReasonOptions & { confidence?: ExtractionConfidence | null },
 ): ComparisonOutput<null | WasteQuantityComparison> => {
   const weighingValue = getWeighingValueKg(weighingEvents);
 
@@ -276,7 +297,7 @@ export const compareWasteQuantity = (
     );
     const isMatch =
       normalizedKg !== undefined && weighingValue !== undefined
-        ? weighingValue <= normalizedKg + WEIGHT_TOLERANCE_KG
+        ? getWeighingPosition(normalizedKg, weighingValue) === 'within'
         : null;
 
     return {
@@ -298,7 +319,7 @@ export const compareWasteQuantity = (
   const extractedKg = hasValidQuantity ? totalKg : undefined;
   const isMatch =
     extractedKg !== undefined && weighingValue !== undefined
-      ? weighingValue <= extractedKg + WEIGHT_TOLERANCE_KG
+      ? getWeighingPosition(extractedKg, weighingValue) === 'within'
       : null;
 
   return {

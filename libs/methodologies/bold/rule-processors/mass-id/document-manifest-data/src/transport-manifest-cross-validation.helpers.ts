@@ -291,6 +291,7 @@ export const validateMtrExtractedData = (
       notExtractedReason: REVIEW_REASONS.FIELD_NOT_EXTRACTED({
         field: 'waste quantity',
       }),
+      onFarBelow: REVIEW_REASONS.WASTE_QUANTITY_FAR_BELOW_WEIGHING,
       onMismatch: REVIEW_REASONS.WASTE_QUANTITY_WEIGHT_MISMATCH,
     },
   );
