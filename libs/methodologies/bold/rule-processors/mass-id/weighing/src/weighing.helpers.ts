@@ -39,12 +39,14 @@ import { WEIGHING_FINDINGS } from './weighing.findings';
 import {
   type ContainerCapacityApprovedException,
   type ContainerQuantityApprovedException,
+  type ScaleTicketApprovedException,
   type TareApprovedException,
 } from './weighing.types';
 import {
   isAdditionalVerificationAttributeValue,
   isContainerCapacityApprovedException,
   isContainerQuantityApprovedException,
+  isScaleTicketApprovedException,
   isTareApprovedException,
 } from './weighing.validators';
 
@@ -200,6 +202,18 @@ export const getContainerQuantityExceptionFromAccreditationDocument = (
     ? containerQuantityException
     : undefined;
 };
+
+export const getScaleTicketExceptionFromAccreditationDocument = (
+  recyclerAccreditationDocument: BoldDocument,
+  wasteGeneratorParticipantId: string | undefined,
+): ScaleTicketApprovedException | undefined =>
+  getApprovedExceptions(recyclerAccreditationDocument, ACCREDITATION_RESULT)
+    ?.filter(isScaleTicketApprovedException)
+    .find(
+      (exception) =>
+        exception['Waste Generator Participant ID'] ===
+          wasteGeneratorParticipantId && isApprovedExceptionValid(exception),
+    );
 
 export const isExceptionValid = (
   exception:

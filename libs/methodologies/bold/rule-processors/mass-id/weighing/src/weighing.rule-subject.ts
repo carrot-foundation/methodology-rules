@@ -12,6 +12,7 @@ const MAX_WEIGHING_EVENTS = 2;
 export const WeighingRuleSubjectSchema = z.object({
   massIDDocumentId: NonEmptyStringSchema,
   recyclerAccreditationDocument: BoldDocumentSchema,
+  wasteGeneratorParticipantId: NonEmptyStringSchema.optional(),
   weighingEvents: z
     .array(BoldDocumentEventSchema)
     .superRefine((events, context) => {

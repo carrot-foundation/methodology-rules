@@ -3,15 +3,18 @@ import type { RuleTestCase } from '@carrot-fndn/shared/rule/types';
 
 import {
   BoldStubsBuilder,
+  MASS_ID_ACTOR_PARTICIPANTS,
   type MetadataAttributeParameter,
   stubBoldAccreditationResultEvent,
   type StubBoldDocumentParameters,
   stubBoldMassIDWeighingEvent,
   stubBoldMonitoringSystemsAndEquipmentEvent,
+  stubDocumentEventAttachment,
   stubParticipant,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   BoldApprovedExceptionType,
+  BoldAttachmentLabel,
   BoldAttributeName,
   BoldContainerType,
   type BoldDocument,
@@ -26,6 +29,7 @@ import { stubEnumValue } from '@carrot-fndn/shared/testing';
 import {
   ApprovedException,
   DocumentEventAttributeFormat,
+  type DocumentParticipant,
 } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 
@@ -53,7 +57,7 @@ const {
   VEHICLE_LICENSE_PLATE,
   WEIGHING_CAPTURE_METHOD,
 } = BoldAttributeName;
-const { RECYCLER } = MassIDActorType;
+const { RECYCLER, WASTE_GENERATOR } = MassIDActorType;
 const { KILOGRAM } = DocumentEventAttributeFormat;
 
 const scaleType = stubEnumValue(BoldScaleType);
@@ -68,7 +72,34 @@ const MANIFEST_TWO_STEP_PARTICIPANT = stubParticipant({
   id: '550e8400-e29b-41d4-a716-446655440001',
 });
 
+const wasteGeneratorParticipant = stubParticipant({ type: WASTE_GENERATOR });
+const massIDActorParticipants = new Map<string, DocumentParticipant>(
+  MASS_ID_ACTOR_PARTICIPANTS.map((actorType) => [
+    actorType,
+    actorType === WASTE_GENERATOR
+      ? wasteGeneratorParticipant
+      : stubParticipant({ type: actorType }),
+  ]),
+);
+
+const stubScaleTicketException = (
+  overrides: Record<string, unknown> = {},
+): Record<string, unknown> => ({
+  'Attribute Location': {
+    Asset: {
+      Category: BoldDocumentCategory.MASS_ID,
+    },
+    Event: WEIGHING,
+  },
+  'Attribute Name': BoldAttachmentLabel.WEIGHING_TICKET,
+  'Exception Type': BoldApprovedExceptionType.MANDATORY_ATTACHMENT,
+  Reason: 'The recycler receives no scale ticket for this waste generator',
+  'Waste Generator Participant ID': wasteGeneratorParticipant.id,
+  ...overrides,
+});
+
 const stubBaseAccreditationDocuments = ({
+  scaleTicketException,
   scaleTypeValue = scaleType,
   tareExceptionValidUntil,
   withContainerCapacityException = false,
@@ -76,6 +107,7 @@ const stubBaseAccreditationDocuments = ({
   withScaleTicketVerification = false,
   withTareException = false,
 }: {
+  scaleTicketException?: Record<string, unknown>;
   scaleTypeValue?: BoldScaleType;
   tareExceptionValidUntil?: string;
   withContainerCapacityException?: boolean;
@@ -83,8 +115,12 @@ const stubBaseAccreditationDocuments = ({
   withScaleTicketVerification?: boolean;
   withTareException?: boolean;
 } = {}) => {
-  const exceptions = [];
+  const exceptions: unknown[] = [];
   const additionalVerifications = [];
+
+  if (scaleTicketException) {
+    exceptions.push(scaleTicketException);
+  }
 
   if (withContainerCapacityException) {
     exceptions.push({
@@ -267,6 +303,7 @@ const createTwoStepWeighingEvents = (
 
 interface WeighingTestCase extends RuleTestCase {
   accreditationDocuments?: Map<string, StubBoldDocumentParameters> | undefined;
+  massIDActorParticipants?: Map<string, DocumentParticipant>;
   massIDDocumentEvents: Record<string, BoldDocumentEvent | undefined>;
   scaleTicketVerificationError?: RenderedRuleFinding;
 }
@@ -556,6 +593,102 @@ export const weighingTestCases: WeighingTestCase[] = [
       'INVALID.SCALE_TICKET_LAYOUT_NOT_RECOGNIZED',
     ),
     scenario: `The scale ticket attached to the "${WEIGHING}" event does not match a supported layout`,
+  },
+  {
+    accreditationDocuments: stubBaseAccreditationDocuments({
+      scaleTicketException: stubScaleTicketException(),
+      withScaleTicketVerification: true,
+    }),
+    massIDActorParticipants,
+    massIDDocumentEvents: {
+      [WEIGHING]: createWeighingEvent(validWeighingAttributes),
+    },
+    resultComment: PASSED_RESULT_COMMENTS.PASSED_WITH_SCALE_TICKET_EXCEPTION(
+      PASSED_RESULT_COMMENTS.SINGLE_STEP,
+    ),
+    resultStatus: 'PASSED',
+    scenario: `The "${WEIGHING}" event has no "${BoldAttachmentLabel.WEIGHING_TICKET}" and the recycler has a scale ticket exception for the waste generator`,
+  },
+  {
+    accreditationDocuments: stubBaseAccreditationDocuments({
+      scaleTicketException: stubScaleTicketException({
+        'Waste Generator Participant ID': faker.string.uuid(),
+      }),
+      withScaleTicketVerification: true,
+    }),
+    massIDActorParticipants,
+    massIDDocumentEvents: {
+      [WEIGHING]: createWeighingEvent(validWeighingAttributes),
+    },
+    resultComment: INVALID_RESULT_COMMENTS.SCALE_TICKET_MISSING_SOURCE,
+    resultStatus: 'FAILED',
+    scaleTicketVerificationError: WEIGHING_FINDINGS.render(
+      'INVALID.SCALE_TICKET_MISSING_SOURCE',
+    ),
+    scenario: `The "${WEIGHING}" event has no "${BoldAttachmentLabel.WEIGHING_TICKET}" and the scale ticket exception is for another waste generator`,
+  },
+  {
+    accreditationDocuments: stubBaseAccreditationDocuments({
+      scaleTicketException: stubScaleTicketException({
+        'Valid Until': faker.date.past().toISOString(),
+      }),
+      withScaleTicketVerification: true,
+    }),
+    massIDActorParticipants,
+    massIDDocumentEvents: {
+      [WEIGHING]: createWeighingEvent(validWeighingAttributes),
+    },
+    resultComment: INVALID_RESULT_COMMENTS.SCALE_TICKET_MISSING_SOURCE,
+    resultStatus: 'FAILED',
+    scaleTicketVerificationError: WEIGHING_FINDINGS.render(
+      'INVALID.SCALE_TICKET_MISSING_SOURCE',
+    ),
+    scenario: `The "${WEIGHING}" event has no "${BoldAttachmentLabel.WEIGHING_TICKET}" and the scale ticket exception has expired`,
+  },
+  {
+    accreditationDocuments: stubBaseAccreditationDocuments({
+      scaleTicketException: stubScaleTicketException({
+        'Waste Generator Participant ID': undefined,
+      }),
+      withScaleTicketVerification: true,
+    }),
+    massIDActorParticipants,
+    massIDDocumentEvents: {
+      [WEIGHING]: createWeighingEvent(validWeighingAttributes),
+    },
+    resultComment: INVALID_RESULT_COMMENTS.SCALE_TICKET_MISSING_SOURCE,
+    resultStatus: 'FAILED',
+    scaleTicketVerificationError: WEIGHING_FINDINGS.render(
+      'INVALID.SCALE_TICKET_MISSING_SOURCE',
+    ),
+    scenario: `The "${WEIGHING}" event has no "${BoldAttachmentLabel.WEIGHING_TICKET}" and the scale ticket exception names no waste generator`,
+  },
+  {
+    accreditationDocuments: stubBaseAccreditationDocuments({
+      scaleTicketException: stubScaleTicketException(),
+      withScaleTicketVerification: true,
+    }),
+    massIDActorParticipants,
+    massIDDocumentEvents: {
+      [WEIGHING]: {
+        ...createWeighingEvent(validWeighingAttributes),
+        attachments: [
+          stubDocumentEventAttachment({
+            label: BoldAttachmentLabel.WEIGHING_TICKET,
+          }),
+        ],
+      },
+    },
+    resultComment: INVALID_RESULT_COMMENTS.SCALE_TICKET_NET_WEIGHT_MISMATCH({
+      expectedNetWeight: eventValue,
+      ticketNetWeight: eventValue + 10,
+    }),
+    resultStatus: 'FAILED',
+    scaleTicketVerificationError: WEIGHING_FINDINGS.render(
+      'INVALID.SCALE_TICKET_NET_WEIGHT_MISMATCH',
+      { expectedNetWeight: eventValue, ticketNetWeight: eventValue + 10 },
+    ),
+    scenario: `The "${WEIGHING}" event has a "${BoldAttachmentLabel.WEIGHING_TICKET}" that is still verified despite a scale ticket exception`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments({

@@ -14,13 +14,20 @@ import {
   MASS_ID,
   PARTICIPANT_ACCREDITATION_PARTIAL_MATCH,
 } from '@carrot-fndn/shared/methodologies/bold/matchers';
+import {
+  and,
+  eventLabelIsAnyOf,
+  eventNameIsAnyOf,
+} from '@carrot-fndn/shared/methodologies/bold/predicates';
 import { validateRuleSubjectOrThrow } from '@carrot-fndn/shared/methodologies/bold/processors';
 import {
   BoldAttachmentLabel,
   type BoldDocument,
   type BoldDocumentEvent,
+  BoldDocumentEventName,
   BoldDocumentSubtype,
   BoldWeighingCaptureMethod,
+  MassIDActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
   getAttachmentS3Key,
@@ -40,6 +47,8 @@ import {
   NonEmptyString,
 } from '@carrot-fndn/shared/types';
 
+import type { ScaleTicketApprovedException } from './weighing.types';
+
 import {
   isScaleTicketVerificationConfig,
   verifyScaleTicketNetWeight,
@@ -49,6 +58,7 @@ import { WeighingProcessorErrors } from './weighing.errors';
 import { WEIGHING_FINDINGS } from './weighing.findings';
 import {
   getRequiredAdditionalVerificationsFromAccreditationDocument,
+  getScaleTicketExceptionFromAccreditationDocument,
   getValuesRelatedToWeighing,
   getWeighingEvents,
   isExceptionValid,
@@ -109,10 +119,12 @@ export class WeighingProcessor extends RuleDataProcessor {
 
   protected buildPassMessage({
     isTwoStepWeighingEvent,
+    scaleTicketExempted,
     scaleTicketValidated,
     weighingValues,
   }: {
     isTwoStepWeighingEvent: boolean;
+    scaleTicketExempted: boolean;
     scaleTicketValidated: boolean;
     weighingValues: WeighingValues;
   }): string {
@@ -157,12 +169,18 @@ export class WeighingProcessor extends RuleDataProcessor {
         PASSED_RESULT_COMMENTS.PASSED_WITH_SCALE_TICKET_VALIDATION(passMessage);
     }
 
+    if (scaleTicketExempted) {
+      passMessage =
+        PASSED_RESULT_COMMENTS.PASSED_WITH_SCALE_TICKET_EXCEPTION(passMessage);
+    }
+
     return passMessage;
   }
 
   protected async evaluateResult({
     massIDDocumentId,
     recyclerAccreditationDocument,
+    wasteGeneratorParticipantId,
     weighingEvents,
   }: WeighingRuleSubject): Promise<EvaluateResultOutput> {
     const isTwoStepWeighingEvent = weighingEvents.length === 2;
@@ -210,6 +228,10 @@ export class WeighingProcessor extends RuleDataProcessor {
       expectedNetWeight: weighingValues.eventValue,
       massIDDocumentId,
       scaleTicketConfig,
+      scaleTicketException: getScaleTicketExceptionFromAccreditationDocument(
+        recyclerAccreditationDocument,
+        wasteGeneratorParticipantId,
+      ),
       weighingEvent,
     });
 
@@ -217,11 +239,10 @@ export class WeighingProcessor extends RuleDataProcessor {
       return scaleTicketValidationResult.errorResult;
     }
 
-    const scaleTicketValidated = scaleTicketValidationResult.validated;
-
     const passMessage = this.buildPassMessage({
       isTwoStepWeighingEvent,
-      scaleTicketValidated,
+      scaleTicketExempted: scaleTicketValidationResult.exempted ?? false,
+      scaleTicketValidated: scaleTicketValidationResult.validated,
       weighingValues,
     });
 
@@ -251,9 +272,17 @@ export class WeighingProcessor extends RuleDataProcessor {
   }: DocumentPair): WeighingRuleSubject {
     const weighingEvents = getWeighingEvents(massIDDocument);
 
+    const wasteGeneratorEvent = massIDDocument.externalEvents?.find(
+      and(
+        eventNameIsAnyOf([BoldDocumentEventName.ACTOR]),
+        eventLabelIsAnyOf([MassIDActorType.WASTE_GENERATOR]),
+      ),
+    );
+
     return {
       massIDDocumentId: massIDDocument.id,
       recyclerAccreditationDocument,
+      wasteGeneratorParticipantId: wasteGeneratorEvent?.participant.id,
       weighingEvents,
     };
   }
@@ -262,18 +291,28 @@ export class WeighingProcessor extends RuleDataProcessor {
     expectedNetWeight,
     massIDDocumentId,
     scaleTicketConfig,
+    scaleTicketException,
     weighingEvent,
   }: {
     expectedNetWeight: number | undefined;
     massIDDocumentId: NonEmptyString;
     scaleTicketConfig: AdditionalVerification | undefined;
+    scaleTicketException: ScaleTicketApprovedException | undefined;
     weighingEvent: BoldDocumentEvent;
   }): Promise<{
     errorResult?: EvaluateResultOutput;
+    exempted?: boolean;
     validated: boolean;
   }> {
     if (!scaleTicketConfig || expectedNetWeight === undefined) {
       return { validated: false };
+    }
+
+    if (
+      scaleTicketException &&
+      !this.findScaleTicketAttachment(weighingEvent)
+    ) {
+      return { exempted: true, validated: false };
     }
 
     const textExtractorInput = this.buildScaleTicketTextExtractorInput(
@@ -304,11 +343,7 @@ export class WeighingProcessor extends RuleDataProcessor {
     weighingEvent: BoldDocumentEvent,
     massIDDocumentId: NonEmptyString,
   ): TextExtractionInput | undefined {
-    const scaleTicketAttachment = weighingEvent.attachments?.find(
-      (attachment) =>
-        String(attachment.label) ===
-        String(BoldAttachmentLabel.WEIGHING_TICKET),
-    );
+    const scaleTicketAttachment = this.findScaleTicketAttachment(weighingEvent);
 
     if (!scaleTicketAttachment) {
       return undefined;
@@ -373,6 +408,14 @@ export class WeighingProcessor extends RuleDataProcessor {
       recyclerAccreditationDocument:
         recyclerAccreditationDocument as BoldDocument,
     };
+  }
+
+  private findScaleTicketAttachment(weighingEvent: BoldDocumentEvent) {
+    return weighingEvent.attachments?.find(
+      (attachment) =>
+        String(attachment.label) ===
+        String(BoldAttachmentLabel.WEIGHING_TICKET),
+    );
   }
 
   private validateOrThrow(
