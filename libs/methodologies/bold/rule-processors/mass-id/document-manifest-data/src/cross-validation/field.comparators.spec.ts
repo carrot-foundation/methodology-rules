@@ -536,6 +536,63 @@ describe('cross-validation field comparators', () => {
       },
     );
 
+    it.each([
+      { label: 'blank state', state: '' },
+      { label: 'stray non-UF token', state: 'Id' },
+    ])(
+      'should match the address when the document state is unusable ($label) and the event carries one',
+      ({ state }) => {
+        const entity = stubMtrEntityWithHighAddress(
+          'Fictional Generator',
+          '11.111.111/0001-11',
+          'ROD ZZ 123, S/N- KM 110,4, n° S/N',
+          'Vila Inventada',
+          state,
+        );
+        const result = compareEntity(
+          entity,
+          ['Fictional Generator'],
+          '11.111.111/0001-11',
+          entityReasonsWithAddress,
+          stubEventAddress({
+            city: 'Vila Inventada',
+            countryState: 'Rio Grande do Sul',
+            number: 'S/N',
+            street: 'ROD ZZ 123',
+          }),
+        );
+
+        expect(result.validation).toEqual([]);
+        expect(result.debug?.address?.event).toBe(
+          'ROD ZZ 123, S/N, Vila Inventada',
+        );
+      },
+    );
+
+    it('should still fail a different city when the document state is blank', () => {
+      const entity = stubMtrEntityWithHighAddress(
+        'Fictional Generator',
+        '11.111.111/0001-11',
+        'ROD ZZ 123, S/N- KM 110,4, n° S/N',
+        'Cidade Diferente',
+        '',
+      );
+      const result = compareEntity(
+        entity,
+        ['Fictional Generator'],
+        '11.111.111/0001-11',
+        entityReasonsWithAddress,
+        stubEventAddress({
+          city: 'Vila Inventada',
+          countryState: 'Rio Grande do Sul',
+          number: 'S/N',
+          street: 'ROD ZZ 123',
+        }),
+      );
+
+      expect(result.validation).toHaveLength(1);
+    });
+
     it('should include address in debug for entity with address fields', () => {
       const entity = stubEntityWithAddress(
         'Generator Co',

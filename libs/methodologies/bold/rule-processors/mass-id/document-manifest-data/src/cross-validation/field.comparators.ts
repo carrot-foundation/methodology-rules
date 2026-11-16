@@ -6,6 +6,7 @@ import type {
 } from '@carrot-fndn/shared/document-extractor';
 import type { DocumentAddress } from '@carrot-fndn/shared/types';
 
+import { isBrazilianStateCode } from '@carrot-fndn/shared/document-extractor';
 import {
   dateDifferenceInDays,
   isAddressMatch,
@@ -219,16 +220,30 @@ const buildEntityNotExtractedReasons = (
   return validation;
 };
 
+// A blank UF, or a stray token the parser took for one, must not count against the event's state.
+const hasUsableState = (entityWithAddress: ExtractedEntityWithAddressInfo) =>
+  isBrazilianStateCode(entityWithAddress.state.parsed);
+
 const buildExtractedAddress = (
   entityWithAddress: ExtractedEntityWithAddressInfo,
 ): string =>
   [
     entityWithAddress.address.parsed,
     entityWithAddress.city.parsed,
-    entityWithAddress.state.parsed,
+    hasUsableState(entityWithAddress) ? entityWithAddress.state.parsed : '',
   ]
     .filter(Boolean)
     .join(', ');
+
+const buildEventAddressString = (
+  entityWithAddress: ExtractedEntityWithAddressInfo,
+  eventAddress: DocumentAddress,
+): string =>
+  buildAddressString(
+    hasUsableState(entityWithAddress)
+      ? eventAddress
+      : { ...eventAddress, countryState: '' },
+  );
 
 const buildAddressDebug = (
   entityWithAddress: ExtractedEntityWithAddressInfo,
@@ -243,7 +258,10 @@ const buildAddressDebug = (
     };
   }
 
-  const eventAddressString = buildAddressString(eventAddress);
+  const eventAddressString = buildEventAddressString(
+    entityWithAddress,
+    eventAddress,
+  );
   const { score } = isAddressMatch(extractedAddress, eventAddressString);
 
   return {
@@ -263,7 +281,10 @@ const validateEntityAddress = (
     return undefined;
   }
 
-  const eventAddressString = buildAddressString(eventAddress);
+  const eventAddressString = buildEventAddressString(
+    entityWithAddress,
+    eventAddress,
+  );
   const extractedAddress = buildExtractedAddress(entityWithAddress);
   const { isMatch, score } = isAddressMatch(
     extractedAddress,

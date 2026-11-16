@@ -8,6 +8,7 @@ import {
   type ExtractionOutput,
   extractSection,
   finalizeExtraction,
+  isBrazilianStateCode,
 } from '@carrot-fndn/shared/document-extractor';
 import { normalizeVehiclePlate } from '@carrot-fndn/shared/helpers';
 
@@ -65,41 +66,11 @@ export const MTR_ADDRESS_PATTERNS = {
   state: /\b(?:UF|Estado)[^\S\n]*:?[^\S\n]*([A-Z]{2})\b/gi,
 } as const;
 
-const BRAZILIAN_STATE_CODES = new Set([
-  'AC',
-  'AL',
-  'AM',
-  'AP',
-  'BA',
-  'CE',
-  'DF',
-  'ES',
-  'GO',
-  'MA',
-  'MG',
-  'MS',
-  'MT',
-  'PA',
-  'PB',
-  'PE',
-  'PI',
-  'PR',
-  'RJ',
-  'RN',
-  'RO',
-  'RR',
-  'RS',
-  'SC',
-  'SE',
-  'SP',
-  'TO',
-]);
-
 const extractState = (sectionText: string): string | undefined => {
   for (const match of sectionText.matchAll(MTR_ADDRESS_PATTERNS.state)) {
     const state = match[1]?.toUpperCase();
 
-    if (state && BRAZILIAN_STATE_CODES.has(state)) {
+    if (state && isBrazilianStateCode(state)) {
       return state;
     }
   }

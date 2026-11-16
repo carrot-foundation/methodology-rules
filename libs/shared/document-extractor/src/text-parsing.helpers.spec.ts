@@ -8,6 +8,7 @@ import {
   extractFieldWithLabelFallback,
   extractSection,
   extractStringField,
+  isBrazilianStateCode,
   parseBrazilianNumber,
   stripAccents,
 } from './text-parsing.helpers';
@@ -485,6 +486,17 @@ describe('text-parsing.helpers', () => {
       expect(result).toBeDefined();
       expect(result?.value.name).toBe('Company ABC LTDA');
       expect(result?.value.taxId).toBe('28324667000169');
+    });
+  });
+
+  describe('isBrazilianStateCode', () => {
+    it.each([
+      ['RS', true],
+      [' sp ', true],
+      ['Id', false],
+      ['', false],
+    ])('should return the UF check for %j', (value, expected) => {
+      expect(isBrazilianStateCode(value)).toBe(expected);
     });
   });
 });
