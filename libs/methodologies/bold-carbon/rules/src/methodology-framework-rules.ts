@@ -316,7 +316,7 @@ export const methodologyFrameworkRules = [
   },
   {
     description:
-      "The MassID must have at least one 'WEIGHING' event with the following metadata: 'Gross Weight' (decimal > 0, in kg), 'Container Capacity' (decimal > 0, in KILOGRAM, LITER, or CUBIC_METER), 'Tare' (decimal >= 0, in kg), 'Mass Net Weight' (decimal > 0, in kg), and 'Container Quantity' (integer >= 1, required when Container Type is not 'Truck').",
+      "The MassID must have at least one 'WEIGHING' event with the following metadata: 'Gross Weight' (decimal > 0, in kg), 'Container Capacity' (decimal > 0, in KILOGRAM, LITER, or CUBIC_METER), 'Tare' (decimal > 0, in kg), 'Mass Net Weight' (decimal > 0, in kg), and 'Container Quantity' (integer >= 1, required when Container Type is not 'Truck').",
     name: 'Weighing Fields',
     slug: 'weighing-fields',
     type: 'structural',
