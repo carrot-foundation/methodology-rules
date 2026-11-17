@@ -36,6 +36,7 @@ describe('WeighingProcessor E2E', () => {
     async (testCase) => {
       const {
         accreditationDocuments,
+        massIDActorParticipants,
         massIDDocumentEvents,
         resultComment,
         resultStatus,
@@ -51,7 +52,9 @@ describe('WeighingProcessor E2E', () => {
         massIDAuditDocument,
         massIDDocument,
         participantsAccreditationDocuments,
-      } = new BoldStubsBuilder()
+      } = new BoldStubsBuilder({
+        ...(massIDActorParticipants && { massIDActorParticipants }),
+      })
         .createMassIDDocuments({
           externalEventsMap: massIDDocumentEvents,
         })

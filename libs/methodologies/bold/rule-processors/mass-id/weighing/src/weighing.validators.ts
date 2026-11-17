@@ -5,6 +5,7 @@ import type {
 
 import {
   BoldApprovedExceptionType,
+  BoldAttachmentLabel,
   BoldAttributeName,
   BoldDocumentCategory,
   BoldDocumentEventName,
@@ -15,6 +16,7 @@ import { z } from 'zod';
 import type {
   ContainerCapacityApprovedException,
   ContainerQuantityApprovedException,
+  ScaleTicketApprovedException,
   TareApprovedException,
 } from './weighing.types';
 
@@ -57,6 +59,20 @@ const ContainerQuantityApprovedExceptionSchema = z.object({
   'Valid Until': z.string().optional(),
 });
 
+const ScaleTicketApprovedExceptionSchema = z.object({
+  'Attribute Location': z.object({
+    Asset: z.object({
+      Category: z.literal(BoldDocumentCategory.MASS_ID),
+    }),
+    Event: z.literal(BoldDocumentEventName.WEIGHING),
+  }),
+  'Attribute Name': z.literal(BoldAttachmentLabel.WEIGHING_TICKET),
+  'Exception Type': z.literal(BoldApprovedExceptionType.MANDATORY_ATTACHMENT),
+  Reason: NonEmptyStringSchema,
+  'Valid Until': z.string().optional(),
+  'Waste Generator Participant ID': NonEmptyStringSchema,
+});
+
 const AdditionalVerificationSchema = z.object({
   'Layout IDs': z.array(NonEmptyStringSchema).optional(),
   'Verification Type': z.string(),
@@ -80,6 +96,11 @@ export const isContainerQuantityApprovedException = (
   input: unknown,
 ): input is ContainerQuantityApprovedException =>
   ContainerQuantityApprovedExceptionSchema.safeParse(input).success;
+
+export const isScaleTicketApprovedException = (
+  input: unknown,
+): input is ScaleTicketApprovedException =>
+  ScaleTicketApprovedExceptionSchema.safeParse(input).success;
 
 export const isAdditionalVerificationAttributeValue = (
   input: unknown,

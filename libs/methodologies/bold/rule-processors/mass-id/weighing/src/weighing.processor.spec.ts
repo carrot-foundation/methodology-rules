@@ -48,6 +48,7 @@ describe('WeighingProcessor', () => {
 
     return createRuleTestFixture({
       accreditationDocuments: testCase.accreditationDocuments,
+      massIDActorParticipants: testCase.massIDActorParticipants,
       massIDDocumentsParams: {
         externalEventsMap: testCase.massIDDocumentEvents,
       },

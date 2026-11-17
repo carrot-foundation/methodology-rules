@@ -17,6 +17,7 @@ export const ApprovedExceptionSchema = z.object({
   'Exception Type': NonEmptyStringSchema,
   Reason: NonEmptyStringSchema,
   'Valid Until': z.string().optional(),
+  'Waste Generator Participant ID': NonEmptyStringSchema.optional(),
 });
 export type ApprovedException = z.infer<typeof ApprovedExceptionSchema>;
 

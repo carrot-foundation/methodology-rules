@@ -1,4 +1,5 @@
 import {
+  BoldAttachmentLabel,
   BoldAttributeName,
   BoldContainerType,
   BoldDocumentEventName,
@@ -31,6 +32,8 @@ export const PASSED_RESULT_COMMENTS = {
     `${originalPassMessage} The omission of the "${CONTAINER_QUANTITY}" is permitted under an approved exception granted to this recycler for the duration of the accreditation period.`,
   PASSED_WITH_EXCEPTION: (originalPassMessage: string) =>
     `${originalPassMessage} The omission of the "${CONTAINER_CAPACITY}" is permitted under an approved exception granted to this recycler for the duration of the accreditation period.`,
+  PASSED_WITH_SCALE_TICKET_EXCEPTION: (originalPassMessage: string) =>
+    `${originalPassMessage} The omission of the "${BoldAttachmentLabel.WEIGHING_TICKET}" attachment is permitted under an approved exception granted to this recycler for this waste generator.`,
   PASSED_WITH_SCALE_TICKET_VALIDATION: (originalPassMessage: string) =>
     `${originalPassMessage} Scale ticket validation was successful.`,
   PASSED_WITH_TARE_EXCEPTION: (originalPassMessage: string) =>

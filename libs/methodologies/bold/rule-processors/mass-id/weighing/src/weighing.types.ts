@@ -2,6 +2,7 @@ import type { ApprovedException } from '@carrot-fndn/shared/types';
 
 import {
   BoldApprovedExceptionType,
+  BoldAttachmentLabel,
   BoldAttributeName,
   BoldDocumentCategory,
   BoldDocumentEventName,
@@ -29,6 +30,19 @@ export interface ContainerQuantityApprovedException extends ApprovedException {
   'Attribute Name': typeof BoldAttributeName.CONTAINER_QUANTITY;
   'Exception Type': (typeof BoldApprovedExceptionType)['MANDATORY_ATTRIBUTE'];
   Reason: string;
+}
+
+export interface ScaleTicketApprovedException extends ApprovedException {
+  'Attribute Location': {
+    Asset: {
+      Category: typeof BoldDocumentCategory.MASS_ID;
+    };
+    Event: typeof BoldDocumentEventName.WEIGHING;
+  };
+  'Attribute Name': typeof BoldAttachmentLabel.WEIGHING_TICKET;
+  'Exception Type': (typeof BoldApprovedExceptionType)['MANDATORY_ATTACHMENT'];
+  Reason: string;
+  'Waste Generator Participant ID': string;
 }
 
 export interface TareApprovedException extends ApprovedException {

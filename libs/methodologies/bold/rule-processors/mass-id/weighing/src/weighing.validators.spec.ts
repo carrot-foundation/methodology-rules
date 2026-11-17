@@ -1,5 +1,6 @@
 import {
   BoldApprovedExceptionType,
+  BoldAttachmentLabel,
   BoldAttributeName,
   BoldDocumentCategory,
   BoldDocumentEventName,
@@ -9,6 +10,7 @@ import { type AdditionalVerificationAttributeValue } from '@carrot-fndn/shared/t
 import {
   isAdditionalVerification,
   isAdditionalVerificationAttributeValue,
+  isScaleTicketApprovedException,
 } from './weighing.validators';
 
 describe('weighing.validators', () => {
@@ -50,6 +52,32 @@ describe('weighing.validators', () => {
             'Layout IDs': ['layout-1'],
           },
         ]),
+      ).toBe(false);
+    });
+  });
+
+  describe('isScaleTicketApprovedException', () => {
+    const scaleTicketException = {
+      'Attribute Location': {
+        Asset: { Category: BoldDocumentCategory.MASS_ID },
+        Event: BoldDocumentEventName.WEIGHING,
+      },
+      'Attribute Name': BoldAttachmentLabel.WEIGHING_TICKET,
+      'Exception Type': BoldApprovedExceptionType.MANDATORY_ATTACHMENT,
+      Reason: 'No scale ticket for this waste generator',
+      'Waste Generator Participant ID': 'waste-generator-participant-id',
+    };
+
+    it('should return true for an exception scoped to a waste generator', () => {
+      expect(isScaleTicketApprovedException(scaleTicketException)).toBe(true);
+    });
+
+    it('should return false when the waste generator participant id is missing', () => {
+      expect(
+        isScaleTicketApprovedException({
+          ...scaleTicketException,
+          'Waste Generator Participant ID': undefined,
+        }),
       ).toBe(false);
     });
   });
