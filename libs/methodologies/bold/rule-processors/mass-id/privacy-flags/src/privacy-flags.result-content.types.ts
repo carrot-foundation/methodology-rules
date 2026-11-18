@@ -17,6 +17,7 @@ export interface PrivacyFlagsResultContent {
 
 export interface PrivacyReviewReason extends ReviewReason {
   actual: boolean | undefined;
+  attachmentLabel?: string;
   attributeName?: string;
   eventLabel?: string;
   eventName: string;

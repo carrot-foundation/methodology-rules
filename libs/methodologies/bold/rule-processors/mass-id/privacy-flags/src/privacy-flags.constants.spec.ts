@@ -14,6 +14,7 @@ describe('privacy-flags constants', () => {
         [...EVENT_PRIVACY_SPEC].map(([eventName, eventSpec]) => [
           eventName,
           {
+            attachments: Object.fromEntries(eventSpec.attachments),
             attributes: Object.fromEntries(eventSpec.attributes),
             isPublic: eventSpec.isPublic,
           },
@@ -21,6 +22,7 @@ describe('privacy-flags constants', () => {
       ),
     ).toEqual({
       'Drop-off': {
+        attachments: {},
         attributes: {
           Description: { isPublic: true, sensitive: false },
           'Receiving Operator Identifier': {
@@ -31,6 +33,7 @@ describe('privacy-flags constants', () => {
         isPublic: true,
       },
       'Pick-up': {
+        attachments: {},
         attributes: {
           Description: { isPublic: true, sensitive: false },
           'Driver Identifier': { isPublic: true, sensitive: true },
@@ -52,12 +55,14 @@ describe('privacy-flags constants', () => {
         isPublic: true,
       },
       Recycled: {
+        attachments: {},
         attributes: {
           Description: { isPublic: true, sensitive: false },
         },
         isPublic: true,
       },
       'Recycling Manifest': {
+        attachments: { 'Recycling Manifest': { isPublic: false } },
         attributes: {
           'Document Number': { isPublic: true, sensitive: false },
           'Document Type': { isPublic: true, sensitive: false },
@@ -66,6 +71,7 @@ describe('privacy-flags constants', () => {
         isPublic: true,
       },
       Sorting: {
+        attachments: {},
         attributes: {
           'Deducted Weight': { isPublic: true, sensitive: false },
           Description: { isPublic: true, sensitive: false },
@@ -74,6 +80,7 @@ describe('privacy-flags constants', () => {
         isPublic: true,
       },
       'Transport Manifest': {
+        attachments: { 'Transport Manifest': { isPublic: false } },
         attributes: {
           'Document Number': { isPublic: true, sensitive: false },
           'Document Type': { isPublic: true, sensitive: false },
@@ -83,6 +90,7 @@ describe('privacy-flags constants', () => {
         isPublic: true,
       },
       Weighing: {
+        attachments: {},
         attributes: {
           'Container Type': { isPublic: true, sensitive: false },
           Description: { isPublic: true, sensitive: false },
