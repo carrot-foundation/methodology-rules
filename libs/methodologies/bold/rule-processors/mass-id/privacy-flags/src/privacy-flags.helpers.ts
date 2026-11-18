@@ -59,24 +59,27 @@ export const participantRolesOf = (
 ): ReadonlySet<string> =>
   new Set(occurrences.flatMap(({ roles }) => [...roles]));
 
-const isHaulerOnly = ({ roles }: ParticipantOccurrence): boolean =>
-  roles.size === 1 && roles.has(HAULER);
+// Only roles the spec names count: a label outside it, such as Auditor, does not stop an occurrence being Hauler-only.
+const isHaulerOnly = ({ roles }: ParticipantOccurrence): boolean => {
+  const specRoles = [...roles].filter((role) =>
+    PARTICIPANT_PRESERVE_SENSITIVE_DATA_SPEC.has(role),
+  );
 
-const holdsRecyclerOrProcessor = (roles: ReadonlySet<string>): boolean =>
-  roles.has(RECYCLER) || roles.has(PROCESSOR);
+  return specRoles.length === 1 && specRoles[0] === HAULER;
+};
 
 export const resolveParticipantVisibility = (
   occurrences: readonly ParticipantOccurrence[],
 ): ParticipantVisibility | undefined => {
   const roles = participantRolesOf(occurrences);
-  // Spec step 1 sets aside a Hauler-only flag once a public role discloses the entity, so step 3 can decide.
-  const setsHaulerOnlyFlagAside = holdsRecyclerOrProcessor(roles);
+  const holdsRecyclerOrProcessor = roles.has(RECYCLER) || roles.has(PROCESSOR);
 
+  // Spec step 1 sets aside a Hauler-only flag once a public role discloses the entity, so step 3 can decide.
   if (
     occurrences.some(
       (occurrence) =>
         occurrence.preserveSensitiveData === true &&
-        !(setsHaulerOnlyFlagAside && isHaulerOnly(occurrence)),
+        !(holdsRecyclerOrProcessor && isHaulerOnly(occurrence)),
     )
   ) {
     return 'private';
@@ -86,7 +89,7 @@ export const resolveParticipantVisibility = (
     return 'private';
   }
 
-  if (roles.has(HAULER) && holdsRecyclerOrProcessor(roles)) {
+  if (roles.has(HAULER) && holdsRecyclerOrProcessor) {
     return 'public';
   }
 

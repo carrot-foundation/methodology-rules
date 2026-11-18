@@ -897,7 +897,7 @@ describe('PrivacyFlagsProcessor', () => {
       expect(resultContent.reviewReasons).toEqual([]);
     });
 
-    it('should accept a Recycler and Processor that also hauls and flags only its Hauler Actor event as private', async () => {
+    it('should pass a Recycler and Processor that also hauls and flags its Hauler Actor event as private', async () => {
       const haulerActorEvent = conformantActorEvent(HAULER);
       const { participant } = haulerActorEvent;
       const massIDDocument = buildMassID({
@@ -914,20 +914,45 @@ describe('PrivacyFlagsProcessor', () => {
 
       const { resultContent, resultStatus } = await evaluate(massIDDocument);
 
-      expect(haulerActorEvent.preserveSensitiveData).toBe(true);
       expect(resultStatus).toBe('PASSED');
       expect(resultContent.reviewReasons).toEqual([]);
     });
 
-    it('should set a Hauler-only true flag aside when the participant is also a Recycler, so an undeclared Waste Manager role is not required to declare', async () => {
-      const haulerActorEvent = conformantActorEvent(HAULER);
-      const { participant } = haulerActorEvent;
+    it.each([{ publicRole: RECYCLER }, { publicRole: PROCESSOR }])(
+      'should set a Hauler-only true flag aside when the participant is also a $publicRole, so an undeclared Waste Manager role is not required to declare',
+      async ({ publicRole }) => {
+        const haulerActorEvent = conformantActorEvent(HAULER);
+        const { participant } = haulerActorEvent;
+        const massIDDocument = buildMassID({
+          [actorEventKey(HAULER)]: haulerActorEvent,
+          [actorEventKey(publicRole)]: {
+            ...conformantActorEvent(publicRole),
+            participant,
+          },
+          [actorEventKey(WASTE_MANAGER_LABEL)]: {
+            ...conformantActorEvent(WASTE_MANAGER_LABEL),
+            participant,
+            preserveSensitiveData: undefined,
+          },
+        });
+
+        const { resultContent, resultStatus } = await evaluate(massIDDocument);
+
+        expect(resultStatus).toBe('PASSED');
+        expect(resultContent.reviewReasons).toEqual([]);
+      },
+    );
+
+    it('should treat an Actor event read as Hauler only through actor-type as Hauler-only even when its label names no spec role', async () => {
+      const recyclerActorEvent = conformantActorEvent(RECYCLER);
+      const { participant } = recyclerActorEvent;
       const massIDDocument = buildMassID({
-        [actorEventKey(HAULER)]: haulerActorEvent,
-        [actorEventKey(RECYCLER)]: {
-          ...conformantActorEvent(RECYCLER),
+        [actorEventKey(AUDITOR)]: legacyActorEvent('HAULER', {
+          label: AUDITOR,
           participant,
-        },
+          preserveSensitiveData: true,
+        }),
+        [actorEventKey(RECYCLER)]: recyclerActorEvent,
         [actorEventKey(WASTE_MANAGER_LABEL)]: {
           ...conformantActorEvent(WASTE_MANAGER_LABEL),
           participant,
@@ -939,6 +964,34 @@ describe('PrivacyFlagsProcessor', () => {
 
       expect(resultStatus).toBe('PASSED');
       expect(resultContent.reviewReasons).toEqual([]);
+    });
+
+    it('should review a true flag on a non-Actor event of a Hauler that is also a Recycler, because the event carries every role and the Recycler default is false', async () => {
+      const haulerActorEvent = conformantActorEvent(HAULER);
+      const { participant } = haulerActorEvent;
+      const massIDDocument = buildMassID({
+        [actorEventKey(HAULER)]: haulerActorEvent,
+        [actorEventKey(RECYCLER)]: {
+          ...conformantActorEvent(RECYCLER),
+          participant,
+        },
+        [PICK_UP]: {
+          ...conformantEvent(PICK_UP),
+          participant,
+          preserveSensitiveData: true,
+        },
+      });
+
+      const { resultContent, resultStatus } = await evaluate(massIDDocument);
+
+      expect(resultStatus).toBe('REVIEW_REQUIRED');
+      expect(resultContent.reviewReasons).toEqual([
+        expect.objectContaining({
+          code: PRIVACY_REASON_CODES.EVENT_PRESERVE_SENSITIVE_DATA,
+          eventName: PICK_UP,
+          participantRole: RECYCLER,
+        }),
+      ]);
     });
 
     it('should keep a Hauler true flag when the participant holds no Recycler or Processor role, so an undeclared Waste Manager role must declare', async () => {
