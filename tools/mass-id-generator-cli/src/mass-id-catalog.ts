@@ -237,7 +237,6 @@ export const MASS_ID_CATALOG: MassIDCatalog = {
       attachments: [
         {
           fileName: 'transport-manifest.pdf',
-          isPublic: false,
           label: BoldAttachmentLabel.TRANSPORT_MANIFEST,
         },
       ],
@@ -434,7 +433,6 @@ export const MASS_ID_CATALOG: MassIDCatalog = {
       attachments: [
         {
           fileName: 'recycling-manifest.pdf',
-          isPublic: false,
           label: BoldAttachmentLabel.RECYCLING_MANIFEST,
         },
       ],

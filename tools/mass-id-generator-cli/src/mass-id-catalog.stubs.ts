@@ -1,6 +1,7 @@
 import {
   stubDocument,
   stubDocumentEvent,
+  stubDocumentEventAttachment,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   type BoldDocument,
@@ -27,13 +28,16 @@ const toLoadedAddress = ({
 
 const toLoadedEvent = ({
   addressId,
+  attachments,
   participantId,
   ...eventFields
 }: EventPayload): BoldDocumentEvent =>
   stubDocumentEvent({
     ...eventFields,
     address: toLoadedAddress({ addressId, participantId }),
-    attachments: undefined,
+    attachments: attachments?.map(({ isPublic, label }) =>
+      stubDocumentEventAttachment({ isPublic, label }),
+    ),
     participant: { id: participantId },
     relatedDocument: undefined,
   });
