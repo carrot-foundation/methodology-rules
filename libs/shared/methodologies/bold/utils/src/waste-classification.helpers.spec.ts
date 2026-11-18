@@ -51,6 +51,35 @@ describe('findBrWasteClassification', () => {
       ).toMatchObject({ CDM_CODE: '8.4' });
     },
   );
+
+  it.each([
+    '02 02 04',
+    '02 03 05',
+    '02 04 03',
+    '02 05 02',
+    '02 06 03',
+    '02 07 05',
+    '03 03 11',
+    '04 02 20',
+    '07 01 12',
+    '07 02 12',
+    '07 03 12',
+    '07 04 12',
+    '07 05 12',
+    '07 06 12',
+    '07 07 12',
+    '10 01 21',
+    '10 11 20',
+    '10 12 13',
+    '19 11 06',
+  ])(
+    'should classify the industrial effluent treatment code %s as Industrial Sludge (8.7B)',
+    (localWasteClassificationId) => {
+      expect(
+        findBrWasteClassification(localWasteClassificationId),
+      ).toMatchObject({ CDM_CODE: '8.7B' });
+    },
+  );
 });
 
 describe('getSubtypesByCdmCode', () => {
