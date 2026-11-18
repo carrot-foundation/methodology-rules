@@ -467,10 +467,10 @@ export const regionalWasteClassificationTestCases: RegionalWasteClassificationTe
         [`${ACTOR}-${RECYCLER}`]: brazilianRecyclerEvent,
         [PICK_UP]: stubBoldMassIDPickUpEvent({
           metadataAttributes: [
-            [LOCAL_WASTE_CLASSIFICATION_ID, '02 02 04'],
+            [LOCAL_WASTE_CLASSIFICATION_ID, '20 03 04'],
             [
               LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
-              WASTE_CLASSIFICATION_CODES.BR['02 02 04'].description,
+              WASTE_CLASSIFICATION_CODES.BR['20 03 04'].description,
             ],
           ],
         }),
@@ -480,8 +480,8 @@ export const regionalWasteClassificationTestCases: RegionalWasteClassificationTe
       },
       resultComment: RESULT_COMMENTS.passed.VALID_CLASSIFICATION,
       resultContent: {
-        description: WASTE_CLASSIFICATION_CODES.BR['02 02 04'].description,
-        id: '02 02 04',
+        description: WASTE_CLASSIFICATION_CODES.BR['20 03 04'].description,
+        id: '20 03 04',
         recyclerCountryCode: 'BR',
         subtype: MassIDOrganicSubtype.DOMESTIC_SLUDGE,
       },

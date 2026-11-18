@@ -55,7 +55,7 @@ export const WASTE_CLASSIFICATION_CODES = {
       description: UNSUITABLE_MATERIALS,
     },
     '02 02 04': {
-      CDM_CODE: '8.7C',
+      CDM_CODE: '8.7B',
       description: EFFLUENT_TREATMENT_SLUDGE,
     },
     '02 02 99': {
@@ -72,7 +72,7 @@ export const WASTE_CLASSIFICATION_CODES = {
       description: UNSUITABLE_MATERIALS,
     },
     '02 03 05': {
-      CDM_CODE: '8.7C',
+      CDM_CODE: '8.7B',
       description: EFFLUENT_TREATMENT_SLUDGE,
     },
     '02 03 99': {
@@ -80,7 +80,7 @@ export const WASTE_CLASSIFICATION_CODES = {
       description: OTHER_WASTE,
     },
     '02 04 03': {
-      CDM_CODE: '8.7C',
+      CDM_CODE: '8.7B',
       description: EFFLUENT_TREATMENT_SLUDGE,
     },
     '02 04 04': {
@@ -100,7 +100,7 @@ export const WASTE_CLASSIFICATION_CODES = {
       description: UNSUITABLE_MATERIALS,
     },
     '02 05 02': {
-      CDM_CODE: '8.7C',
+      CDM_CODE: '8.7B',
       description: EFFLUENT_TREATMENT_SLUDGE,
     },
     '02 05 99': {
@@ -112,7 +112,7 @@ export const WASTE_CLASSIFICATION_CODES = {
       description: UNSUITABLE_MATERIALS,
     },
     '02 06 03': {
-      CDM_CODE: '8.7C',
+      CDM_CODE: '8.7B',
       description: EFFLUENT_TREATMENT_SLUDGE,
     },
     '02 07 02': {
@@ -124,7 +124,7 @@ export const WASTE_CLASSIFICATION_CODES = {
       description: UNSUITABLE_MATERIALS,
     },
     '02 07 05': {
-      CDM_CODE: '8.7C',
+      CDM_CODE: '8.7B',
       description: EFFLUENT_TREATMENT_SLUDGE,
     },
     '02 07 99': {
@@ -178,7 +178,7 @@ export const WASTE_CLASSIFICATION_CODES = {
         'Rejeitos de fibras e lodos de fibras, fillers e revestimentos, provenientes da separação mecânica',
     },
     '03 03 11': {
-      CDM_CODE: '8.7C',
+      CDM_CODE: '8.7B',
       description:
         'Lodos do tratamento local de efluentes não abrangidas em 03 03 10',
     },
@@ -227,7 +227,7 @@ export const WASTE_CLASSIFICATION_CODES = {
       description: 'Resíduos dos acabamentos não abrangidos em 04 02 14',
     },
     '04 02 20': {
-      CDM_CODE: '8.7C',
+      CDM_CODE: '8.7B',
       description:
         'Lodos do tratamento local de efluentes não abrangidas em 04 02 19',
     },
@@ -286,7 +286,7 @@ export const WASTE_CLASSIFICATION_CODES = {
       description: OTHER_WASTE,
     },
     '07 01 12': {
-      CDM_CODE: '8.7C',
+      CDM_CODE: '8.7B',
       description:
         'Lodos do tratamento local de efluentes não abrangidas em 07 01 11',
     },
@@ -295,7 +295,7 @@ export const WASTE_CLASSIFICATION_CODES = {
       description: OTHER_WASTE,
     },
     '07 02 12': {
-      CDM_CODE: '8.7C',
+      CDM_CODE: '8.7B',
       description:
         'Lodos do tratamento local de efluentes não abrangidas em 07 02 11',
     },
@@ -304,7 +304,7 @@ export const WASTE_CLASSIFICATION_CODES = {
       description: OTHER_WASTE,
     },
     '07 03 12': {
-      CDM_CODE: '8.7C',
+      CDM_CODE: '8.7B',
       description:
         'Lodos do tratamento local de efluentes não abrangidas em 07 03 11',
     },
@@ -313,7 +313,7 @@ export const WASTE_CLASSIFICATION_CODES = {
       description: OTHER_WASTE,
     },
     '07 04 12': {
-      CDM_CODE: '8.7C',
+      CDM_CODE: '8.7B',
       description:
         'Lodos do tratamento local de efluentes não abrangidas em 07 04 11',
     },
@@ -322,7 +322,7 @@ export const WASTE_CLASSIFICATION_CODES = {
       description: OTHER_WASTE,
     },
     '07 05 12': {
-      CDM_CODE: '8.7C',
+      CDM_CODE: '8.7B',
       description:
         'Lodos do tratamento local de efluentes não abrangidas em 07 05 11',
     },
@@ -335,7 +335,7 @@ export const WASTE_CLASSIFICATION_CODES = {
       description: OTHER_WASTE,
     },
     '07 06 12': {
-      CDM_CODE: '8.7C',
+      CDM_CODE: '8.7B',
       description:
         'Lodos do tratamento local de efluentes não abrangidas em 07 06 11',
     },
@@ -344,7 +344,7 @@ export const WASTE_CLASSIFICATION_CODES = {
       description: OTHER_WASTE,
     },
     '07 07 12': {
-      CDM_CODE: '8.7C',
+      CDM_CODE: '8.7B',
       description:
         'Lodos do tratamento local de efluentes não abrangidas em 07 07 11',
     },
@@ -373,7 +373,7 @@ export const WASTE_CLASSIFICATION_CODES = {
       description: OTHER_WASTE,
     },
     '10 01 21': {
-      CDM_CODE: '8.7C',
+      CDM_CODE: '8.7B',
       description:
         'Lodos do tratamento local de efluentes não abrangidas em 10 01 20',
     },
@@ -428,7 +428,7 @@ export const WASTE_CLASSIFICATION_CODES = {
       description: OTHER_WASTE,
     },
     '10 11 20': {
-      CDM_CODE: '8.7C',
+      CDM_CODE: '8.7B',
       description:
         'Resíduos sólidos do tratamento local de efluentes não abrangidos em 10 11 19',
     },
@@ -437,7 +437,7 @@ export const WASTE_CLASSIFICATION_CODES = {
       description: OTHER_WASTE,
     },
     '10 12 13': {
-      CDM_CODE: '8.7C',
+      CDM_CODE: '8.7B',
       description: EFFLUENT_TREATMENT_SLUDGE,
     },
     '10 12 99': {
@@ -754,7 +754,7 @@ export const WASTE_CLASSIFICATION_CODES = {
       description: 'Outras frações não abrangidas em 19 10 05',
     },
     '19 11 06': {
-      CDM_CODE: '8.7C',
+      CDM_CODE: '8.7B',
       description:
         'Lodos do tratamento local de efluentes não abrangidas em 19 11 05',
     },
