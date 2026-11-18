@@ -455,24 +455,32 @@ describe('PrivacyFlagsProcessor', () => {
     },
   );
 
-  it('should not validate a manifest event attachment whose label the spec does not list', async () => {
-    const massIDDocument = buildMassID({
-      [TRANSPORT_MANIFEST]: {
-        ...conformantEvent(TRANSPORT_MANIFEST),
-        attachments: [
-          stubDocumentEventAttachment({
-            isPublic: true,
-            label: FILE_NAME_LABEL,
-          }),
-        ],
-      },
-    });
+  it.each([
+    { eventName: TRANSPORT_MANIFEST, label: FILE_NAME_LABEL },
+    {
+      eventName: TRANSPORT_MANIFEST,
+      label: BoldAttachmentLabel.RECYCLING_MANIFEST,
+    },
+    {
+      eventName: RECYCLING_MANIFEST,
+      label: BoldAttachmentLabel.TRANSPORT_MANIFEST,
+    },
+  ])(
+    'should not validate a public $label attachment on the $eventName event, whose spec does not list it',
+    async ({ eventName, label }) => {
+      const massIDDocument = buildMassID({
+        [eventName]: {
+          ...conformantEvent(eventName),
+          attachments: [stubDocumentEventAttachment({ isPublic: true, label })],
+        },
+      });
 
-    const { resultContent, resultStatus } = await evaluate(massIDDocument);
+      const { resultContent, resultStatus } = await evaluate(massIDDocument);
 
-    expect(resultStatus).toBe('PASSED');
-    expect(resultContent.reviewReasons).toEqual([]);
-  });
+      expect(resultStatus).toBe('PASSED');
+      expect(resultContent.reviewReasons).toEqual([]);
+    },
+  );
 
   it('should flag only the manifest events when public manifest files also sit on EVIDENCE and document-number events', async () => {
     const massIDDocument = buildMassID({
