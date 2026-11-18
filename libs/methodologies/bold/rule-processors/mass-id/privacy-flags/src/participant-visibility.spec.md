@@ -13,9 +13,16 @@ Copies live in: `palantir`, `smaug`, `methodology-rules`, `rivendell`.
 
 ## The rule
 
-One participant resolves to **one** visibility for the whole document. Roles and
-`preserveSensitiveData` flags are collected across **every** occurrence of that participant id
-in the document, then resolved in this order. The first step that matches decides.
+One participant resolves to **one** visibility for the whole document. An **occurrence** is an
+ACTOR event naming that participant id. Roles and `preserveSensitiveData` flags are collected
+across **every** occurrence in the document, then resolved in this order. The first step that
+matches decides.
+
+A `preserveSensitiveData` on any other event (pick-up, drop-off, weighing, …) is not an
+occurrence. It masks that event's own data wherever the event is published, and it never decides
+the participant's visibility: producers flag a collector's movement events by the same policy
+that flags its Hauler event, so counting them would withhold the recycler step 1's set-aside
+exists to publish.
 
 1. `preserveSensitiveData: true` on **any** occurrence → **private**. Most-private-wins.
    One kind of flag is set aside: each `true` on a **Hauler-only** occurrence — one whose roles,
@@ -60,11 +67,11 @@ and decides before step 4 is reached.
 Hauler events `preserveSensitiveData: true` because the published policy masks hauler data, and
 a recycler or processor that runs its own collection is recorded under Hauler as well. Without
 the set-aside, step 1 decides every such participant private and step 3 never runs on the shape
-it was written for. The set-aside is narrow: a `true` on an occurrence that also holds
-another known role, a `true` on the Recycler or Processor occurrence, a Recycler or Processor
-role that is not publicly disclosed (held only on events that are not public, or read only
-from a private `actor-type` attribute), or a Waste Generator role anywhere still withholds the
-participant.
+it was written for. The set-aside is narrow. It needs one publicly disclosed Recycler or
+Processor role somewhere in the document — one is enough, whatever the other occurrences hold —
+and without one the Hauler flag withholds the participant. Even with one, a `true` on an
+occurrence that also holds another known role, a `true` on the Recycler or Processor
+occurrence, or a Waste Generator role anywhere still withholds it.
 
 ## Roles
 

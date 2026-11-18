@@ -5,8 +5,8 @@
     "Vendored byte-identical into palantir, smaug, methodology-rules and rivendell.",
     "Each repo runs these through ITS OWN resolver. Do not copy a reference implementation.",
     "",
-    "Each vector describes ONE participant across ONE whole document. `occurrences` are every",
-    "place that participant id appears; `preserveSensitiveData` is omitted when the source data",
+    "Each vector describes ONE participant across ONE whole document. `occurrences` are every ACTOR",
+    "event naming that participant; no other event is an occurrence. `preserveSensitiveData` is omitted when the source data",
     "omits it, which is a distinct case from false and is where implementations diverge.",
     "",
     "`decidedBy` names the spec step that decides, so a failure points at the rule, not just at",
@@ -116,7 +116,7 @@
     {
       "id": "hauler-only-true-with-waste-generator-is-private",
       "decidedBy": 2,
-      "note": "Setting the Hauler flag aside never reaches past step 2: a generator stays private.",
+      "note": "The Hauler flag is set aside (the Recycler role is publicly disclosed), and step 2 still withholds a generator.",
       "participantType": "COMPANY",
       "occurrences": [
         {
@@ -127,7 +127,8 @@
           "preserveSensitiveData": true
         },
         {
-          "role": "Recycler"
+          "role": "Recycler",
+          "eventIsPublic": true
         }
       ],
       "expected": "private"
@@ -443,6 +444,26 @@
             "isPublic": true
           },
           "eventIsPublic": true
+        }
+      ],
+      "expected": "public"
+    },
+    {
+      "id": "hauler-only-true-with-public-recycler-and-private-processor-is-public",
+      "decidedBy": 3,
+      "note": "One publicly disclosed Recycler or Processor role is enough to set the Hauler flag aside; a Processor role on a non-public event does not undo it.",
+      "participantType": "COMPANY",
+      "occurrences": [
+        {
+          "role": "Hauler",
+          "preserveSensitiveData": true
+        },
+        {
+          "role": "Recycler",
+          "eventIsPublic": true
+        },
+        {
+          "role": "Processor"
         }
       ],
       "expected": "public"

@@ -123,11 +123,16 @@ export class PrivacyFlagsProcessor extends ParentDocumentRuleProcessor<RuleSubje
     return { events: document.externalEvents ?? [] };
   }
 
+  // Only an Actor event is an occurrence: a flag on any other event masks that event and never decides the participant's visibility.
   private collectParticipantOccurrences(
     event: BoldDocumentEvent,
     participantRoles: ReadonlySet<string>,
     occurrences: Map<string, ParticipantOccurrence[]>,
   ): void {
+    if (event.name !== ACTOR) {
+      return;
+    }
+
     occurrences.set(event.participant.id, [
       ...(occurrences.get(event.participant.id) ?? []),
       {

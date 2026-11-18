@@ -110,7 +110,7 @@ const unexpressible = vectors
 describe('participant-visibility.vectors.json', () => {
   it('should replay the vendored contract this suite was written against', () => {
     expect({ vectorCount: vectors.length, version }).toEqual({
-      vectorCount: 43,
+      vectorCount: 44,
       version: '1.4.0',
     });
     expect(unexpressible.map(({ id }) => id).sort(sortAlphabetically)).toEqual(
