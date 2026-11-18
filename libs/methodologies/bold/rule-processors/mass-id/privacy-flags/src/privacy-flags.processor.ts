@@ -29,7 +29,6 @@ import { PRIVACY_FLAGS_FINDINGS } from './privacy-flags.findings';
 import {
   actorEventRolesOf,
   addPrivacyReview,
-  participantOccurrencesOf,
   participantRolesOf,
   resolveParticipantVisibility,
 } from './privacy-flags.helpers';
@@ -125,10 +124,10 @@ export class PrivacyFlagsProcessor extends ParentDocumentRuleProcessor<RuleSubje
   ): void {
     occurrences.set(event.participant.id, [
       ...(occurrences.get(event.participant.id) ?? []),
-      ...participantOccurrencesOf(
-        event.preserveSensitiveData,
-        participantRoles,
-      ),
+      {
+        preserveSensitiveData: event.preserveSensitiveData,
+        roles: participantRoles,
+      },
     ]);
   }
 
@@ -348,8 +347,8 @@ export class PrivacyFlagsProcessor extends ParentDocumentRuleProcessor<RuleSubje
         }
 
         const roleDeclared = participantOccurrences.some(
-          ({ preserveSensitiveData, role }) =>
-            role === participantRole && preserveSensitiveData !== undefined,
+          ({ preserveSensitiveData, roles }) =>
+            roles.has(participantRole) && preserveSensitiveData !== undefined,
         );
 
         if (roleDeclared) {

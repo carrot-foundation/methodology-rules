@@ -18,7 +18,7 @@ const { HAULER, PROCESSOR, RECYCLER, WASTE_GENERATOR } = BoldActorType;
 
 export interface ParticipantOccurrence {
   preserveSensitiveData?: boolean | undefined;
-  role?: string | undefined;
+  roles: ReadonlySet<string>;
 }
 
 export type ParticipantVisibility = 'private' | 'public';
@@ -54,39 +54,39 @@ export const addPrivacyReview = (
   reviews.push({ finding, reason: buildReason(message) });
 };
 
-export const participantOccurrencesOf = (
-  preserveSensitiveData: boolean | undefined,
-  roles: ReadonlySet<string>,
-): ParticipantOccurrence[] =>
-  roles.size === 0
-    ? [{ preserveSensitiveData }]
-    : [...roles].map((role) => ({ preserveSensitiveData, role }));
-
 export const participantRolesOf = (
   occurrences: readonly ParticipantOccurrence[],
 ): ReadonlySet<string> =>
-  new Set(
-    occurrences.flatMap(({ role }) => (role === undefined ? [] : [role])),
-  );
+  new Set(occurrences.flatMap(({ roles }) => [...roles]));
+
+const isHaulerOnly = ({ roles }: ParticipantOccurrence): boolean =>
+  roles.size === 1 && roles.has(HAULER);
+
+const holdsHaulerPublicRole = (roles: ReadonlySet<string>): boolean =>
+  roles.has(RECYCLER) || roles.has(PROCESSOR);
 
 export const resolveParticipantVisibility = (
   occurrences: readonly ParticipantOccurrence[],
 ): ParticipantVisibility | undefined => {
+  const roles = participantRolesOf(occurrences);
+  // Spec step 1 sets aside a Hauler-only flag once a public role discloses the entity, so step 3 can decide.
+  const setsHaulerOnlyFlagAside = holdsHaulerPublicRole(roles);
+
   if (
     occurrences.some(
-      ({ preserveSensitiveData }) => preserveSensitiveData === true,
+      (occurrence) =>
+        occurrence.preserveSensitiveData === true &&
+        !(setsHaulerOnlyFlagAside && isHaulerOnly(occurrence)),
     )
   ) {
     return 'private';
   }
 
-  const roles = participantRolesOf(occurrences);
-
   if (roles.has(WASTE_GENERATOR)) {
     return 'private';
   }
 
-  if (roles.has(HAULER) && (roles.has(RECYCLER) || roles.has(PROCESSOR))) {
+  if (roles.has(HAULER) && holdsHaulerPublicRole(roles)) {
     return 'public';
   }
 

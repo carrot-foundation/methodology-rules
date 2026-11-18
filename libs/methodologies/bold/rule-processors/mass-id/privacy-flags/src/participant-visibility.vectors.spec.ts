@@ -8,7 +8,6 @@ import type { ParticipantOccurrence } from './privacy-flags.helpers';
 import { LEGACY_ACTOR_TYPE_ATTRIBUTE_NAME } from './privacy-flags.constants';
 import {
   actorEventRolesOf,
-  participantOccurrencesOf,
   resolveParticipantVisibility,
 } from './privacy-flags.helpers';
 
@@ -69,26 +68,24 @@ const sortAlphabetically = (a: string, b: string): number => a.localeCompare(b);
 const toOccurrences = (
   occurrences: readonly z.infer<typeof VectorOccurrenceSchema>[],
 ): ParticipantOccurrence[] =>
-  occurrences.flatMap(({ legacyActorType, preserveSensitiveData, role }) =>
-    participantOccurrencesOf(
-      preserveSensitiveData,
-      actorEventRolesOf({
-        label:
-          role === undefined ? undefined : (SPEC_ROLE_LABELS.get(role) ?? role),
-        metadata: {
-          attributes:
-            legacyActorType === undefined
-              ? []
-              : [
-                  {
-                    name: LEGACY_ACTOR_TYPE_ATTRIBUTE_NAME,
-                    ...legacyActorType,
-                  },
-                ],
-        },
-      }),
-    ),
-  );
+  occurrences.map(({ legacyActorType, preserveSensitiveData, role }) => ({
+    preserveSensitiveData,
+    roles: actorEventRolesOf({
+      label:
+        role === undefined ? undefined : (SPEC_ROLE_LABELS.get(role) ?? role),
+      metadata: {
+        attributes:
+          legacyActorType === undefined
+            ? []
+            : [
+                {
+                  name: LEGACY_ACTOR_TYPE_ATTRIBUTE_NAME,
+                  ...legacyActorType,
+                },
+              ],
+      },
+    }),
+  }));
 
 const expressible = vectors.filter(({ id }) => !UNEXPRESSIBLE_VECTORS.has(id));
 const unexpressible = vectors
@@ -101,8 +98,8 @@ const unexpressible = vectors
 describe('participant-visibility.vectors.json', () => {
   it('should replay the vendored contract this suite was written against', () => {
     expect({ vectorCount: vectors.length, version }).toEqual({
-      vectorCount: 31,
-      version: '1.3.0',
+      vectorCount: 37,
+      version: '1.4.0',
     });
     expect(unexpressible.map(({ id }) => id).sort(sortAlphabetically)).toEqual(
       [...UNEXPRESSIBLE_VECTORS.keys()].sort(sortAlphabetically),

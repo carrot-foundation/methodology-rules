@@ -36,6 +36,7 @@ const { AUDITOR, HAULER, INTEGRATOR, PROCESSOR, RECYCLER, WASTE_GENERATOR } =
   BoldActorType;
 
 const METHODOLOGY_PLATFORM_LABEL = 'METHODOLOGY PLATFORM';
+const WASTE_MANAGER_LABEL = 'Waste Manager';
 const SKIPPED_EVENT_NAME = 'MassID Audit (BOLD Recycling)';
 const UNKNOWN_EVENT_NAME = 'Unlisted Event';
 const UNKNOWN_ATTRIBUTE_NAME = 'Unlisted Attribute';
@@ -894,6 +895,77 @@ describe('PrivacyFlagsProcessor', () => {
 
       expect(resultStatus).toBe('PASSED');
       expect(resultContent.reviewReasons).toEqual([]);
+    });
+
+    it('should accept a Recycler and Processor that also hauls and flags only its Hauler Actor event as private', async () => {
+      const haulerActorEvent = conformantActorEvent(HAULER);
+      const { participant } = haulerActorEvent;
+      const massIDDocument = buildMassID({
+        [actorEventKey(HAULER)]: haulerActorEvent,
+        [actorEventKey(PROCESSOR)]: {
+          ...conformantActorEvent(PROCESSOR),
+          participant,
+        },
+        [actorEventKey(RECYCLER)]: {
+          ...conformantActorEvent(RECYCLER),
+          participant,
+        },
+      });
+
+      const { resultContent, resultStatus } = await evaluate(massIDDocument);
+
+      expect(haulerActorEvent.preserveSensitiveData).toBe(true);
+      expect(resultStatus).toBe('PASSED');
+      expect(resultContent.reviewReasons).toEqual([]);
+    });
+
+    it('should set a Hauler-only true flag aside when the participant is also a Recycler, so an undeclared Waste Manager role is not required to declare', async () => {
+      const haulerActorEvent = conformantActorEvent(HAULER);
+      const { participant } = haulerActorEvent;
+      const massIDDocument = buildMassID({
+        [actorEventKey(HAULER)]: haulerActorEvent,
+        [actorEventKey(RECYCLER)]: {
+          ...conformantActorEvent(RECYCLER),
+          participant,
+        },
+        [actorEventKey(WASTE_MANAGER_LABEL)]: {
+          ...conformantActorEvent(WASTE_MANAGER_LABEL),
+          participant,
+          preserveSensitiveData: undefined,
+        },
+      });
+
+      const { resultContent, resultStatus } = await evaluate(massIDDocument);
+
+      expect(resultStatus).toBe('PASSED');
+      expect(resultContent.reviewReasons).toEqual([]);
+    });
+
+    it('should keep a Hauler true flag when the participant holds no Recycler or Processor role, so an undeclared Waste Manager role must declare', async () => {
+      const haulerActorEvent = conformantActorEvent(HAULER);
+      const { participant } = haulerActorEvent;
+      const massIDDocument = buildMassID({
+        [actorEventKey(HAULER)]: haulerActorEvent,
+        [actorEventKey(INTEGRATOR)]: {
+          ...conformantActorEvent(INTEGRATOR),
+          participant,
+        },
+        [actorEventKey(WASTE_MANAGER_LABEL)]: {
+          ...conformantActorEvent(WASTE_MANAGER_LABEL),
+          participant,
+          preserveSensitiveData: undefined,
+        },
+      });
+
+      const { resultContent, resultStatus } = await evaluate(massIDDocument);
+
+      expect(resultStatus).toBe('REVIEW_REQUIRED');
+      expect(resultContent.reviewReasons).toEqual([
+        expect.objectContaining({
+          code: PRIVACY_REASON_CODES.PARTICIPANT_PRESERVE_SENSITIVE_DATA_MISSING,
+          participantRole: WASTE_MANAGER_LABEL,
+        }),
+      ]);
     });
 
     it('should add a review reason when the Integrator actor declares preserveSensitiveData as true', async () => {

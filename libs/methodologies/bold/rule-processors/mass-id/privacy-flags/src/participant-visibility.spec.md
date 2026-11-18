@@ -18,6 +18,10 @@ One participant resolves to **one** visibility for the whole document. Roles and
 in the document, then resolved in this order. The first step that matches decides.
 
 1. `preserveSensitiveData: true` on **any** occurrence → **private**. Most-private-wins.
+   One flag is set aside: a `true` on a **Hauler-only** occurrence — one whose roles are
+   exactly Hauler — when the participant also holds **Recycler** or **Processor** on another
+   occurrence. That flag masks the hauling appearance of an entity its public role already
+   discloses, which is the case step 3 exists for.
 2. The participant holds **Waste Generator** → **private**. Step 3 never applies to it.
 3. The participant holds **Hauler** together with **Recycler** or **Processor** → **public**.
    The entity is already disclosed by its public role, so masking its hauling appearance
@@ -36,7 +40,7 @@ in the document, then resolved in this order. The first step that matches decide
      `participantType`, which overrides the vector's for that occurrence, and two
      vectors place the non-`COMPANY` occurrence on each side of the `COMPANY` one.
 
-### Two consequences worth stating, because implementations get them wrong
+### Three consequences worth stating, because implementations get them wrong
 
 **An absent `preserveSensitiveData` is not a private default.** It falls through to step 5, so
 an omitted flag on a Recycler resolves **public**. An implementation that treats absence as
@@ -46,6 +50,14 @@ field.
 **Waste Generator and Hauler are not symmetric.** A Hauler with an explicit `false` is public
 (step 4). A Waste Generator with an explicit `false` is still **private** — step 2 is terminal
 and decides before step 4 is reached.
+
+**A producer's Hauler flag does not withhold a recycler that also collects.** Producers mark
+Hauler events `preserveSensitiveData: true` because the published policy masks hauler data, and
+a recycler or processor that runs its own collection is recorded under Hauler as well. Without
+the set-aside, step 1 decides every such participant private and step 3 never runs on the shape
+it was written for. The set-aside is narrow: a `true` on an occurrence that also holds
+another role, a `true` on the Recycler or Processor occurrence, or a Waste Generator role
+anywhere still withholds the participant.
 
 ## Roles
 
