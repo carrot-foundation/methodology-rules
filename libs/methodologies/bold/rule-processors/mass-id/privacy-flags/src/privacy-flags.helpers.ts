@@ -17,6 +17,8 @@ import {
 const { HAULER, PROCESSOR, RECYCLER, WASTE_GENERATOR } = BoldActorType;
 
 export interface ParticipantOccurrence {
+  // The isPublic of an ACTOR event that names its own role; undefined for any event whose roles are borrowed, which cannot disclose one.
+  eventIsPublic?: boolean | undefined;
   preserveSensitiveData?: boolean | undefined;
   roles: ReadonlySet<string>;
 }
@@ -68,18 +70,27 @@ const isHaulerOnly = ({ roles }: ParticipantOccurrence): boolean => {
   return specRoles.length === 1 && specRoles[0] === HAULER;
 };
 
+const isPublicRecyclerOrProcessor = ({
+  eventIsPublic,
+  roles,
+}: ParticipantOccurrence): boolean =>
+  eventIsPublic === true && (roles.has(RECYCLER) || roles.has(PROCESSOR));
+
 export const resolveParticipantVisibility = (
   occurrences: readonly ParticipantOccurrence[],
 ): ParticipantVisibility | undefined => {
   const roles = participantRolesOf(occurrences);
   const holdsRecyclerOrProcessor = roles.has(RECYCLER) || roles.has(PROCESSOR);
+  const disclosedByPublicRole = occurrences.some((occurrence) =>
+    isPublicRecyclerOrProcessor(occurrence),
+  );
 
-  // Spec step 1 sets aside a Hauler-only flag once a public role discloses the entity, so step 3 can decide.
+  // Spec step 1 sets aside a Hauler-only flag once a Recycler or Processor on a public ACTOR event discloses the entity, so step 3 can decide.
   if (
     occurrences.some(
       (occurrence) =>
         occurrence.preserveSensitiveData === true &&
-        !(holdsRecyclerOrProcessor && isHaulerOnly(occurrence)),
+        !(disclosedByPublicRole && isHaulerOnly(occurrence)),
     )
   ) {
     return 'private';

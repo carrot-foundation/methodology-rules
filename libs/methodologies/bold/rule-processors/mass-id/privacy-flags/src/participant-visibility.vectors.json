@@ -14,7 +14,10 @@
     "",
     "An occurrence with no `role` is an ACTOR event with no `label`. `legacyActorType` is that",
     "event's legacy `actor-type` metadata attribute, value and own `isPublic` as the source data",
-    "carries them. See \"Where the role comes from\" in the spec."
+    "carries them. See \"Where the role comes from\" in the spec.",
+    "",
+    "`eventIsPublic` is the occurrence's ACTOR event `isPublic`. Absent means the source event omits it,",
+    "which is not true. Only step 1's Hauler-only set-aside reads it."
   ],
   "version": "1.4.0",
   "roles": {
@@ -283,7 +286,8 @@
           "preserveSensitiveData": true
         },
         {
-          "role": "Recycler"
+          "role": "Recycler",
+          "eventIsPublic": true
         }
       ],
       "expected": "public"
@@ -300,11 +304,13 @@
         },
         {
           "role": "Recycler",
-          "preserveSensitiveData": false
+          "preserveSensitiveData": false,
+          "eventIsPublic": true
         },
         {
           "role": "Processor",
-          "preserveSensitiveData": false
+          "preserveSensitiveData": false,
+          "eventIsPublic": true
         }
       ],
       "expected": "public"
@@ -319,7 +325,8 @@
           "preserveSensitiveData": true
         },
         {
-          "role": "Processor"
+          "role": "Processor",
+          "eventIsPublic": true
         }
       ],
       "expected": "public"
@@ -338,7 +345,84 @@
           "preserveSensitiveData": true
         },
         {
+          "role": "Recycler",
+          "eventIsPublic": true
+        }
+      ],
+      "expected": "public"
+    },
+    {
+      "id": "hauler-only-true-with-recycler-only-on-a-private-event-is-private",
+      "decidedBy": 1,
+      "note": "The Recycler role sits only on an event the public view drops, so it discloses nothing there and cannot set the Hauler flag aside.",
+      "participantType": "COMPANY",
+      "occurrences": [
+        {
+          "role": "Hauler",
+          "preserveSensitiveData": true,
+          "eventIsPublic": true
+        },
+        {
+          "role": "Recycler",
+          "eventIsPublic": false
+        }
+      ],
+      "expected": "private"
+    },
+    {
+      "id": "hauler-only-true-with-recycler-event-visibility-absent-is-private",
+      "decidedBy": 1,
+      "note": "An absent event `isPublic` is not true. A resolver that defaults it to public sets the flag aside here and is wrong.",
+      "participantType": "COMPANY",
+      "occurrences": [
+        {
+          "role": "Hauler",
+          "preserveSensitiveData": true
+        },
+        {
           "role": "Recycler"
+        }
+      ],
+      "expected": "private"
+    },
+    {
+      "id": "hauler-only-true-with-one-public-disclosing-occurrence-is-public",
+      "decidedBy": 3,
+      "note": "One public Recycler occurrence is enough; the Processor role on a private event neither helps nor hurts.",
+      "participantType": "COMPANY",
+      "occurrences": [
+        {
+          "role": "Hauler",
+          "preserveSensitiveData": true
+        },
+        {
+          "role": "Processor",
+          "eventIsPublic": false
+        },
+        {
+          "role": "Recycler",
+          "eventIsPublic": true
+        }
+      ],
+      "expected": "public"
+    },
+    {
+      "id": "unlisted-label-on-a-legacy-hauler-true-with-recycler-is-public",
+      "decidedBy": 3,
+      "note": "`Auditor` is not one of the seven roles, so this occurrence is Hauler-only. A resolver that counts raw labels keeps its flag and is wrong.",
+      "participantType": "COMPANY",
+      "occurrences": [
+        {
+          "role": "Auditor",
+          "legacyActorType": {
+            "value": "HAULER",
+            "isPublic": true
+          },
+          "preserveSensitiveData": true
+        },
+        {
+          "role": "Recycler",
+          "eventIsPublic": true
         }
       ],
       "expected": "public"

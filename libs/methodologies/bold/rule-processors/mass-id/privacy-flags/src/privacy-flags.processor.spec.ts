@@ -919,7 +919,7 @@ describe('PrivacyFlagsProcessor', () => {
     });
 
     it.each([{ publicRole: RECYCLER }, { publicRole: PROCESSOR }])(
-      'should set a Hauler-only true flag aside when the participant is also a $publicRole, so an undeclared Waste Manager role is not required to declare',
+      'should set a Hauler-only true flag aside when the participant is also a $publicRole on a public Actor event, so an undeclared Waste Manager role is not required to declare',
       async ({ publicRole }) => {
         const haulerActorEvent = conformantActorEvent(HAULER);
         const { participant } = haulerActorEvent;
@@ -942,6 +942,79 @@ describe('PrivacyFlagsProcessor', () => {
         expect(resultContent.reviewReasons).toEqual([]);
       },
     );
+
+    it.each([{ publicRole: RECYCLER }, { publicRole: PROCESSOR }])(
+      'should keep a Hauler-only true flag when the $publicRole Actor event is not public, even though a public non-Actor event of the participant carries that role',
+      async ({ publicRole }) => {
+        const haulerActorEvent = conformantActorEvent(HAULER);
+        const { participant } = haulerActorEvent;
+        const massIDDocument = buildMassID({
+          [actorEventKey(HAULER)]: haulerActorEvent,
+          [actorEventKey(publicRole)]: {
+            ...conformantActorEvent(publicRole),
+            isPublic: false,
+            participant,
+          },
+          [actorEventKey(WASTE_MANAGER_LABEL)]: {
+            ...conformantActorEvent(WASTE_MANAGER_LABEL),
+            participant,
+            preserveSensitiveData: undefined,
+          },
+          [PICK_UP]: {
+            ...conformantEvent(PICK_UP),
+            label: publicRole,
+            participant,
+            preserveSensitiveData: undefined,
+          },
+        });
+
+        const { resultContent, resultStatus } = await evaluate(massIDDocument);
+
+        expect(resultStatus).toBe('REVIEW_REQUIRED');
+        expect(resultContent.reviewReasons).toEqual([
+          expect.objectContaining({
+            code: PRIVACY_REASON_CODES.EVENT_IS_PUBLIC,
+            eventLabel: publicRole,
+          }),
+          expect.objectContaining({
+            code: PRIVACY_REASON_CODES.PARTICIPANT_PRESERVE_SENSITIVE_DATA_MISSING,
+            participantRole: WASTE_MANAGER_LABEL,
+          }),
+        ]);
+      },
+    );
+
+    it('should keep a Hauler-only true flag when the only public Actor event naming no role of its own inherits a Recycler role held on a private event', async () => {
+      const haulerActorEvent = conformantActorEvent(HAULER);
+      const { participant } = haulerActorEvent;
+      const massIDDocument = buildMassID({
+        'ACTOR-legacy-recycler': legacyActorEvent('RECYCLER', {
+          isPublic: false,
+          participant,
+          preserveSensitiveData: undefined,
+        }),
+        'ACTOR-legacy-unknown': legacyActorEvent(1, {
+          participant,
+          preserveSensitiveData: undefined,
+        }),
+        [actorEventKey(HAULER)]: haulerActorEvent,
+        [actorEventKey(WASTE_MANAGER_LABEL)]: {
+          ...conformantActorEvent(WASTE_MANAGER_LABEL),
+          participant,
+          preserveSensitiveData: undefined,
+        },
+      });
+
+      const { resultContent, resultStatus } = await evaluate(massIDDocument);
+
+      expect(resultStatus).toBe('REVIEW_REQUIRED');
+      expect(resultContent.reviewReasons).toEqual([
+        expect.objectContaining({
+          code: PRIVACY_REASON_CODES.PARTICIPANT_PRESERVE_SENSITIVE_DATA_MISSING,
+          participantRole: WASTE_MANAGER_LABEL,
+        }),
+      ]);
+    });
 
     it('should treat an Actor event read as Hauler only through actor-type as Hauler-only even when its label names no spec role', async () => {
       const recyclerActorEvent = conformantActorEvent(RECYCLER);

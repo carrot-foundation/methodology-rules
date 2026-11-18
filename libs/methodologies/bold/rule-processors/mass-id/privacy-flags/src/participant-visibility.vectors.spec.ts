@@ -12,6 +12,7 @@ import {
 } from './privacy-flags.helpers';
 
 const VectorOccurrenceSchema = z.object({
+  eventIsPublic: z.boolean().optional(),
   legacyActorType: z
     .object({ isPublic: z.boolean(), value: z.string() })
     .optional(),
@@ -68,24 +69,27 @@ const sortAlphabetically = (a: string, b: string): number => a.localeCompare(b);
 const toOccurrences = (
   occurrences: readonly z.infer<typeof VectorOccurrenceSchema>[],
 ): ParticipantOccurrence[] =>
-  occurrences.map(({ legacyActorType, preserveSensitiveData, role }) => ({
-    preserveSensitiveData,
-    roles: actorEventRolesOf({
-      label:
-        role === undefined ? undefined : (SPEC_ROLE_LABELS.get(role) ?? role),
-      metadata: {
-        attributes:
-          legacyActorType === undefined
-            ? []
-            : [
-                {
-                  name: LEGACY_ACTOR_TYPE_ATTRIBUTE_NAME,
-                  ...legacyActorType,
-                },
-              ],
-      },
+  occurrences.map(
+    ({ eventIsPublic, legacyActorType, preserveSensitiveData, role }) => ({
+      eventIsPublic,
+      preserveSensitiveData,
+      roles: actorEventRolesOf({
+        label:
+          role === undefined ? undefined : (SPEC_ROLE_LABELS.get(role) ?? role),
+        metadata: {
+          attributes:
+            legacyActorType === undefined
+              ? []
+              : [
+                  {
+                    name: LEGACY_ACTOR_TYPE_ATTRIBUTE_NAME,
+                    ...legacyActorType,
+                  },
+                ],
+        },
+      }),
     }),
-  }));
+  );
 
 const expressible = vectors.filter(({ id }) => !UNEXPRESSIBLE_VECTORS.has(id));
 const unexpressible = vectors
@@ -98,7 +102,7 @@ const unexpressible = vectors
 describe('participant-visibility.vectors.json', () => {
   it('should replay the vendored contract this suite was written against', () => {
     expect({ vectorCount: vectors.length, version }).toEqual({
-      vectorCount: 37,
+      vectorCount: 41,
       version: '1.4.0',
     });
     expect(unexpressible.map(({ id }) => id).sort(sortAlphabetically)).toEqual(

@@ -35,6 +35,11 @@ import {
 
 const { ACTOR } = BoldDocumentEventName;
 
+// Only an ACTOR event that names its own role can disclose it. Any other event, including a role-less
+// ACTOR event, borrows every role the participant holds, some of which may sit only on private events.
+const namesOwnRoles = (event: BoldDocumentEvent): boolean =>
+  event.name === ACTOR && actorEventRolesOf(event).size > 0;
+
 interface RuleSubject {
   events: BoldDocumentEvent[];
 }
@@ -125,6 +130,7 @@ export class PrivacyFlagsProcessor extends ParentDocumentRuleProcessor<RuleSubje
     occurrences.set(event.participant.id, [
       ...(occurrences.get(event.participant.id) ?? []),
       {
+        eventIsPublic: namesOwnRoles(event) ? event.isPublic : undefined,
         preserveSensitiveData: event.preserveSensitiveData,
         roles: participantRoles,
       },
@@ -161,11 +167,8 @@ export class PrivacyFlagsProcessor extends ParentDocumentRuleProcessor<RuleSubje
     event: BoldDocumentEvent,
     participantRoles: ReadonlyMap<string, ReadonlySet<string>>,
   ): ReadonlySet<string> {
-    const actorRoles =
-      event.name === ACTOR ? actorEventRolesOf(event) : new Set<string>();
-
-    if (actorRoles.size > 0) {
-      return actorRoles;
+    if (namesOwnRoles(event)) {
+      return actorEventRolesOf(event);
     }
 
     return participantRoles.get(event.participant.id) ?? new Set();
