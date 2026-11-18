@@ -30,6 +30,7 @@ import {
   actorEventRolesOf,
   addPrivacyReview,
   participantRolesOf,
+  publiclyDisclosedRolesOf,
   resolveParticipantVisibility,
 } from './privacy-flags.helpers';
 
@@ -130,7 +131,9 @@ export class PrivacyFlagsProcessor extends ParentDocumentRuleProcessor<RuleSubje
     occurrences.set(event.participant.id, [
       ...(occurrences.get(event.participant.id) ?? []),
       {
-        eventIsPublic: namesOwnRoles(event) ? event.isPublic : undefined,
+        disclosedRoles: namesOwnRoles(event)
+          ? publiclyDisclosedRolesOf(event)
+          : undefined,
         preserveSensitiveData: event.preserveSensitiveData,
         roles: participantRoles,
       },

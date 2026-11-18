@@ -18,12 +18,15 @@ One participant resolves to **one** visibility for the whole document. Roles and
 in the document, then resolved in this order. The first step that matches decides.
 
 1. `preserveSensitiveData: true` on **any** occurrence → **private**. Most-private-wins.
-   One flag is set aside: a `true` on a **Hauler-only** occurrence — one whose roles, counting
-   only the seven below, are exactly Hauler — when the participant also holds **Recycler** or
-   **Processor** on an occurrence whose ACTOR event is `isPublic: true`. That flag masks the
-   hauling appearance of an entity its public role already discloses, which is the case step 3
-   exists for. A Recycler or Processor role held only on events that are not `isPublic: true`
-   discloses nothing on a public surface, so it sets no flag aside.
+   One kind of flag is set aside: each `true` on a **Hauler-only** occurrence — one whose roles,
+   counting only the seven below, are exactly Hauler — when the participant also holds a
+   **publicly disclosed** **Recycler** or **Processor** role. A role is publicly disclosed only
+   on an occurrence whose ACTOR event is `isPublic: true`, and only when it is read from that
+   event's `label` or from an `actor-type` attribute that is itself `isPublic: true`. That flag
+   masks the hauling appearance of an entity its public role already discloses, which is the
+   case step 3 exists for. A Recycler or Processor role held only on events that are not
+   `isPublic: true`, or read only from a private `actor-type` attribute, discloses nothing on a
+   public surface, so it sets no flag aside.
 2. The participant holds **Waste Generator** → **private**. Step 3 never applies to it.
 3. The participant holds **Hauler** together with **Recycler** or **Processor** → **public**.
    The entity is already disclosed by its public role, so masking its hauling appearance
@@ -58,9 +61,10 @@ Hauler events `preserveSensitiveData: true` because the published policy masks h
 a recycler or processor that runs its own collection is recorded under Hauler as well. Without
 the set-aside, step 1 decides every such participant private and step 3 never runs on the shape
 it was written for. The set-aside is narrow: a `true` on an occurrence that also holds
-another role, a `true` on the Recycler or Processor occurrence, a Recycler or Processor role
-held only on events that are not public, or a Waste Generator role anywhere still withholds
-the participant.
+another known role, a `true` on the Recycler or Processor occurrence, a Recycler or Processor
+role that is not publicly disclosed (held only on events that are not public, or read only
+from a private `actor-type` attribute), or a Waste Generator role anywhere still withholds the
+participant.
 
 ## Roles
 
@@ -110,6 +114,10 @@ reads only `label`, or only public attributes, sees no role on a legacy generato
 `preserveSensitiveData: false` step 4 publishes it, and with the flag absent step 5 publishes it
 whenever it is a `COMPANY`.
 
+The one place the attribute's `isPublic` matters is disclosure. Reading a role to **withhold**
+ignores it; counting a role as **publicly disclosed** for step 1's set-aside requires it. A
+private attribute is never shown, so a Recycler role that lives only there discloses nothing.
+
 In the vectors, an occurrence with no `role` has no `label`, and `legacyActorType` carries the
 attribute's `value` and its own `isPublic`. An occurrence's optional `participantType`
 overrides the vector's `participantType` for that occurrence alone; a harness reads
@@ -117,7 +125,8 @@ overrides the vector's `participantType` for that occurrence alone; a harness re
 
 An occurrence's optional `eventIsPublic` is its ACTOR event's own `isPublic`. Absent means the
 source event omits it, which is not `true`: only `eventIsPublic: true` lets a Recycler or
-Processor occurrence set a Hauler-only flag aside. No other step reads it.
+Processor occurrence set a Hauler-only flag aside, and then only for a role read from its
+`role` or from a `legacyActorType` whose own `isPublic` is `true`. No other step reads it.
 
 ## What a conforming repo does
 

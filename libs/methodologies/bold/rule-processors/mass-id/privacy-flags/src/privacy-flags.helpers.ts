@@ -17,8 +17,8 @@ import {
 const { HAULER, PROCESSOR, RECYCLER, WASTE_GENERATOR } = BoldActorType;
 
 export interface ParticipantOccurrence {
-  // The isPublic of an ACTOR event that names its own role; undefined for any event whose roles are borrowed, which cannot disclose one.
-  eventIsPublic?: boolean | undefined;
+  // The roles a public surface shows for this occurrence; undefined for any event whose roles are borrowed, which cannot disclose one.
+  disclosedRoles?: ReadonlySet<string> | undefined;
   preserveSensitiveData?: boolean | undefined;
   roles: ReadonlySet<string>;
 }
@@ -48,6 +48,25 @@ export const actorEventRolesOf = ({
   return new Set([...(label === undefined ? [] : [label]), ...legacyRoles]);
 };
 
+// A private event shows no role, and a private actor-type attribute is never shown, so neither discloses one.
+export const publiclyDisclosedRolesOf = ({
+  isPublic,
+  label,
+  metadata,
+}: Pick<BoldDocumentEvent, 'label' | 'metadata'> & {
+  isPublic?: boolean | undefined;
+}): ReadonlySet<string> =>
+  isPublic === true
+    ? actorEventRolesOf({
+        label,
+        metadata: {
+          attributes: (metadata?.attributes ?? []).filter(
+            (attribute) => attribute.isPublic,
+          ),
+        },
+      })
+    : new Set();
+
 export const addPrivacyReview = (
   reviews: PrivacyReview[],
   { finding, message }: RenderedRuleFinding,
@@ -70,11 +89,11 @@ const isHaulerOnly = ({ roles }: ParticipantOccurrence): boolean => {
   return specRoles.length === 1 && specRoles[0] === HAULER;
 };
 
-const isPublicRecyclerOrProcessor = ({
-  eventIsPublic,
-  roles,
+const disclosesRecyclerOrProcessor = ({
+  disclosedRoles,
 }: ParticipantOccurrence): boolean =>
-  eventIsPublic === true && (roles.has(RECYCLER) || roles.has(PROCESSOR));
+  disclosedRoles !== undefined &&
+  (disclosedRoles.has(RECYCLER) || disclosedRoles.has(PROCESSOR));
 
 export const resolveParticipantVisibility = (
   occurrences: readonly ParticipantOccurrence[],
@@ -82,10 +101,10 @@ export const resolveParticipantVisibility = (
   const roles = participantRolesOf(occurrences);
   const holdsRecyclerOrProcessor = roles.has(RECYCLER) || roles.has(PROCESSOR);
   const disclosedByPublicRole = occurrences.some((occurrence) =>
-    isPublicRecyclerOrProcessor(occurrence),
+    disclosesRecyclerOrProcessor(occurrence),
   );
 
-  // Spec step 1 sets aside a Hauler-only flag once a Recycler or Processor on a public ACTOR event discloses the entity, so step 3 can decide.
+  // Spec step 1 sets aside a Hauler-only flag once a publicly disclosed Recycler or Processor role discloses the entity, so step 3 can decide.
   if (
     occurrences.some(
       (occurrence) =>

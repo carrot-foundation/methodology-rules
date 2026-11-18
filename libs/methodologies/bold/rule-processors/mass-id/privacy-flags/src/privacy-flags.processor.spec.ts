@@ -1016,6 +1016,58 @@ describe('PrivacyFlagsProcessor', () => {
       ]);
     });
 
+    it.each([
+      {
+        attributeIsPublic: false,
+        expectedReasons: [
+          expect.objectContaining({
+            code: PRIVACY_REASON_CODES.PARTICIPANT_PRESERVE_SENSITIVE_DATA_MISSING,
+            participantRole: WASTE_MANAGER_LABEL,
+          }),
+        ],
+        expectedStatus: 'REVIEW_REQUIRED',
+        outcome: 'keep',
+      },
+      {
+        attributeIsPublic: true,
+        expectedReasons: [],
+        expectedStatus: 'PASSED',
+        outcome: 'set aside',
+      },
+    ])(
+      'should $outcome a Hauler-only true flag when a public Actor event reads Recycler only from an actor-type attribute whose isPublic is $attributeIsPublic',
+      async ({ attributeIsPublic, expectedReasons, expectedStatus }) => {
+        const haulerActorEvent = conformantActorEvent(HAULER);
+        const { participant } = haulerActorEvent;
+        const massIDDocument = buildMassID({
+          'ACTOR-legacy-recycler': legacyActorEvent('RECYCLER', {
+            metadata: {
+              attributes: [
+                stubDocumentEventAttribute({
+                  isPublic: attributeIsPublic,
+                  name: LEGACY_ACTOR_TYPE_ATTRIBUTE_NAME,
+                  value: 'RECYCLER',
+                }),
+              ],
+            },
+            participant,
+            preserveSensitiveData: undefined,
+          }),
+          [actorEventKey(HAULER)]: haulerActorEvent,
+          [actorEventKey(WASTE_MANAGER_LABEL)]: {
+            ...conformantActorEvent(WASTE_MANAGER_LABEL),
+            participant,
+            preserveSensitiveData: undefined,
+          },
+        });
+
+        const { resultContent, resultStatus } = await evaluate(massIDDocument);
+
+        expect(resultStatus).toBe(expectedStatus);
+        expect(resultContent.reviewReasons).toEqual(expectedReasons);
+      },
+    );
+
     it('should treat an Actor event read as Hauler only through actor-type as Hauler-only even when its label names no spec role', async () => {
       const recyclerActorEvent = conformantActorEvent(RECYCLER);
       const { participant } = recyclerActorEvent;

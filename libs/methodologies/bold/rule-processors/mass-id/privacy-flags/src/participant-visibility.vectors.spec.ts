@@ -8,6 +8,7 @@ import type { ParticipantOccurrence } from './privacy-flags.helpers';
 import { LEGACY_ACTOR_TYPE_ATTRIBUTE_NAME } from './privacy-flags.constants';
 import {
   actorEventRolesOf,
+  publiclyDisclosedRolesOf,
   resolveParticipantVisibility,
 } from './privacy-flags.helpers';
 
@@ -70,10 +71,8 @@ const toOccurrences = (
   occurrences: readonly z.infer<typeof VectorOccurrenceSchema>[],
 ): ParticipantOccurrence[] =>
   occurrences.map(
-    ({ eventIsPublic, legacyActorType, preserveSensitiveData, role }) => ({
-      eventIsPublic,
-      preserveSensitiveData,
-      roles: actorEventRolesOf({
+    ({ eventIsPublic, legacyActorType, preserveSensitiveData, role }) => {
+      const actorEvent = {
         label:
           role === undefined ? undefined : (SPEC_ROLE_LABELS.get(role) ?? role),
         metadata: {
@@ -87,8 +86,17 @@ const toOccurrences = (
                   },
                 ],
         },
-      }),
-    }),
+      };
+
+      return {
+        disclosedRoles: publiclyDisclosedRolesOf({
+          ...actorEvent,
+          isPublic: eventIsPublic,
+        }),
+        preserveSensitiveData,
+        roles: actorEventRolesOf(actorEvent),
+      };
+    },
   );
 
 const expressible = vectors.filter(({ id }) => !UNEXPRESSIBLE_VECTORS.has(id));
@@ -102,7 +110,7 @@ const unexpressible = vectors
 describe('participant-visibility.vectors.json', () => {
   it('should replay the vendored contract this suite was written against', () => {
     expect({ vectorCount: vectors.length, version }).toEqual({
-      vectorCount: 41,
+      vectorCount: 43,
       version: '1.4.0',
     });
     expect(unexpressible.map(({ id }) => id).sort(sortAlphabetically)).toEqual(

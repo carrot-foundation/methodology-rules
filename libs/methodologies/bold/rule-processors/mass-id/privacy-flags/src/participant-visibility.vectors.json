@@ -17,7 +17,8 @@
     "carries them. See \"Where the role comes from\" in the spec.",
     "",
     "`eventIsPublic` is the occurrence's ACTOR event `isPublic`. Absent means the source event omits it,",
-    "which is not true. Only step 1's Hauler-only set-aside reads it."
+    "which is not true. Only step 1's Hauler-only set-aside reads it, and there a role counts as",
+    "disclosed only from `role` or from a `legacyActorType` whose own `isPublic` is true."
   ],
   "version": "1.4.0",
   "roles": {
@@ -401,6 +402,46 @@
         },
         {
           "role": "Recycler",
+          "eventIsPublic": true
+        }
+      ],
+      "expected": "public"
+    },
+    {
+      "id": "hauler-only-true-with-recycler-only-in-a-private-legacy-attribute-is-private",
+      "decidedBy": 1,
+      "note": "The Recycler role is read only from a private `actor-type` attribute, which no public surface shows. The event being public does not disclose it, so the Hauler flag stands. A resolver that reads the attribute for disclosure as it does for withholding publishes this participant at step 3.",
+      "participantType": "COMPANY",
+      "occurrences": [
+        {
+          "role": "Hauler",
+          "preserveSensitiveData": true
+        },
+        {
+          "legacyActorType": {
+            "value": "RECYCLER",
+            "isPublic": false
+          },
+          "eventIsPublic": true
+        }
+      ],
+      "expected": "private"
+    },
+    {
+      "id": "hauler-only-true-with-recycler-in-a-public-legacy-attribute-is-public",
+      "decidedBy": 3,
+      "note": "The companion case: the same unlabeled legacy Recycler, but its `actor-type` attribute is public on a public event, so the role is disclosed and the Hauler flag is set aside.",
+      "participantType": "COMPANY",
+      "occurrences": [
+        {
+          "role": "Hauler",
+          "preserveSensitiveData": true
+        },
+        {
+          "legacyActorType": {
+            "value": "RECYCLER",
+            "isPublic": true
+          },
           "eventIsPublic": true
         }
       ],
