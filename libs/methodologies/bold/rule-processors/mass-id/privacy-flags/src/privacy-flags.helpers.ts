@@ -62,7 +62,7 @@ export const participantRolesOf = (
 const isHaulerOnly = ({ roles }: ParticipantOccurrence): boolean =>
   roles.size === 1 && roles.has(HAULER);
 
-const holdsHaulerPublicRole = (roles: ReadonlySet<string>): boolean =>
+const holdsRecyclerOrProcessor = (roles: ReadonlySet<string>): boolean =>
   roles.has(RECYCLER) || roles.has(PROCESSOR);
 
 export const resolveParticipantVisibility = (
@@ -70,7 +70,7 @@ export const resolveParticipantVisibility = (
 ): ParticipantVisibility | undefined => {
   const roles = participantRolesOf(occurrences);
   // Spec step 1 sets aside a Hauler-only flag once a public role discloses the entity, so step 3 can decide.
-  const setsHaulerOnlyFlagAside = holdsHaulerPublicRole(roles);
+  const setsHaulerOnlyFlagAside = holdsRecyclerOrProcessor(roles);
 
   if (
     occurrences.some(
@@ -86,7 +86,7 @@ export const resolveParticipantVisibility = (
     return 'private';
   }
 
-  if (roles.has(HAULER) && holdsHaulerPublicRole(roles)) {
+  if (roles.has(HAULER) && holdsRecyclerOrProcessor(roles)) {
     return 'public';
   }
 
