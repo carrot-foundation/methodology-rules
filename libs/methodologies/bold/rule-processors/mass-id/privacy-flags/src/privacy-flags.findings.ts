@@ -16,6 +16,14 @@ export const PRIVACY_FLAGS_FINDINGS = defineRuleFindings(
         'Envie o evento de ator com o valor de "isPublic" exigido para o rótulo.',
       title: 'Visibilidade do ator incorreta',
     },
+    'REVIEW_REQUIRED.ATTACHMENT_IS_PUBLIC': {
+      category: 'PRIVACY',
+      defaultOwner: 'INTEGRATOR',
+      description:
+        'Um anexo do evento não declara "isPublic" com o valor esperado.',
+      guidance: 'Envie o anexo com o valor de "isPublic" exigido.',
+      title: 'Visibilidade do anexo incorreta',
+    },
     'REVIEW_REQUIRED.ATTRIBUTE_IS_PUBLIC': {
       category: 'PRIVACY',
       defaultOwner: 'INTEGRATOR',

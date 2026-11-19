@@ -230,6 +230,36 @@ export class PrivacyFlagsProcessor extends ParentDocumentRuleProcessor<RuleSubje
       );
     }
 
+    for (const attachment of event.attachments ?? []) {
+      const attachmentSpec = eventSpec.attachments.get(attachment.label);
+
+      if (
+        attachmentSpec === undefined ||
+        attachment.isPublic === attachmentSpec.isPublic
+      ) {
+        continue;
+      }
+
+      addPrivacyReview(
+        reviews,
+        PRIVACY_FLAGS_FINDINGS.render(
+          'REVIEW_REQUIRED.ATTACHMENT_IS_PUBLIC',
+          event.name,
+          attachment.label,
+          attachmentSpec.isPublic,
+        ),
+        (description) => ({
+          actual: attachment.isPublic,
+          attachmentLabel: attachment.label,
+          code: PRIVACY_REASON_CODES.ATTACHMENT_IS_PUBLIC,
+          description,
+          eventName: event.name,
+          expected: attachmentSpec.isPublic,
+          field: 'isPublic',
+        }),
+      );
+    }
+
     for (const attribute of event.metadata?.attributes ?? []) {
       const attributeSpec = eventSpec.attributes.get(attribute.name);
 

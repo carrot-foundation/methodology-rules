@@ -122,4 +122,32 @@ describe('MassID catalog rule verification E2E', () => {
       }),
     );
   });
+
+  it('should stop returning PASSED from privacy-flags when a manifest attachment is public', async () => {
+    const document = stubCatalogMassIDDocument();
+    const response = await runRule(privacyFlagsLambda, {
+      ...document,
+      externalEvents: document.externalEvents?.map((event) => ({
+        ...event,
+        attachments: event.attachments?.map((attachment) => ({
+          ...attachment,
+          isPublic: true,
+        })),
+      })),
+    });
+
+    expect(response.resultStatus).not.toBe('PASSED');
+    expect(response.resultContent?.['reviewReasons']).toStrictEqual(
+      [
+        BoldDocumentEventName.TRANSPORT_MANIFEST,
+        BoldDocumentEventName.RECYCLING_MANIFEST,
+      ].map((eventName) =>
+        expect.objectContaining({
+          attachmentLabel: eventName,
+          eventName,
+          field: 'isPublic',
+        }),
+      ),
+    );
+  });
 });

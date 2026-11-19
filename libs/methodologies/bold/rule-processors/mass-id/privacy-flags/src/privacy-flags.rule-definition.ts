@@ -6,7 +6,7 @@ import { BoldDocumentEventName } from '@carrot-fndn/shared/methodologies/bold/ty
 
 export const ruleDefinition = {
   description:
-    'Validates that the privacy flags declared on methodology-specified MassID events and attributes match the BOLD methodology specification.',
+    'Validates that the privacy flags declared on methodology-specified MassID events, attributes and manifest attachments match the BOLD methodology specification.',
   events: [
     BoldDocumentEventName.ACTOR,
     BoldDocumentEventName.DROP_OFF,

@@ -3,10 +3,12 @@ import {
   BoldStubsBuilder,
   expectRuleFindings,
   stubDocumentEvent,
+  stubDocumentEventAttachment,
   stubDocumentEventAttribute,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   BoldActorType,
+  BoldAttachmentLabel,
   BoldAttributeName,
   type BoldDocument,
   type BoldDocumentEvent,
@@ -31,7 +33,8 @@ import {
 } from './privacy-flags.test-cases';
 
 const { DESCRIPTION, VEHICLE_LICENSE_PLATE } = BoldAttributeName;
-const { ACTOR, DROP_OFF, PICK_UP } = BoldDocumentEventName;
+const { ACTOR, DROP_OFF, PICK_UP, RECYCLING_MANIFEST, TRANSPORT_MANIFEST } =
+  BoldDocumentEventName;
 const { AUDITOR, HAULER, INTEGRATOR, PROCESSOR, RECYCLER, WASTE_GENERATOR } =
   BoldActorType;
 
@@ -39,6 +42,19 @@ const METHODOLOGY_PLATFORM_LABEL = 'METHODOLOGY PLATFORM';
 const SKIPPED_EVENT_NAME = 'MassID Audit (BOLD Recycling)';
 const UNKNOWN_EVENT_NAME = 'Unlisted Event';
 const UNKNOWN_ATTRIBUTE_NAME = 'Unlisted Attribute';
+const EVIDENCE_EVENT_NAME = 'EVIDENCE';
+const DOCUMENT_NUMBER_EVENT_NAME = '000000-0';
+const FILE_NAME_LABEL = 'manifest.pdf';
+
+const withPublicAttachments = (
+  event: BoldDocumentEvent,
+): BoldDocumentEvent => ({
+  ...event,
+  attachments: (event.attachments ?? []).map((attachment) => ({
+    ...attachment,
+    isPublic: true,
+  })),
+});
 
 const legacyActorEvent = (
   actorType: number | string,
@@ -397,6 +413,136 @@ describe('PrivacyFlagsProcessor', () => {
         expected: false,
         field: 'sensitive',
       }),
+    );
+  });
+
+  it.each([
+    {
+      eventName: TRANSPORT_MANIFEST,
+      label: BoldAttachmentLabel.TRANSPORT_MANIFEST,
+    },
+    {
+      eventName: RECYCLING_MANIFEST,
+      label: BoldAttachmentLabel.RECYCLING_MANIFEST,
+    },
+  ])(
+    'should add a review reason when the $label attachment of the $eventName event is public',
+    async ({ eventName, label }) => {
+      const massIDDocument = buildMassID({
+        [eventName]: withPublicAttachments(conformantEvent(eventName)),
+      });
+
+      const { findings, resultComment, resultContent, resultStatus } =
+        await evaluate(massIDDocument);
+
+      expect(resultStatus).toBe('REVIEW_REQUIRED');
+      expect(resultContent.reviewReasons).toEqual([
+        expect.objectContaining({
+          actual: true,
+          attachmentLabel: label,
+          code: PRIVACY_REASON_CODES.ATTACHMENT_IS_PUBLIC,
+          eventName,
+          expected: false,
+          field: 'isPublic',
+        }),
+      ]);
+      expect(resultComment).toBe(
+        `The "${label}" attachment of the "${eventName}" event must declare "isPublic" as false.`,
+      );
+      expect(findings).toEqual([
+        PRIVACY_FLAGS_FINDINGS.finding('REVIEW_REQUIRED.ATTACHMENT_IS_PUBLIC'),
+      ]);
+    },
+  );
+
+  it.each([
+    { eventName: TRANSPORT_MANIFEST, label: FILE_NAME_LABEL },
+    {
+      eventName: TRANSPORT_MANIFEST,
+      label: BoldAttachmentLabel.RECYCLING_MANIFEST,
+    },
+    {
+      eventName: RECYCLING_MANIFEST,
+      label: BoldAttachmentLabel.TRANSPORT_MANIFEST,
+    },
+  ])(
+    'should not validate a public $label attachment on the $eventName event, whose spec does not list it',
+    async ({ eventName, label }) => {
+      const massIDDocument = buildMassID({
+        [eventName]: {
+          ...conformantEvent(eventName),
+          attachments: [stubDocumentEventAttachment({ isPublic: true, label })],
+        },
+      });
+
+      const { resultContent, resultStatus } = await evaluate(massIDDocument);
+
+      expect(resultStatus).toBe('PASSED');
+      expect(resultContent.reviewReasons).toEqual([]);
+    },
+  );
+
+  it('should flag only the manifest events when public manifest files also sit on EVIDENCE and document-number events', async () => {
+    const massIDDocument = buildMassID({
+      [DOCUMENT_NUMBER_EVENT_NAME]: stubDocumentEvent({
+        attachments: [
+          stubDocumentEventAttachment({
+            isPublic: true,
+            label: FILE_NAME_LABEL,
+          }),
+        ],
+        isPublic: false,
+        name: DOCUMENT_NUMBER_EVENT_NAME,
+      }),
+      [EVIDENCE_EVENT_NAME]: stubDocumentEvent({
+        attachments: [
+          stubDocumentEventAttachment({
+            isPublic: true,
+            label: FILE_NAME_LABEL,
+          }),
+        ],
+        isPublic: false,
+        name: EVIDENCE_EVENT_NAME,
+      }),
+      [RECYCLING_MANIFEST]: withPublicAttachments(
+        conformantEvent(RECYCLING_MANIFEST),
+      ),
+      [TRANSPORT_MANIFEST]: withPublicAttachments(
+        conformantEvent(TRANSPORT_MANIFEST),
+      ),
+    });
+
+    const { resultContent, resultStatus } = await evaluate(massIDDocument);
+
+    expect(resultStatus).toBe('REVIEW_REQUIRED');
+    expect(
+      resultContent.reviewReasons.map(
+        ({ attachmentLabel, code, eventName }) => ({
+          attachmentLabel,
+          code,
+          eventName,
+        }),
+      ),
+    ).toEqual(
+      expect.arrayContaining([
+        {
+          attachmentLabel: BoldAttachmentLabel.TRANSPORT_MANIFEST,
+          code: PRIVACY_REASON_CODES.ATTACHMENT_IS_PUBLIC,
+          eventName: TRANSPORT_MANIFEST,
+        },
+        {
+          attachmentLabel: BoldAttachmentLabel.RECYCLING_MANIFEST,
+          code: PRIVACY_REASON_CODES.ATTACHMENT_IS_PUBLIC,
+          eventName: RECYCLING_MANIFEST,
+        },
+      ]),
+    );
+    expect(resultContent.reviewReasons).toHaveLength(2);
+    expect(resultContent.notValidated).toEqual(
+      expect.arrayContaining([
+        { eventName: EVIDENCE_EVENT_NAME },
+        { eventName: DOCUMENT_NUMBER_EVENT_NAME },
+      ]),
     );
   });
 

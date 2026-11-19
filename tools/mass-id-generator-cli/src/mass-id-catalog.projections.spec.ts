@@ -1,5 +1,6 @@
 import { OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_LOCAL_CODE } from '@carrot-fndn/shared/methodologies/bold/rule-processors/mass-id/prevented-emissions/constants';
 import {
+  BoldAttachmentLabel,
   BoldDocumentEventName,
   MassIDActorType,
   MassIDOrganicSubtype,
@@ -137,6 +138,34 @@ describe('mass-id-catalog projections', () => {
           (attribute) => Object.keys(attribute),
         ),
       ).toContainEqual(['sensitive', 'isPublic', 'name', 'value']);
+    });
+
+    it.each([
+      [TRANSPORT_MANIFEST, 'transport-manifest.pdf'],
+      [RECYCLING_MANIFEST, 'recycling-manifest.pdf'],
+    ])(
+      'should emit the %s attachment as private from the privacy table',
+      (eventName, fileName) => {
+        expect(toEventPayload(findEvent(eventName)).attachments).toStrictEqual([
+          { fileName, isPublic: false, label: eventName },
+        ]);
+      },
+    );
+
+    it('should reject an attachment the privacy table does not list', () => {
+      expect(() =>
+        toEventPayload({
+          ...findEvent(TRANSPORT_MANIFEST),
+          attachments: [
+            {
+              fileName: 'recycling-manifest.pdf',
+              label: BoldAttachmentLabel.RECYCLING_MANIFEST,
+            },
+          ],
+        }),
+      ).toThrow(
+        'No privacy spec for attachment "Recycling Manifest" of event "Transport Manifest"',
+      );
     });
 
     it('should emit an attribute the privacy table does not list as public without a sensitive key', () => {

@@ -15,6 +15,7 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/utils';
 
 import type {
+  AttachmentPayload,
   AttributeDictionary,
   AttributePayload,
   CatalogActor,
@@ -35,7 +36,7 @@ const WASTE_CLASSIFICATION_FILE_NAME = 'waste-classification.json';
 
 interface EventPayloadFields {
   addressId: string;
-  attachments?: readonly CatalogAttachment[] | undefined;
+  attachments?: readonly AttachmentPayload[] | undefined;
   attributes: AttributePayload[];
   externalCreatedAt: string;
   label?: MassIDActorType | undefined;
@@ -94,6 +95,22 @@ const buildEventPayload = (
   }),
 });
 
+const toAttachmentPayload = (
+  eventName: string,
+  eventPrivacySpec: EventPrivacySpec,
+  { fileName, label }: CatalogAttachment,
+): AttachmentPayload => {
+  const attachmentPrivacySpec = eventPrivacySpec.attachments.get(label);
+
+  if (attachmentPrivacySpec === undefined) {
+    throw new Error(
+      `No privacy spec for attachment "${label}" of event "${eventName}"`,
+    );
+  }
+
+  return { fileName, isPublic: attachmentPrivacySpec.isPublic, label };
+};
+
 const toAttributePayloads = (
   eventPrivacySpec: EventPrivacySpec,
   { example, format, name }: CatalogAttribute,
@@ -121,7 +138,9 @@ export const toEventPayload = (event: CatalogEvent): EventPayload => {
   return buildEventPayload(
     {
       addressId: event.addressId,
-      attachments: event.attachments,
+      attachments: event.attachments?.map((attachment) =>
+        toAttachmentPayload(event.name, eventPrivacySpec, attachment),
+      ),
       attributes: event.attributes.flatMap((attribute) =>
         toAttributePayloads(eventPrivacySpec, attribute),
       ),

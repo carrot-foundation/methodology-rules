@@ -2,6 +2,7 @@ import type { BoldDocumentEvent } from '@carrot-fndn/shared/methodologies/bold/t
 
 import {
   stubDocumentEvent,
+  stubDocumentEventAttachment,
   stubDocumentEventAttribute,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import { BoldDocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
@@ -26,6 +27,9 @@ export const conformantEvent = (eventName: string): BoldDocumentEvent => {
   }
 
   return stubDocumentEvent({
+    attachments: [...eventSpec.attachments].map(([label, attachmentSpec]) =>
+      stubDocumentEventAttachment({ isPublic: attachmentSpec.isPublic, label }),
+    ),
     isPublic: true,
     metadata: {
       attributes: [...eventSpec.attributes].map(

@@ -1,5 +1,6 @@
 import {
   BoldActorType,
+  BoldAttachmentLabel,
   BoldAttributeName,
   BoldDocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
@@ -43,22 +44,35 @@ const { HAULER, INTEGRATOR, PROCESSOR, RECYCLER, WASTE_GENERATOR } =
 const BIN_CUSTODIAN = 'Bin Custodian';
 const WASTE_MANAGER = 'Waste Manager';
 
+export interface AttachmentPrivacySpec {
+  isPublic: boolean;
+}
+
 export interface AttributePrivacySpec {
   isPublic: boolean;
   sensitive: boolean;
 }
 
 export interface EventPrivacySpec {
+  attachments: ReadonlyMap<string, AttachmentPrivacySpec>;
   attributes: ReadonlyMap<string, AttributePrivacySpec>;
   isPublic: boolean;
 }
 
 const PUBLIC: AttributePrivacySpec = { isPublic: true, sensitive: false };
 const PUBLIC_MASKED: AttributePrivacySpec = { isPublic: true, sensitive: true };
+const PRIVATE_ATTACHMENT: AttachmentPrivacySpec = { isPublic: false };
 
 const publicEvent = (
   attributes: ReadonlyArray<readonly [BoldAttributeName, AttributePrivacySpec]>,
-): EventPrivacySpec => ({ attributes: new Map(attributes), isPublic: true });
+  attachments: ReadonlyArray<
+    readonly [BoldAttachmentLabel, AttachmentPrivacySpec]
+  > = [],
+): EventPrivacySpec => ({
+  attachments: new Map(attachments),
+  attributes: new Map(attributes),
+  isPublic: true,
+});
 
 export const EVENT_PRIVACY_SPEC: ReadonlyMap<string, EventPrivacySpec> =
   new Map<BoldDocumentEventName, EventPrivacySpec>([
@@ -84,11 +98,14 @@ export const EVENT_PRIVACY_SPEC: ReadonlyMap<string, EventPrivacySpec> =
     [RECYCLED, publicEvent([[DESCRIPTION, PUBLIC]])],
     [
       RECYCLING_MANIFEST,
-      publicEvent([
-        [DOCUMENT_NUMBER, PUBLIC],
-        [DOCUMENT_TYPE, PUBLIC],
-        [ISSUE_DATE, PUBLIC],
-      ]),
+      publicEvent(
+        [
+          [DOCUMENT_NUMBER, PUBLIC],
+          [DOCUMENT_TYPE, PUBLIC],
+          [ISSUE_DATE, PUBLIC],
+        ],
+        [[BoldAttachmentLabel.RECYCLING_MANIFEST, PRIVATE_ATTACHMENT]],
+      ),
     ],
     [
       SORTING,
@@ -100,12 +117,15 @@ export const EVENT_PRIVACY_SPEC: ReadonlyMap<string, EventPrivacySpec> =
     ],
     [
       TRANSPORT_MANIFEST,
-      publicEvent([
-        [DOCUMENT_NUMBER, PUBLIC],
-        [DOCUMENT_TYPE, PUBLIC],
-        [EXEMPTION_JUSTIFICATION, PUBLIC],
-        [ISSUE_DATE, PUBLIC],
-      ]),
+      publicEvent(
+        [
+          [DOCUMENT_NUMBER, PUBLIC],
+          [DOCUMENT_TYPE, PUBLIC],
+          [EXEMPTION_JUSTIFICATION, PUBLIC],
+          [ISSUE_DATE, PUBLIC],
+        ],
+        [[BoldAttachmentLabel.TRANSPORT_MANIFEST, PRIVATE_ATTACHMENT]],
+      ),
     ],
     [
       WEIGHING,
@@ -158,6 +178,7 @@ export const SKIPPED_EVENT_NAMES: ReadonlySet<string> = new Set([
 
 export const PRIVACY_REASON_CODES = {
   ACTOR_PRESERVE_SENSITIVE_DATA: 'PRIVACY_ACTOR_PRESERVE_SENSITIVE_DATA',
+  ATTACHMENT_IS_PUBLIC: 'PRIVACY_ATTACHMENT_IS_PUBLIC_MISMATCH',
   ATTRIBUTE_IS_PUBLIC: 'PRIVACY_ATTRIBUTE_IS_PUBLIC_MISMATCH',
   ATTRIBUTE_SENSITIVE: 'PRIVACY_ATTRIBUTE_SENSITIVE_MISMATCH',
   EVENT_IS_PUBLIC: 'PRIVACY_EVENT_IS_PUBLIC_MISMATCH',
@@ -175,6 +196,12 @@ export const RESULT_COMMENTS = {
   reviewRequired: {
     ACTOR_IS_PUBLIC: (label: string, expected: boolean) =>
       `The "${ACTOR}" event labeled "${label}" must declare "isPublic" as ${String(expected)}.`,
+    ATTACHMENT_IS_PUBLIC: (
+      eventName: string,
+      attachmentLabel: string,
+      expected: boolean,
+    ) =>
+      `The "${attachmentLabel}" attachment of the "${eventName}" event must declare "isPublic" as ${String(expected)}.`,
     ATTRIBUTE_IS_PUBLIC: (
       eventName: string,
       attributeName: string,

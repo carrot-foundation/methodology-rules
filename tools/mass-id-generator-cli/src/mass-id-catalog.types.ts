@@ -8,6 +8,12 @@ import type {
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import type { DocumentEventAttributeFormat } from '@carrot-fndn/shared/types';
 
+export interface AttachmentPayload {
+  fileName: string;
+  isPublic: boolean;
+  label: BoldAttachmentLabel;
+}
+
 export interface AttributeDictionary {
   attributes: AttributeDictionaryEntry[];
 }
@@ -40,7 +46,6 @@ export interface CatalogActor {
 
 export interface CatalogAttachment {
   fileName: string;
-  isPublic: boolean;
   label: BoldAttachmentLabel;
 }
 
@@ -84,7 +89,7 @@ export type EmittedArtifact =
 
 export interface EventPayload {
   addressId: string;
-  attachments?: readonly CatalogAttachment[];
+  attachments?: readonly AttachmentPayload[];
   externalCreatedAt: string;
   isPublic: boolean;
   label?: MassIDActorType;
