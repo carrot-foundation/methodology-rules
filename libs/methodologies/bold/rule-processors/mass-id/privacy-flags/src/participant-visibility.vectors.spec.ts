@@ -8,11 +8,12 @@ import type { ParticipantOccurrence } from './privacy-flags.helpers';
 import { LEGACY_ACTOR_TYPE_ATTRIBUTE_NAME } from './privacy-flags.constants';
 import {
   actorEventRolesOf,
-  participantOccurrencesOf,
+  publiclyDisclosedRolesOf,
   resolveParticipantVisibility,
 } from './privacy-flags.helpers';
 
 const VectorOccurrenceSchema = z.object({
+  eventIsPublic: z.boolean().optional(),
   legacyActorType: z
     .object({ isPublic: z.boolean(), value: z.string() })
     .optional(),
@@ -69,10 +70,9 @@ const sortAlphabetically = (a: string, b: string): number => a.localeCompare(b);
 const toOccurrences = (
   occurrences: readonly z.infer<typeof VectorOccurrenceSchema>[],
 ): ParticipantOccurrence[] =>
-  occurrences.flatMap(({ legacyActorType, preserveSensitiveData, role }) =>
-    participantOccurrencesOf(
-      preserveSensitiveData,
-      actorEventRolesOf({
+  occurrences.map(
+    ({ eventIsPublic, legacyActorType, preserveSensitiveData, role }) => {
+      const actorEvent = {
         label:
           role === undefined ? undefined : (SPEC_ROLE_LABELS.get(role) ?? role),
         metadata: {
@@ -86,8 +86,17 @@ const toOccurrences = (
                   },
                 ],
         },
-      }),
-    ),
+      };
+
+      return {
+        disclosedRoles: publiclyDisclosedRolesOf({
+          ...actorEvent,
+          isPublic: eventIsPublic,
+        }),
+        preserveSensitiveData,
+        roles: actorEventRolesOf(actorEvent),
+      };
+    },
   );
 
 const expressible = vectors.filter(({ id }) => !UNEXPRESSIBLE_VECTORS.has(id));
@@ -101,8 +110,8 @@ const unexpressible = vectors
 describe('participant-visibility.vectors.json', () => {
   it('should replay the vendored contract this suite was written against', () => {
     expect({ vectorCount: vectors.length, version }).toEqual({
-      vectorCount: 31,
-      version: '1.3.0',
+      vectorCount: 44,
+      version: '1.4.0',
     });
     expect(unexpressible.map(({ id }) => id).sort(sortAlphabetically)).toEqual(
       [...UNEXPRESSIBLE_VECTORS.keys()].sort(sortAlphabetically),

@@ -13,11 +13,27 @@ Copies live in: `palantir`, `smaug`, `methodology-rules`, `rivendell`.
 
 ## The rule
 
-One participant resolves to **one** visibility for the whole document. Roles and
-`preserveSensitiveData` flags are collected across **every** occurrence of that participant id
-in the document, then resolved in this order. The first step that matches decides.
+One participant resolves to **one** visibility for the whole document. An **occurrence** is an
+ACTOR event naming that participant id. Roles and `preserveSensitiveData` flags are collected
+across **every** occurrence in the document, then resolved in this order. The first step that
+matches decides.
+
+A `preserveSensitiveData` on any other event (pick-up, drop-off, weighing, …) is not an
+occurrence. It masks that event's own data wherever the event is published, and it never decides
+the participant's visibility: producers flag a collector's movement events by the same policy
+that flags its Hauler event, so counting them would withhold the recycler step 1's set-aside
+exists to publish.
 
 1. `preserveSensitiveData: true` on **any** occurrence → **private**. Most-private-wins.
+   One kind of flag is set aside: each `true` on a **Hauler-only** occurrence — one whose roles,
+   counting only the seven below, are exactly Hauler — when the participant also holds a
+   **publicly disclosed** **Recycler** or **Processor** role. A role is publicly disclosed only
+   on an occurrence whose ACTOR event is `isPublic: true`, and only when it is read from that
+   event's `label` or from an `actor-type` attribute that is itself `isPublic: true`. That flag
+   masks the hauling appearance of an entity its public role already discloses, which is the
+   case step 3 exists for. A Recycler or Processor role held only on events that are not
+   `isPublic: true`, or read only from a private `actor-type` attribute, discloses nothing on a
+   public surface, so it sets no flag aside.
 2. The participant holds **Waste Generator** → **private**. Step 3 never applies to it.
 3. The participant holds **Hauler** together with **Recycler** or **Processor** → **public**.
    The entity is already disclosed by its public role, so masking its hauling appearance
@@ -36,7 +52,7 @@ in the document, then resolved in this order. The first step that matches decide
      `participantType`, which overrides the vector's for that occurrence, and two
      vectors place the non-`COMPANY` occurrence on each side of the `COMPANY` one.
 
-### Two consequences worth stating, because implementations get them wrong
+### Three consequences worth stating, because implementations get them wrong
 
 **An absent `preserveSensitiveData` is not a private default.** It falls through to step 5, so
 an omitted flag on a Recycler resolves **public**. An implementation that treats absence as
@@ -46,6 +62,16 @@ field.
 **Waste Generator and Hauler are not symmetric.** A Hauler with an explicit `false` is public
 (step 4). A Waste Generator with an explicit `false` is still **private** — step 2 is terminal
 and decides before step 4 is reached.
+
+**A producer's Hauler flag does not withhold a recycler that also collects.** Producers mark
+Hauler events `preserveSensitiveData: true` because the published policy masks hauler data, and
+a recycler or processor that runs its own collection is recorded under Hauler as well. Without
+the set-aside, step 1 decides every such participant private and step 3 never runs on the shape
+it was written for. The set-aside is narrow. It needs one publicly disclosed Recycler or
+Processor role somewhere in the document — one is enough, whatever the other occurrences hold —
+and without one the Hauler flag withholds the participant. Even with one, a `true` on an
+occurrence that also holds another known role, a `true` on the Recycler or Processor
+occurrence, or a Waste Generator role anywhere still withholds it.
 
 ## Roles
 
@@ -95,10 +121,19 @@ reads only `label`, or only public attributes, sees no role on a legacy generato
 `preserveSensitiveData: false` step 4 publishes it, and with the flag absent step 5 publishes it
 whenever it is a `COMPANY`.
 
+The one place the attribute's `isPublic` matters is disclosure. Reading a role to **withhold**
+ignores it; counting a role as **publicly disclosed** for step 1's set-aside requires it. A
+private attribute is never shown, so a Recycler role that lives only there discloses nothing.
+
 In the vectors, an occurrence with no `role` has no `label`, and `legacyActorType` carries the
 attribute's `value` and its own `isPublic`. An occurrence's optional `participantType`
 overrides the vector's `participantType` for that occurrence alone; a harness reads
 `occurrence.participantType ?? vector.participantType`.
+
+An occurrence's optional `eventIsPublic` is its ACTOR event's own `isPublic`. Absent means the
+source event omits it, which is not `true`: only `eventIsPublic: true` lets a Recycler or
+Processor occurrence set a Hauler-only flag aside, and then only for a role read from its
+`role` or from a `legacyActorType` whose own `isPublic` is `true`. No other step reads it.
 
 ## What a conforming repo does
 

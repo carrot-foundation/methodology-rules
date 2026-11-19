@@ -17,8 +17,10 @@ import {
 const { HAULER, PROCESSOR, RECYCLER, WASTE_GENERATOR } = BoldActorType;
 
 export interface ParticipantOccurrence {
+  // The roles a public surface shows for this occurrence; undefined for any event whose roles are borrowed, which cannot disclose one.
+  disclosedRoles?: ReadonlySet<string> | undefined;
   preserveSensitiveData?: boolean | undefined;
-  role?: string | undefined;
+  roles: ReadonlySet<string>;
 }
 
 export type ParticipantVisibility = 'private' | 'public';
@@ -46,6 +48,25 @@ export const actorEventRolesOf = ({
   return new Set([...(label === undefined ? [] : [label]), ...legacyRoles]);
 };
 
+// A private event shows no role, and a private actor-type attribute is never shown, so neither discloses one.
+export const publiclyDisclosedRolesOf = ({
+  isPublic,
+  label,
+  metadata,
+}: Pick<BoldDocumentEvent, 'label' | 'metadata'> & {
+  isPublic?: boolean | undefined;
+}): ReadonlySet<string> =>
+  isPublic === true
+    ? actorEventRolesOf({
+        label,
+        metadata: {
+          attributes: (metadata?.attributes ?? []).filter(
+            (attribute) => attribute.isPublic,
+          ),
+        },
+      })
+    : new Set();
+
 export const addPrivacyReview = (
   reviews: PrivacyReview[],
   { finding, message }: RenderedRuleFinding,
@@ -54,39 +75,51 @@ export const addPrivacyReview = (
   reviews.push({ finding, reason: buildReason(message) });
 };
 
-export const participantOccurrencesOf = (
-  preserveSensitiveData: boolean | undefined,
-  roles: ReadonlySet<string>,
-): ParticipantOccurrence[] =>
-  roles.size === 0
-    ? [{ preserveSensitiveData }]
-    : [...roles].map((role) => ({ preserveSensitiveData, role }));
-
 export const participantRolesOf = (
   occurrences: readonly ParticipantOccurrence[],
 ): ReadonlySet<string> =>
-  new Set(
-    occurrences.flatMap(({ role }) => (role === undefined ? [] : [role])),
+  new Set(occurrences.flatMap(({ roles }) => [...roles]));
+
+// Only roles the spec names count: a label outside it, such as Auditor, does not stop an occurrence being Hauler-only.
+const isHaulerOnly = ({ roles }: ParticipantOccurrence): boolean => {
+  const specRoles = [...roles].filter((role) =>
+    PARTICIPANT_PRESERVE_SENSITIVE_DATA_SPEC.has(role),
   );
+
+  return specRoles.length === 1 && specRoles[0] === HAULER;
+};
+
+const disclosesRecyclerOrProcessor = ({
+  disclosedRoles,
+}: ParticipantOccurrence): boolean =>
+  disclosedRoles !== undefined &&
+  (disclosedRoles.has(RECYCLER) || disclosedRoles.has(PROCESSOR));
 
 export const resolveParticipantVisibility = (
   occurrences: readonly ParticipantOccurrence[],
 ): ParticipantVisibility | undefined => {
+  const roles = participantRolesOf(occurrences);
+  const holdsRecyclerOrProcessor = roles.has(RECYCLER) || roles.has(PROCESSOR);
+  const disclosedByPublicRole = occurrences.some((occurrence) =>
+    disclosesRecyclerOrProcessor(occurrence),
+  );
+
+  // Spec step 1 sets aside a Hauler-only flag once a publicly disclosed Recycler or Processor role discloses the entity, so step 3 can decide.
   if (
     occurrences.some(
-      ({ preserveSensitiveData }) => preserveSensitiveData === true,
+      (occurrence) =>
+        occurrence.preserveSensitiveData === true &&
+        !(disclosedByPublicRole && isHaulerOnly(occurrence)),
     )
   ) {
     return 'private';
   }
 
-  const roles = participantRolesOf(occurrences);
-
   if (roles.has(WASTE_GENERATOR)) {
     return 'private';
   }
 
-  if (roles.has(HAULER) && (roles.has(RECYCLER) || roles.has(PROCESSOR))) {
+  if (roles.has(HAULER) && holdsRecyclerOrProcessor) {
     return 'public';
   }
 

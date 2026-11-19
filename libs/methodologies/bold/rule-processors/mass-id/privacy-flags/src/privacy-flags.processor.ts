@@ -29,12 +29,17 @@ import { PRIVACY_FLAGS_FINDINGS } from './privacy-flags.findings';
 import {
   actorEventRolesOf,
   addPrivacyReview,
-  participantOccurrencesOf,
   participantRolesOf,
+  publiclyDisclosedRolesOf,
   resolveParticipantVisibility,
 } from './privacy-flags.helpers';
 
 const { ACTOR } = BoldDocumentEventName;
+
+// Only an ACTOR event that names its own role can disclose it. Any other event, including a role-less
+// ACTOR event, borrows every role the participant holds, some of which may sit only on private events.
+const namesOwnRoles = (event: BoldDocumentEvent): boolean =>
+  event.name === ACTOR && actorEventRolesOf(event).size > 0;
 
 interface RuleSubject {
   events: BoldDocumentEvent[];
@@ -118,17 +123,25 @@ export class PrivacyFlagsProcessor extends ParentDocumentRuleProcessor<RuleSubje
     return { events: document.externalEvents ?? [] };
   }
 
+  // Only an Actor event is an occurrence: a flag on any other event masks that event and never decides the participant's visibility.
   private collectParticipantOccurrences(
     event: BoldDocumentEvent,
     participantRoles: ReadonlySet<string>,
     occurrences: Map<string, ParticipantOccurrence[]>,
   ): void {
+    if (event.name !== ACTOR) {
+      return;
+    }
+
     occurrences.set(event.participant.id, [
       ...(occurrences.get(event.participant.id) ?? []),
-      ...participantOccurrencesOf(
-        event.preserveSensitiveData,
-        participantRoles,
-      ),
+      {
+        disclosedRoles: namesOwnRoles(event)
+          ? publiclyDisclosedRolesOf(event)
+          : undefined,
+        preserveSensitiveData: event.preserveSensitiveData,
+        roles: participantRoles,
+      },
     ]);
   }
 
@@ -162,11 +175,8 @@ export class PrivacyFlagsProcessor extends ParentDocumentRuleProcessor<RuleSubje
     event: BoldDocumentEvent,
     participantRoles: ReadonlyMap<string, ReadonlySet<string>>,
   ): ReadonlySet<string> {
-    const actorRoles =
-      event.name === ACTOR ? actorEventRolesOf(event) : new Set<string>();
-
-    if (actorRoles.size > 0) {
-      return actorRoles;
+    if (namesOwnRoles(event)) {
+      return actorEventRolesOf(event);
     }
 
     return participantRoles.get(event.participant.id) ?? new Set();
@@ -378,8 +388,8 @@ export class PrivacyFlagsProcessor extends ParentDocumentRuleProcessor<RuleSubje
         }
 
         const roleDeclared = participantOccurrences.some(
-          ({ preserveSensitiveData, role }) =>
-            role === participantRole && preserveSensitiveData !== undefined,
+          ({ preserveSensitiveData, roles }) =>
+            roles.has(participantRole) && preserveSensitiveData !== undefined,
         );
 
         if (roleDeclared) {
