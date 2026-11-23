@@ -81,6 +81,9 @@ export const verifyScaleTicketNetWeight = async ({
 
     if (diff > NET_WEIGHT_CALCULATION_TOLERANCE) {
       return {
+        crossValidation: {
+          netWeight: { event: expectedNetWeight, extracted: ticketNetWeight },
+        },
         errors: [
           WEIGHING_FINDINGS.render('INVALID.SCALE_TICKET_NET_WEIGHT_MISMATCH', {
             expectedNetWeight,

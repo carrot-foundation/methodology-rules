@@ -96,6 +96,7 @@ export class WeighingProcessor extends RuleDataProcessor {
 
       return mapToRuleOutput(ruleInput, evaluationResult.resultStatus, {
         resultComment: evaluationResult.resultComment,
+        resultContent: evaluationResult.resultContent,
         resultFindings: evaluationResult.resultFindings,
       });
     } catch (error) {
@@ -330,6 +331,11 @@ export class WeighingProcessor extends RuleDataProcessor {
       return {
         errorResult: {
           ...joinRenderedFindings(scaleTicketValidation.errors),
+          ...(scaleTicketValidation.crossValidation !== undefined && {
+            resultContent: {
+              crossValidation: scaleTicketValidation.crossValidation,
+            },
+          }),
           resultStatus: 'FAILED',
         },
         validated: false,

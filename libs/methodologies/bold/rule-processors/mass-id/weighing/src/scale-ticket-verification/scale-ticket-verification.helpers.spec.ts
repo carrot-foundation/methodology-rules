@@ -222,6 +222,29 @@ describe('scale-ticket-verification', () => {
       },
     );
 
+    it.each([
+      { crossValidation: undefined, expectedNetWeight: 200.25 },
+      {
+        crossValidation: { netWeight: { event: 150, extracted: 200.25 } },
+        expectedNetWeight: 150,
+      },
+    ])(
+      'should report the compared net weights only on a mismatch against $expectedNetWeight',
+      async ({ crossValidation, expectedNetWeight }) => {
+        vi.spyOn(textExtractor, 'extractText').mockResolvedValue(
+          stubTextExtractionResult(legibleLayout1Text),
+        );
+
+        const result = await verifyScaleTicketNetWeight({
+          config: scaleTicketConfig,
+          expectedNetWeight,
+          textExtractorInput: { filePath: 'dummy-path' },
+        });
+
+        expect(result.crossValidation).toEqual(crossValidation);
+      },
+    );
+
     it('should return a layout not recognized error when no net weight can be read', async () => {
       vi.spyOn(textExtractor, 'extractText').mockResolvedValue(
         stubTextExtractionResult(`

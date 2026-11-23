@@ -7,6 +7,7 @@ import {
   listAccreditationDependencies,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
+  BoldAttachmentLabel,
   BoldAttributeName,
   BoldDocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
@@ -143,6 +144,43 @@ describe('WeighingProcessor', () => {
       expect(ruleOutput.resultContent).toEqual({
         findings: expectedFindings,
       });
+    });
+  });
+
+  it('should store the compared net weights of a scale ticket mismatch with its finding', async () => {
+    const testCase = findTestCase(
+      weighingTestCases,
+      `The "${WEIGHING}" event has a "${BoldAttachmentLabel.WEIGHING_TICKET}" that is still verified despite a scale ticket exception`,
+    );
+    const crossValidation = { netWeight: { event: 100, extracted: 110 } };
+    const mismatch = WEIGHING_FINDINGS.render(
+      'INVALID.SCALE_TICKET_NET_WEIGHT_MISMATCH',
+      { expectedNetWeight: 100, ticketNetWeight: 110 },
+    );
+
+    verifyScaleTicketNetWeightSpy.mockResolvedValue({
+      crossValidation,
+      errors: [mismatch],
+    });
+
+    const { ruleOutput } = await createRuleTestFixture({
+      accreditationDocuments: testCase.accreditationDocuments,
+      massIDActorParticipants: testCase.massIDActorParticipants,
+      massIDDocumentsParams: {
+        externalEventsMap: testCase.massIDDocumentEvents,
+      },
+      ruleDataProcessor,
+      spyOnDocumentQueryServiceLoad,
+    });
+
+    expect(ruleOutput.resultContent).toEqual({
+      crossValidation,
+      findings: [
+        {
+          code: 'weighing.INVALID.SCALE_TICKET_NET_WEIGHT_MISMATCH',
+          defaultOwner: 'INTEGRATOR',
+        },
+      ],
     });
   });
 

@@ -12,6 +12,7 @@ export interface CdfCrossValidation {
   documentNumber: FieldComparison;
   generator: EntityComparison | null;
   issueDate: FieldComparison;
+  lowConfidenceFields?: string[];
   mtrNumbers: MtrNumbersComparison;
   processingPeriod: ProcessingPeriodComparison;
   recycler: EntityComparison | null;
@@ -53,6 +54,7 @@ export interface MtrCrossValidation {
   generator: EntityComparison | null;
   hauler: EntityComparison | null;
   issueDate: FieldComparison;
+  lowConfidenceFields?: string[];
   receiver: EntityComparison | null;
   receivingDate: FieldComparison;
   transportDate: FieldComparison;

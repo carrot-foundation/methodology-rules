@@ -1,5 +1,10 @@
 import { MassIDActorType } from '@carrot-fndn/shared/methodologies/bold/types';
-import { defineRuleFindings } from '@carrot-fndn/shared/rule/result';
+import {
+  crossValidationEvidence,
+  defineRuleFindings,
+} from '@carrot-fndn/shared/rule/result';
+
+import type { ScaleTicketCrossValidation } from './scale-ticket-verification/scale-ticket-verification.types';
 
 import {
   INVALID_RESULT_COMMENTS,
@@ -118,6 +123,9 @@ export const WEIGHING_FINDINGS = defineRuleFindings(
       defaultOwner: 'INTEGRATOR',
       description:
         'O peso líquido lido no ticket de balança não é igual ao valor do evento "Weighing".',
+      evidence: [
+        crossValidationEvidence<ScaleTicketCrossValidation>('netWeight'),
+      ],
       guidance:
         'Confira o ticket anexado e o valor do evento "Weighing"; envie o peso que consta no ticket.',
       title: 'Peso do ticket diverge do evento',

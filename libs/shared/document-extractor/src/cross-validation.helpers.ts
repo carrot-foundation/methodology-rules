@@ -44,6 +44,25 @@ const recordExtractionFailure = (
   result.failReasons.push({ code, description });
 };
 
+// The audit report shows which fields a LOW_CONFIDENCE review reason flagged, across every attachment
+const recordLowConfidenceFields = (
+  fields: string[],
+  result: CrossValidationResult,
+): void => {
+  if (fields.length === 0) {
+    return;
+  }
+
+  const recorded: unknown = result.crossValidation['lowConfidenceFields'];
+  const previous = Array.isArray(recorded)
+    ? recorded.filter((field): field is string => typeof field === 'string')
+    : [];
+
+  result.crossValidation['lowConfidenceFields'] = [
+    ...new Set([...previous, ...fields]),
+  ];
+};
+
 const processInput = async <
   TEventData,
   TExtractedData extends BaseExtractedData,
@@ -114,6 +133,10 @@ const processInput = async <
     if (extractionResult.reviewRequired) {
       result.reviewRequired = true;
       result.reviewReasons.push(...extractionResult.reviewReasons);
+      recordLowConfidenceFields(
+        extractionResult.data.lowConfidenceFields,
+        result,
+      );
     }
   } catch (error) {
     recordExtractionFailure(error, attachmentInfo, result);

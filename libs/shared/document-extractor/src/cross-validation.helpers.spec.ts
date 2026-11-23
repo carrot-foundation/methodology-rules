@@ -363,6 +363,71 @@ describe('crossValidateAttachments', () => {
     expect(result.failMessages[0]).toContain('Unknown error');
   });
 
+  it('should record the low-confidence fields of every attachment once in crossValidation', async () => {
+    const extractor: DocumentExtractorService = {
+      extract: vi
+        .fn()
+        .mockResolvedValueOnce(
+          createExtractionOutput({
+            data: {
+              ...createExtractionOutput().data,
+              lowConfidenceFields: ['transportDate', 'wasteTypes[0].code'],
+            },
+            reviewRequired: true,
+          }),
+        )
+        .mockResolvedValueOnce(
+          createExtractionOutput({
+            data: {
+              ...createExtractionOutput().data,
+              lowConfidenceFields: ['transportDate', 'vehiclePlate'],
+            },
+            reviewRequired: true,
+          }),
+        ),
+    };
+    const inputs: CrossValidationInput<TestEventData>[] = [
+      {
+        attachmentInfo: createAttachmentInfo('att-1'),
+        eventData: createEventData('MTR', 'value1'),
+      },
+      {
+        attachmentInfo: createAttachmentInfo('att-2'),
+        eventData: createEventData('MTR', 'value2'),
+      },
+    ];
+
+    const result = await crossValidateAttachments(
+      inputs,
+      createConfig(),
+      extractor,
+    );
+
+    expect(result.crossValidation['lowConfidenceFields']).toEqual([
+      'transportDate',
+      'wasteTypes[0].code',
+      'vehiclePlate',
+    ]);
+  });
+
+  it('should record no low-confidence fields when the extraction needs no review', async () => {
+    const extractor = createMockExtractor(createExtractionOutput());
+    const inputs: CrossValidationInput<TestEventData>[] = [
+      {
+        attachmentInfo: createAttachmentInfo('att-1'),
+        eventData: createEventData('MTR', 'value1'),
+      },
+    ];
+
+    const result = await crossValidateAttachments(
+      inputs,
+      createConfig(),
+      extractor,
+    );
+
+    expect(result.crossValidation).not.toHaveProperty('lowConfidenceFields');
+  });
+
   it('should process multiple inputs and aggregate results', async () => {
     const extractionOutput = createExtractionOutput();
     const extractor = createMockExtractor(extractionOutput);
