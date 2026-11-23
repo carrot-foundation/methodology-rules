@@ -171,13 +171,12 @@ export const normalizeAddress = (value: string): string => {
     return '';
   }
 
-  const tokens = normalized
-    .split(' ')
-    .map((t) => (isNumericToken(t) ? stripLeadingZeros(t) : t));
-  const expanded = expandAddressAbbreviations(tokens);
+  const expanded = expandAddressAbbreviations(normalized.split(' '));
   const deduped = deduplicateConsecutiveTokens(expanded);
 
-  return deduped.join(' ');
+  return deduped
+    .map((t) => (isNumericToken(t) ? stripLeadingZeros(t) : t))
+    .join(' ');
 };
 
 /**

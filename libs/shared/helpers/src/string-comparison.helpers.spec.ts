@@ -555,6 +555,7 @@ describe('string-comparison.helpers', () => {
         'Rua Curitiba, 52, Curitiba, PR',
         'Via de Acesso das Palmeiras, 52, Curitiba, PR',
       ],
+      ['Rua 01, 1, Cidade, SP', 'Rua 01, 2, Cidade, SP'],
     ])(
       'should keep the different addresses %s and %s apart',
       (first, second) => {
