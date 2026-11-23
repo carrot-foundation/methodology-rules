@@ -270,6 +270,7 @@ export const DOCUMENT_MANIFEST_DATA_FINDINGS = defineRuleFindings(
       defaultOwner: 'RECYCLER',
       description:
         'Um campo do documento anexado foi lido com baixa confiança.',
+      evidence: [crossValidationEvidence('lowConfidenceFields')],
       guidance:
         'Oriente o reciclador a anexar o documento original completo e legível.',
       title: 'Campo lido com baixa confiança',
