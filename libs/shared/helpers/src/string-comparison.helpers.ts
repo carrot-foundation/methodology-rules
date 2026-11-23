@@ -464,7 +464,7 @@ export const isAddressMatch = (
   // Markers on both sides were compared above; their digits must not stand in for street numbers.
   const comparedKilometers =
     kilometersA.distances.length > 0 && kilometersB.distances.length > 0;
-  // A highway code ("SP-65") is not a street number when the other side has no number besides its km marker.
+  // On a rodovia or estrada, a highway code ("SP-65") is not a street number when the other side has none besides its km marker.
   const numericTokensOf = (value: string, other: string): string[] => {
     let numbersSource = joinMeterOffsets(value);
 
@@ -475,7 +475,12 @@ export const isAddressMatch = (
       );
     }
 
-    if (numbersOutsideKilometerMarkers(other).length === 0) {
+    const [streetType] = normalizeAddress(value).split(' ');
+
+    if (
+      (streetType === 'rodovia' || streetType === 'estrada') &&
+      numbersOutsideKilometerMarkers(other).length === 0
+    ) {
       numbersSource = numbersSource.replaceAll(
         HIGHWAY_CODE_PATTERN,
         (code: string, prefix: string): string =>

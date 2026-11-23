@@ -486,6 +486,7 @@ describe('string-comparison.helpers', () => {
         'RODOVIA INVENTADA SP-98, CIDADE INVENTADA, SP',
         'RODOVIA INVENTADA SP-99, CIDADE INVENTADA, SP',
       ],
+      ['Rua das Flores, AP-12, Cidade, SP', 'Rua das Flores, Km 5, Cidade, SP'],
     ])(
       'should not match the different addresses %s and %s',
       (first, second) => {
