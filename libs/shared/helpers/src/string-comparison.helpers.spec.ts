@@ -477,6 +477,7 @@ describe('string-comparison.helpers', () => {
       ],
       ['Rodovia SP-65, km 10, Cidade, SP', 'Rodovia 330, km 10, Cidade, SP'],
       ['Al 100, Cidade, SP', 'Alameda, Km 5, Cidade, SP'],
+      ['Rodovia Inventada XY-12, Cidade', 'Rodovia Inventada, Km 5, Cidade'],
       [
         'Rua das Flores, AP 12, Bairro Norte, Cidade, SP',
         'Rua das Flores, 300, Bairro Norte, Cidade, SP',
