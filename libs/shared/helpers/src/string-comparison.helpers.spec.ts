@@ -547,6 +547,14 @@ describe('string-comparison.helpers', () => {
         'INVENTADA BARRETO, 42 BAIRRO NORTE, SAO PAULO, SP',
         'AVENIDA INVENTADA BARRETO, 42, SANTO ANDRÉ, SP',
       ],
+      [
+        'Rua Pinheiros, 52, Pinheiros, SP',
+        'Via de Acesso Palmeiras, 52, Pinheiros, SP',
+      ],
+      [
+        'Rua Curitiba, 52, Curitiba, PR',
+        'Via de Acesso das Palmeiras, 52, Curitiba, PR',
+      ],
     ])(
       'should keep the different addresses %s and %s apart',
       (first, second) => {

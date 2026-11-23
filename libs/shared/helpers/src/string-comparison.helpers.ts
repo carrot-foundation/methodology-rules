@@ -428,7 +428,11 @@ const STREET_TYPES: ReadonlySet<string> = new Set([
 // Three-letter connectors; "de", "da", "do" and "e" are already shorter than the anchor length.
 const NAME_CONNECTORS: ReadonlySet<string> = new Set(['das', 'dos']);
 
-const canDropStreetType = (typed: string[], untyped: string[]): boolean => {
+const canDropStreetType = (
+  typed: string[],
+  untyped: string[],
+  untypedStreet: string[],
+): boolean => {
   const firstNameWord = typed
     .slice(1)
     .find(
@@ -439,18 +443,24 @@ const canDropStreetType = (typed: string[], untyped: string[]): boolean => {
     STREET_TYPES.has(typed[0]!) &&
     !untyped.some((t) => STREET_TYPES.has(t)) &&
     firstNameWord !== undefined &&
-    untyped.some((t) => isTokenMatch(firstNameWord, t))
+    untypedStreet.some((t) => isTokenMatch(firstNameWord, t))
   );
 };
+
+// The street name precedes the first comma; an address without commas falls back to all its tokens.
+const streetSegmentTokens = (value: string): string[] =>
+  normalizeAddress(value.split(',')[0]!).split(' ');
 
 // A document often omits the street type: drop it when the other side names no type and starts the same street name.
 const dropUnmatchedStreetType = (
   tokensA: string[],
   tokensB: string[],
+  streetA: string[],
+  streetB: string[],
 ): void => {
-  if (canDropStreetType(tokensA, tokensB)) {
+  if (canDropStreetType(tokensA, tokensB, streetB)) {
     tokensA.shift();
-  } else if (canDropStreetType(tokensB, tokensA)) {
+  } else if (canDropStreetType(tokensB, tokensA, streetA)) {
     tokensB.shift();
   }
 };
@@ -491,7 +501,12 @@ export const isAddressMatch = (
     alignHighwayStreetTypes(tokensA, tokensB);
   }
 
-  dropUnmatchedStreetType(tokensA, tokensB);
+  dropUnmatchedStreetType(
+    tokensA,
+    tokensB,
+    streetSegmentTokens(a),
+    streetSegmentTokens(b),
+  );
 
   const normalizedA = tokensA.join(' ');
   const normalizedB = tokensB.join(' ');
