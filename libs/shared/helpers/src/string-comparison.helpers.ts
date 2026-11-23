@@ -75,6 +75,13 @@ const deduplicateConsecutiveTokens = (tokens: string[]): string[] => {
 const KILOMETER_MARKER_PATTERN =
   /(?<![\p{L}_])km\.?\s*((?:[^\p{L}\p{N}\s][^\p{L}\p{N}]*)?\d(?:[\d.+]|[-,](?=\d))*)/giu;
 
+const SPACED_METER_OFFSET_PATTERN =
+  /(?<![\p{L}_])(km\.?\s*\d+)\s*\+\s*(\d{1,3})\s*(?:m|mts?|metros)(?![\p{L}\p{N}])\.?/giu;
+
+// "Km 42 + 300 m" names its unit, so it reads as "Km 42+300"; a bare "Km 42 +300" stays unsupported.
+const joinMeterOffsets = (value: string): string =>
+  value.replaceAll(SPACED_METER_OFFSET_PATTERN, '$1+$2');
+
 interface KilometerMarkers {
   distances: string[];
   invalid: boolean;
@@ -83,7 +90,8 @@ interface KilometerMarkers {
   value: string;
 }
 
-const normalizeKilometerMarkers = (value: string): KilometerMarkers => {
+const normalizeKilometerMarkers = (address: string): KilometerMarkers => {
+  const value = joinMeterOffsets(address);
   const distances: string[] = [];
   const kilometerParts: string[] = [];
   const invalidMarkers: string[] = [];
@@ -358,6 +366,58 @@ const numericTokensMatch = (
   return true;
 };
 
+const BRAZILIAN_HIGHWAY_PREFIXES: ReadonlySet<string> = new Set([
+  'AC',
+  'AL',
+  'AM',
+  'AP',
+  'BA',
+  'BR',
+  'CE',
+  'DF',
+  'ES',
+  'GO',
+  'MA',
+  'MG',
+  'MS',
+  'MT',
+  'PA',
+  'PB',
+  'PE',
+  'PI',
+  'PR',
+  'RJ',
+  'RN',
+  'RO',
+  'RR',
+  'RS',
+  'SC',
+  'SE',
+  'SP',
+  'TO',
+]);
+
+const HIGHWAY_CODE_PATTERN =
+  /(?<![\p{L}\p{N}])(\p{L}{2})[-\s]?(\d{2,3})(?!\p{N})/gu;
+
+const highwayDesignationsOf = (value: string): string[] =>
+  [...value.matchAll(HIGHWAY_CODE_PATTERN)]
+    .filter((match) => BRAZILIAN_HIGHWAY_PREFIXES.has(match[1]!.toUpperCase()))
+    .map((match) => match[0]);
+
+const HIGHWAY_STREET_TYPES: ReadonlySet<string> = new Set([
+  'estrada',
+  'rodovia',
+  'rua',
+]);
+
+// With a km marker on either side, a leading "rua" or "estrada" names the same road as "rodovia".
+const canonicalizeHighwayStreetType = (tokens: string[]): void => {
+  if (HIGHWAY_STREET_TYPES.has(tokens[0]!)) {
+    tokens[0] = 'rodovia';
+  }
+};
+
 /**
  * Checks whether two addresses match using address-specific normalization
  * (abbreviation expansion + OCR dedup) followed by Dice coefficient and
@@ -368,14 +428,21 @@ export const isAddressMatch = (
   b: string,
   threshold = DEFAULT_NAME_MATCH_THRESHOLD,
 ): { isMatch: boolean; score: number } => {
-  const normalizedA = normalizeAddress(a);
-  const normalizedB = normalizeAddress(b);
-  const tokensA = normalizedA.split(' ');
-  const tokensB = normalizedB.split(' ');
-  const score = diceCoefficient(normalizedA, normalizedB);
-
   const kilometersA = normalizeKilometerMarkers(a);
   const kilometersB = normalizeKilometerMarkers(b);
+  const hasKilometerMarker =
+    kilometersA.distances.length > 0 || kilometersB.distances.length > 0;
+  const tokensA = normalizeAddress(a).split(' ');
+  const tokensB = normalizeAddress(b).split(' ');
+
+  if (hasKilometerMarker) {
+    canonicalizeHighwayStreetType(tokensA);
+    canonicalizeHighwayStreetType(tokensB);
+  }
+
+  const normalizedA = tokensA.join(' ');
+  const normalizedB = tokensB.join(' ');
+  const score = diceCoefficient(normalizedA, normalizedB);
 
   // Kilometer distances cannot use the street-number OCR repetition tolerance.
   if (
@@ -389,16 +456,46 @@ export const isAddressMatch = (
   // Markers on both sides were compared above; their digits must not stand in for street numbers.
   const comparedKilometers =
     kilometersA.distances.length > 0 && kilometersB.distances.length > 0;
-  const numericTokensOf = (value: string, tokens: string[]): string[] =>
-    extractNumericTokens(
-      comparedKilometers
-        ? normalizeAddress(
-            value.replaceAll(KILOMETER_MARKER_PATTERN, ' km '),
-          ).split(' ')
-        : tokens,
-    );
-  const numsA = numericTokensOf(a, tokensA);
-  const numsB = numericTokensOf(b, tokensB);
+  // A highway code on one side only ("SP-65") is not a street number, unless the other side repeats it.
+  const designatedA = highwayDesignationsOf(a).length > 0;
+  const designatedB = highwayDesignationsOf(b).length > 0;
+  const numericTokensOf = (
+    value: string,
+    otherTokens: string[] | undefined,
+  ): string[] => {
+    let numbersSource = joinMeterOffsets(value);
+
+    if (comparedKilometers) {
+      numbersSource = numbersSource.replaceAll(
+        KILOMETER_MARKER_PATTERN,
+        ' km ',
+      );
+    }
+
+    if (otherTokens) {
+      const otherNumbers = new Set(extractNumericTokens(otherTokens));
+
+      for (const designation of highwayDesignationsOf(numbersSource)) {
+        if (
+          !otherNumbers.has(
+            stripLeadingZeros(designation.replaceAll(/\D/g, '')),
+          )
+        ) {
+          numbersSource = numbersSource.replace(designation, ' ');
+        }
+      }
+    }
+
+    return extractNumericTokens(normalizeAddress(numbersSource).split(' '));
+  };
+  const numsA = numericTokensOf(
+    a,
+    designatedA && !designatedB ? tokensB : undefined,
+  );
+  const numsB = numericTokensOf(
+    b,
+    designatedB && !designatedA ? tokensA : undefined,
+  );
   const [shorterNums, longerNums] =
     numsA.length <= numsB.length ? [numsA, numsB] : [numsB, numsA];
 
