@@ -287,6 +287,10 @@ describe('CdfSinirParser', () => {
         'wrapped after the label',
         ['COMPOST VERDE LTDA., CPF/CNPJ', '77.888.999/0003-22 certifica que'],
       ],
+      [
+        'when the recycler name contains "nome"',
+        ['RENOME RECICLAGEM LTDA., CPF/CNPJ 77.888.999/0003-22 certifica que'],
+      ],
     ])(
       'should not take the recycler preamble CNPJ %s as the generator tax id',
       (_case, preamble) => {
@@ -319,6 +323,24 @@ describe('CdfSinirParser', () => {
         expect(missing?.taxId.confidence).toBe('low');
       },
     );
+
+    it('should not take a CNPJ after the generator block as the generator tax id', () => {
+      const text = [
+        'CDF n° 4001234/2025',
+        'Identificacao do Gerador',
+        'Razao Social Alimentos Exemplo Brasil Ltda',
+        'CNPJ/CPF',
+        '123.456.789-09',
+        'Identificacao dos Residuos',
+        'Transportador',
+        'CNPJ 99888777000166',
+      ].join('\n');
+
+      const result = parser.parse(stubTextExtractionResult(text));
+
+      expect(result.data.generator?.taxId.parsed).not.toBe('99888777000166');
+      expect(result.data.generator?.taxId.confidence).toBe('low');
+    });
 
     it('should extract generator address from multi-line OCR layout', () => {
       const text = [
