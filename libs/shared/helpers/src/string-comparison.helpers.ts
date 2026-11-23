@@ -400,10 +400,12 @@ const BRAZILIAN_HIGHWAY_PREFIXES: ReadonlySet<string> = new Set([
 const HIGHWAY_CODE_PATTERN =
   /(?<![\p{L}\p{N}])(\p{L}{2})[-\s]?(\d{2,3})(?!\p{N})/gu;
 
-const highwayDesignationsOf = (value: string): string[] =>
-  [...value.matchAll(HIGHWAY_CODE_PATTERN)]
-    .filter((match) => BRAZILIAN_HIGHWAY_PREFIXES.has(match[1]!.toUpperCase()))
-    .map((match) => match[0]);
+const numbersOutsideKilometerMarkers = (value: string): string[] =>
+  extractNumericTokens(
+    normalizeAddress(
+      joinMeterOffsets(value).replaceAll(KILOMETER_MARKER_PATTERN, ' km '),
+    ).split(' '),
+  );
 
 const HIGHWAY_STREET_TYPES: ReadonlySet<string> = new Set([
   'estrada',
@@ -463,13 +465,8 @@ export const isAddressMatch = (
   // Markers on both sides were compared above; their digits must not stand in for street numbers.
   const comparedKilometers =
     kilometersA.distances.length > 0 && kilometersB.distances.length > 0;
-  // A highway code on one side only ("SP-65") is not a street number, unless the other side repeats it.
-  const designatedA = highwayDesignationsOf(a).length > 0;
-  const designatedB = highwayDesignationsOf(b).length > 0;
-  const numericTokensOf = (
-    value: string,
-    otherTokens: string[] | undefined,
-  ): string[] => {
+  // A highway code ("SP-65") is not a street number when the other side has no number besides its km marker.
+  const numericTokensOf = (value: string, other: string): string[] => {
     let numbersSource = joinMeterOffsets(value);
 
     if (comparedKilometers) {
@@ -479,30 +476,18 @@ export const isAddressMatch = (
       );
     }
 
-    if (otherTokens) {
-      const otherNumbers = new Set(extractNumericTokens(otherTokens));
-
-      for (const designation of highwayDesignationsOf(numbersSource)) {
-        if (
-          !otherNumbers.has(
-            stripLeadingZeros(designation.replaceAll(/\D/g, '')),
-          )
-        ) {
-          numbersSource = numbersSource.replace(designation, ' ');
-        }
-      }
+    if (numbersOutsideKilometerMarkers(other).length === 0) {
+      numbersSource = numbersSource.replaceAll(
+        HIGHWAY_CODE_PATTERN,
+        (code: string, prefix: string): string =>
+          BRAZILIAN_HIGHWAY_PREFIXES.has(prefix.toUpperCase()) ? ' ' : code,
+      );
     }
 
     return extractNumericTokens(normalizeAddress(numbersSource).split(' '));
   };
-  const numsA = numericTokensOf(
-    a,
-    designatedA && !designatedB ? tokensB : undefined,
-  );
-  const numsB = numericTokensOf(
-    b,
-    designatedB && !designatedA ? tokensA : undefined,
-  );
+  const numsA = numericTokensOf(a, b);
+  const numsB = numericTokensOf(b, a);
   const [shorterNums, longerNums] =
     numsA.length <= numsB.length ? [numsA, numsB] : [numsB, numsA];
 
