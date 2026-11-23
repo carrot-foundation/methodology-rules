@@ -476,6 +476,7 @@ describe('string-comparison.helpers', () => {
         'Rodovia 116, Cidade Inventada, SC',
       ],
       ['Rodovia SP-65, km 10, Cidade, SP', 'Rodovia 330, km 10, Cidade, SP'],
+      ['Al 100, Cidade, SP', 'Alameda, Km 5, Cidade, SP'],
       [
         'Rua das Flores, AP 12, Bairro Norte, Cidade, SP',
         'Rua das Flores, 300, Bairro Norte, Cidade, SP',

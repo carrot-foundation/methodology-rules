@@ -397,8 +397,7 @@ const BRAZILIAN_HIGHWAY_PREFIXES: ReadonlySet<string> = new Set([
   'TO',
 ]);
 
-const HIGHWAY_CODE_PATTERN =
-  /(?<![\p{L}\p{N}])(\p{L}{2})[-\s]?(\d{2,3})(?!\p{N})/gu;
+const HIGHWAY_CODE_PATTERN = /(?<![\p{L}\p{N}])(\p{L}{2})-(\d{2,3})(?!\p{N})/gu;
 
 const numbersOutsideKilometerMarkers = (value: string): string[] =>
   extractNumericTokens(
