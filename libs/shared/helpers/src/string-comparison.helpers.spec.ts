@@ -418,6 +418,83 @@ describe('string-comparison.helpers', () => {
       ).toBe(true);
     });
 
+    it.each([
+      [
+        'RUA KENJI TANAKA, KM 57 VILA ALTA, CIDADELA, SP',
+        'RODOVIA KENJI TANAKA, S/N, CIDADELA, SP',
+      ],
+      [
+        'RUA INVENTADA, KM 52 + 350 MTS. BAIRRO NORTE, CIDADE INVENTADA, SP',
+        'RODOVIA INVENTADA, KM 52, CIDADE INVENTADA, SP',
+      ],
+      [
+        'RODOVIA FICTICIA DOM INVENTADO I SP-99,, CIDADE INVENTADA, SP',
+        'RODOVIA FICTICIA DOM INVENTADO I, KM 90, CIDADE INVENTADA, SP',
+      ],
+      [
+        'ESTRADA KENJI TANAKA, KM 57 VILA ALTA, CIDADELA, SP',
+        'RODOVIA KENJI TANAKA, S/N, CIDADELA, SP',
+      ],
+      [
+        'Rodovia Inventada, Km 52 + 350 m, Cidade, SP',
+        'Rodovia Inventada, Km 52,35, Cidade, SP',
+      ],
+      [
+        'BR 999 km 147 Colonia Inventada, Cidade Inventada, PR',
+        'BR, 999, Cidade Inventada, PR',
+      ],
+    ])('should match the same highway address %s and %s', (first, second) => {
+      expect(isAddressMatch(first, second).isMatch).toBe(true);
+      expect(isAddressMatch(second, first).isMatch).toBe(true);
+    });
+
+    it.each([
+      ['Rua Inventada, 740, Cidade, SP', 'Avenida Inventada, 759, Cidade, SP'],
+      ['Rua Alfa, 52', 'Rua Beta, 52'],
+      [
+        'Rua Girassol Dourado, Km 52, Cidade Inventada, SP',
+        'Rodovia Pedro Inventado, Km 52, Cidade Inventada, SP',
+      ],
+      [
+        'RUA INVENTADA, KM 52 + 350 MTS., CIDADE INVENTADA, SP',
+        'RODOVIA INVENTADA, KM 57, CIDADE INVENTADA, SP',
+      ],
+      [
+        'RODOVIA INVENTADA, KM 52 + 350 MTS., CIDADE INVENTADA, SP',
+        'RODOVIA INVENTADA, KM 52,4, CIDADE INVENTADA, SP',
+      ],
+      [
+        'Rodovia Inventada, Km 52 + 350, Cidade, SP',
+        'Rodovia Inventada, Km 52, Cidade, SP',
+      ],
+      [
+        'RODOVIA INVENTADA SP-99, 100, CIDADE INVENTADA, SP',
+        'RODOVIA INVENTADA, 200, CIDADE INVENTADA, SP',
+      ],
+      [
+        'Rodovia BR-101, Cidade Inventada, SC',
+        'Rodovia 116, Cidade Inventada, SC',
+      ],
+      ['Rodovia SP-65, km 10, Cidade, SP', 'Rodovia 330, km 10, Cidade, SP'],
+      ['Al 100, Cidade, SP', 'Alameda, Km 5, Cidade, SP'],
+      ['Rodovia Inventada XY-12, Cidade', 'Rodovia Inventada, Km 5, Cidade'],
+      [
+        'Rua das Flores, AP 12, Bairro Norte, Cidade, SP',
+        'Rua das Flores, 300, Bairro Norte, Cidade, SP',
+      ],
+      [
+        'RODOVIA INVENTADA SP-98, CIDADE INVENTADA, SP',
+        'RODOVIA INVENTADA SP-99, CIDADE INVENTADA, SP',
+      ],
+      ['Rua das Flores, AP-12, Cidade, SP', 'Rua das Flores, Km 5, Cidade, SP'],
+    ])(
+      'should not match the different addresses %s and %s',
+      (first, second) => {
+        expect(isAddressMatch(first, second).isMatch).toBe(false);
+        expect(isAddressMatch(second, first).isMatch).toBe(false);
+      },
+    );
+
     it('should deduplicate repeated equivalent kilometer markers from OCR', () => {
       expect(
         isAddressMatch(
