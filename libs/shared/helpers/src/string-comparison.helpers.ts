@@ -425,10 +425,15 @@ const STREET_TYPES: ReadonlySet<string> = new Set([
   'travessa',
 ]);
 
+// Three-letter connectors; "de", "da", "do" and "e" are already shorter than the anchor length.
+const NAME_CONNECTORS: ReadonlySet<string> = new Set(['das', 'dos']);
+
 const canDropStreetType = (typed: string[], untyped: string[]): boolean => {
   const firstNameWord = typed
     .slice(1)
-    .find((t) => t.length >= 3 && !isNumericToken(t));
+    .find(
+      (t) => t.length >= 3 && !isNumericToken(t) && !NAME_CONNECTORS.has(t),
+    );
 
   return (
     STREET_TYPES.has(typed[0]!) &&

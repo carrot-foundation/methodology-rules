@@ -536,6 +536,14 @@ describe('string-comparison.helpers', () => {
         'RUA VINTE DE ABRIL, 52, CIDADE INVENTADA, SP',
       ],
       [
+        'Rua das Acacias, 52, Cidade, SP',
+        'Via de Acesso das Palmeiras, 52, Cidade, SP',
+      ],
+      [
+        'Rua dos Ipes, 52, Cidade, SP',
+        'Via de Acesso dos Cedros, 52, Cidade, SP',
+      ],
+      [
         'INVENTADA BARRETO, 42 BAIRRO NORTE, SAO PAULO, SP',
         'AVENIDA INVENTADA BARRETO, 42, SANTO ANDRÉ, SP',
       ],
