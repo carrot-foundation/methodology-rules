@@ -78,6 +78,29 @@ describe('cross-validation.helpers', () => {
       expect(result.isMatch).toBe(false);
     });
 
+    it('should match an unaccented description of the same waste code', () => {
+      const result = matchWasteTypeEntry(
+        {
+          code: '200108',
+          description: 'Residuos biodegradaveis de cozinha e cantinas',
+        },
+        '200108',
+        'Resíduos biodegradáveis de cozinha e cantinas',
+      );
+
+      expect(result).toMatchObject({ isCodeMatch: true, isMatch: true });
+    });
+
+    it('should not match a different description even when the code matches', () => {
+      const result = matchWasteTypeEntry(
+        { code: '200108', description: 'Lodos de tratamento de efluentes' },
+        '200108',
+        'Resíduos biodegradáveis de cozinha e cantinas',
+      );
+
+      expect(result).toMatchObject({ isCodeMatch: true, isMatch: false });
+    });
+
     it('should normalize waste codes with spaces', () => {
       const result = matchWasteTypeEntry(
         { code: '19 08 12', description: 'Lodos de tratamento' },

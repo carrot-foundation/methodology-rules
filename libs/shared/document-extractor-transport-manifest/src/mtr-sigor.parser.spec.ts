@@ -970,6 +970,49 @@ describe('MtrSigorParser', () => {
       ]);
     });
 
+    it.each([
+      'ONU 200108 Residuos Biodegradaveis 3 III',
+      'ONU: 3077 Substancia que apresenta risco para o meio ambiente 9 III',
+    ])(
+      'should exclude the transport block "%s" from the waste description',
+      (transportBlock) => {
+        const result = parser.parse(
+          stubTextExtractionResultWithBlocks('CETESB', [
+            ...sigorHeaderBlocks,
+            { boundingBox: stubBoundingBox(0.048, 0.4), text: '1' },
+            {
+              boundingBox: stubBoundingBox(0.098, 0.4),
+              text: `200108 - Residuos biodegradaveis de cozinha e cantinas ${transportBlock}`,
+            },
+          ]),
+        );
+
+        expect(result.data.wasteTypes?.map(toWasteTypeEntryData)).toEqual([
+          {
+            code: '200108',
+            description: 'Residuos biodegradaveis de cozinha e cantinas',
+          },
+        ]);
+      },
+    );
+
+    it('should keep a description that mentions ONU without a UN number', () => {
+      const result = parser.parse(
+        stubTextExtractionResultWithBlocks('CETESB', [
+          ...sigorHeaderBlocks,
+          { boundingBox: stubBoundingBox(0.048, 0.4), text: '1' },
+          {
+            boundingBox: stubBoundingBox(0.098, 0.4),
+            text: '200108 - Residuos de cozinha conforme ONU',
+          },
+        ]),
+      );
+
+      expect(result.data.wasteTypes?.map(toWasteTypeEntryData)).toEqual([
+        { code: '200108', description: 'Residuos de cozinha conforme ONU' },
+      ]);
+    });
+
     it('should not read a waste code from discarded observation metadata', () => {
       const result = parser.parse(
         stubTextExtractionResultWithBlocks('CETESB', [

@@ -291,8 +291,14 @@ const LEADING_WASTE_CODE_PATTERN = /^(\d{6})(?:\s*\(\*\))?\s+/;
 const RESIDUE_METADATA_PATTERN =
   /(?:\b[A-Z]\d{3}\s*[-–]|Observa[cç][aã]o\s+Res[ií]duo\s*:).*/i;
 
+// The transport block (UN number, shipping name, risk class, packing group) follows "ONU".
+const TRANSPORT_METADATA_PATTERN = /\bONU[\s:]+\d{4,6}\b.*/i;
+
 const stripResidueMetadata = (description: string): string =>
-  description.replace(RESIDUE_METADATA_PATTERN, '').trim();
+  description
+    .replace(RESIDUE_METADATA_PATTERN, '')
+    .replace(TRANSPORT_METADATA_PATTERN, '')
+    .trim();
 
 const hasItemNumber = (row: Record<string, string | undefined>): boolean => {
   const itemNumber = Number(row['item']);
