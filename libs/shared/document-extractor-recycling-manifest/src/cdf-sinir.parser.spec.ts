@@ -6,6 +6,8 @@ import {
 
 import { CdfSinirParser } from './cdf-sinir.parser';
 
+const high = (parsed: string) => ({ confidence: 'high', parsed });
+
 describe('CdfSinirParser', () => {
   const parser = new CdfSinirParser();
 
@@ -244,10 +246,7 @@ describe('CdfSinirParser', () => {
 
     it('should extract generator when OCR drops the label colons', () => {
       const text = [
-        'CDF n° 4001234/2025',
-        'Periodo : 20/10/2025 ate 25/10/2025',
-        'COMPOST VERDE LTDA., CPF/CNPJ 77.888.999/0003-22 certifica que recebeu, em sua unidade de',
-        'Gerador indicado e no periodo relacionado, para tratamento e destinacao final, os residuos listados abaixo.',
+        'COMPOST VERDE LTDA., CPF/CNPJ 77.888.999/0003-22 certifica que recebeu',
         'Identificacao do Gerador',
         'Razao Social Alimentos Exemplo Brasil Ltda',
         'CNPJ/CPF',
@@ -260,22 +259,17 @@ describe('CdfSinirParser', () => {
         'UF',
         'SP',
         'Identificacao dos Residuos',
-        'Cidade Industrial, 29/10/2025',
-        'Responsavel Tecnico',
       ].join('\n');
 
-      const result = parser.parse(stubTextExtractionResult(text));
+      const { data } = parser.parse(stubTextExtractionResult(text));
 
-      expect(result.data.generator?.name.parsed).toBe(
-        'Alimentos Exemplo Brasil Ltda',
-      );
-      expect(result.data.generator?.name.confidence).toBe('high');
-      expect(result.data.generator?.taxId.parsed).toBe('11.222.333/0001-44');
-      expect(result.data.generator?.taxId.confidence).toBe('high');
-      expect(result.data.generator?.address.parsed).toBe('Rua das Flores ,100');
-      expect(result.data.generator?.city.parsed).toBe('CIDADE MODELO');
-      expect(result.data.generator?.state.parsed).toBe('SP');
-      expect(result.data.lowConfidenceFields).not.toContain('generator.taxId');
+      expect(data.generator).toMatchObject({
+        address: high('Rua das Flores ,100'),
+        city: high('CIDADE MODELO'),
+        name: high('Alimentos Exemplo Brasil Ltda'),
+        state: high('SP'),
+        taxId: high('11.222.333/0001-44'),
+      });
     });
 
     it.each([
