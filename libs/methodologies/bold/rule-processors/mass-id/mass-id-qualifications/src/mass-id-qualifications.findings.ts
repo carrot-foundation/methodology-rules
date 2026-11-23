@@ -10,6 +10,10 @@ import {
 
 import { RESULT_COMMENTS } from './mass-id-qualifications.constants';
 import { MassIDQualificationsProcessorErrors } from './mass-id-qualifications.errors';
+import {
+  WASTE_TYPE_EVIDENCE_FIELDS,
+  type WasteTypeEvidence,
+} from './mass-id-qualifications.helpers';
 import { ruleDefinition } from './mass-id-qualifications.rule-definition';
 
 export const MASS_ID_QUALIFICATIONS_FINDINGS = defineRuleFindings(
@@ -72,6 +76,9 @@ export const MASS_ID_QUALIFICATIONS_FINDINGS = defineRuleFindings(
       category: 'INVALID_DATA',
       defaultOwner: 'INTEGRATOR',
       description: 'O tipo do documento não é "Organic".',
+      evidence: WASTE_TYPE_EVIDENCE_FIELDS.map((field) =>
+        crossValidationEvidence<WasteTypeEvidence>(field),
+      ),
       guidance:
         'Envie o MassID com o tipo "Organic" se o resíduo for orgânico; outros tipos não são elegíveis.',
       title: 'Tipo do resíduo não aceito',

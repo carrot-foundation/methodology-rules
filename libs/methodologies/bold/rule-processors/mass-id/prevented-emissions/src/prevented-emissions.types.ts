@@ -10,6 +10,10 @@ export interface GeneratorCarbonCharacterization {
   moistureFraction: PercentageString;
 }
 
+export interface MissingBaselineEvidence {
+  subtype: string;
+}
+
 export interface OthersIfOrganicCarbonEntry {
   carbonFraction: PercentageString;
 }

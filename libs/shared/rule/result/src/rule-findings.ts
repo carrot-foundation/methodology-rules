@@ -45,6 +45,7 @@ export const EVIDENCE_FIELD_LABELS = {
   sortingValue: 'Sorting enviado',
   subtype: 'Subtipo enviado',
   transportDate: 'Data de transporte',
+  type: 'Tipo enviado',
   vehiclePlate: 'Placa do veículo',
   wasteQuantityWeight: 'Quantidade do resíduo',
   wasteType: 'Tipo de resíduo',

@@ -18,6 +18,7 @@ import { MeasurementUnit } from '@carrot-fndn/shared/types';
 
 import { RESULT_COMMENTS } from './mass-id-qualifications.constants';
 import { MASS_ID_QUALIFICATIONS_FINDINGS } from './mass-id-qualifications.findings';
+import { getWasteTypeEvidence } from './mass-id-qualifications.helpers';
 
 const ALLOWED_SUBTYPES: string[] = Object.values(MassIDOrganicSubtype);
 
@@ -35,6 +36,8 @@ export class MassIDQualificationsProcessor extends ParentDocumentRuleProcessor<B
       return validationResult;
     }
 
+    const isValidType = document.type === ORGANIC.valueOf();
+    const isValidSubtype = this.isValidSubtype(document.subtype);
     const validationCriteria = [
       {
         failure: MASS_ID_QUALIFICATIONS_FINDINGS.render(
@@ -48,7 +51,7 @@ export class MassIDQualificationsProcessor extends ParentDocumentRuleProcessor<B
           'FAILED.INVALID_TYPE',
           document.type!,
         ),
-        isValid: document.type === ORGANIC.valueOf(),
+        isValid: isValidType,
       },
       {
         failure: MASS_ID_QUALIFICATIONS_FINDINGS.render(
@@ -69,7 +72,7 @@ export class MassIDQualificationsProcessor extends ParentDocumentRuleProcessor<B
           'FAILED.INVALID_SUBTYPE',
           document.subtype,
         ),
-        isValid: this.isValidSubtype(document.subtype),
+        isValid: isValidSubtype,
       },
     ];
 
@@ -84,19 +87,29 @@ export class MassIDQualificationsProcessor extends ParentDocumentRuleProcessor<B
       };
     }
 
+    const localWasteClassificationId = getEventAttributeValue(
+      document.externalEvents?.find(
+        eventNameIsAnyOf([BoldDocumentEventName.PICK_UP]),
+      ),
+      BoldAttributeName.LOCAL_WASTE_CLASSIFICATION_ID,
+    );
+
     return {
       ...joinRenderedFindings(failures),
-      ...(!this.isValidSubtype(document.subtype) && {
+      ...(!(isValidType && isValidSubtype) && {
         resultContent: {
-          crossValidation: getWasteSubtypeClassificationEvidence({
-            localWasteClassificationId: getEventAttributeValue(
-              document.externalEvents?.find(
-                eventNameIsAnyOf([BoldDocumentEventName.PICK_UP]),
-              ),
-              BoldAttributeName.LOCAL_WASTE_CLASSIFICATION_ID,
-            ),
-            subtype: document.subtype,
-          }),
+          crossValidation: {
+            ...(!isValidType &&
+              getWasteTypeEvidence({
+                localWasteClassificationId,
+                type: document.type!,
+              })),
+            ...(!isValidSubtype &&
+              getWasteSubtypeClassificationEvidence({
+                localWasteClassificationId,
+                subtype: document.subtype,
+              })),
+          },
         },
       }),
       resultStatus: 'FAILED',
