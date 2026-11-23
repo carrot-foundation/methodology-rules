@@ -494,6 +494,25 @@ describe('MtrSigorParser', () => {
       expect(result.data.receivingDate?.confidence).toBe('low');
     });
 
+    it('should keep a blank transport date followed by the address label as low confidence', () => {
+      const text = [
+        'MTR n° 123456',
+        'CETESB',
+        'Identificação do Transportador',
+        'Razão Social: TRANSPORTES MODELO LTDA. - 1234',
+        'CPF/CNPJ: 22.333.444/0001-66',
+        'Data do transporte:',
+        'Endereço: RUA EXEMPLO, 31 CENTRO',
+        'Telefone: 1100000000',
+      ].join('\n');
+
+      const result = parser.parse(stubTextExtractionResult(text));
+
+      expect(result.data.transportDate?.parsed).toBe('');
+      expect(result.data.transportDate?.confidence).toBe('low');
+      expect(result.data.lowConfidenceFields).toContain('transportDate');
+    });
+
     it('should not extract hauler fields when hauler section is missing', () => {
       const noTransporterText = [
         'MTR n° 123456',
@@ -597,6 +616,51 @@ describe('MtrSigorParser', () => {
           unit: 'KG',
         },
       ]);
+    });
+
+    it.each([
+      ['200201 Residuos de varricao', '200201', 'Residuos de varricao'],
+      ['200201 (*) Residuos de varricao', '200201', 'Residuos de varricao'],
+      ['200201-Residuos de varricao', '200201', 'Residuos de varricao'],
+      ['200201 - Residuos de varricao', '200201', 'Residuos de varricao'],
+    ])(
+      'should read the waste code from description cell "%s"',
+      (cellText, code, description) => {
+        const result = parser.parse(
+          stubTextExtractionResultWithBlocks('CETESB', [
+            ...sigorHeaderBlocks,
+            { boundingBox: stubBoundingBox(0.048, 0.4), text: '1' },
+            { boundingBox: stubBoundingBox(0.098, 0.4), text: cellText },
+            { boundingBox: stubBoundingBox(0.767, 0.4), text: '1,0000' },
+            { boundingBox: stubBoundingBox(0.823, 0.4), text: 'TON' },
+          ]),
+        );
+
+        expect(result.data.wasteTypes?.[0]?.code.parsed).toBe(code);
+        expect(result.data.wasteTypes?.[0]?.code.confidence).toBe('high');
+        expect(result.data.wasteTypes?.[0]?.description.parsed).toBe(
+          description,
+        );
+      },
+    );
+
+    it('should not read six digits inside the description as the waste code', () => {
+      const result = parser.parse(
+        stubTextExtractionResultWithBlocks('CETESB', [
+          ...sigorHeaderBlocks,
+          { boundingBox: stubBoundingBox(0.048, 0.4), text: '1' },
+          {
+            boundingBox: stubBoundingBox(0.098, 0.4),
+            text: 'Residuos de varricao lote 200201 coletado',
+          },
+          { boundingBox: stubBoundingBox(0.767, 0.4), text: '1,0000' },
+          { boundingBox: stubBoundingBox(0.823, 0.4), text: 'TON' },
+        ]),
+      );
+
+      expect(result.data.wasteTypes?.[0]?.code.confidence).toBe('low');
+      expect(result.data.wasteTypes?.[0]?.code.parsed).not.toBe('200201');
+      expect(result.data.lowConfidenceFields).toContain('wasteTypes[0].code');
     });
 
     it('should dynamically detect column positions from header blocks', () => {

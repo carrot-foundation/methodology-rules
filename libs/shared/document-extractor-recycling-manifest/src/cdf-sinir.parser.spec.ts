@@ -6,6 +6,8 @@ import {
 
 import { CdfSinirParser } from './cdf-sinir.parser';
 
+const high = (parsed: string) => ({ confidence: 'high', parsed });
+
 describe('CdfSinirParser', () => {
   const parser = new CdfSinirParser();
 
@@ -240,6 +242,101 @@ describe('CdfSinirParser', () => {
       expect(result.data.generator?.state.parsed).toBe('PR');
       expect(result.data.issueDate?.parsed).toBe('06/05/2024');
       expect(result.data.issueDate?.confidence).toBe('high');
+    });
+
+    it('should extract generator when OCR drops the label colons', () => {
+      const text = [
+        'COMPOST VERDE LTDA., CPF/CNPJ 77.888.999/0003-22 certifica que recebeu',
+        'Identificacao do Gerador',
+        'Razao Social Alimentos Exemplo Brasil Ltda',
+        'CNPJ/CPF',
+        '11.222.333/0001-44',
+        'Endereco',
+        ':',
+        'Rua das Flores ,100',
+        'Municipio :',
+        'CIDADE MODELO',
+        'UF',
+        'SP',
+        'Identificacao dos Residuos',
+      ].join('\n');
+
+      const { data } = parser.parse(stubTextExtractionResult(text));
+
+      expect(data.generator).toMatchObject({
+        address: high('Rua das Flores ,100'),
+        city: high('CIDADE MODELO'),
+        name: high('Alimentos Exemplo Brasil Ltda'),
+        state: high('SP'),
+        taxId: high('11.222.333/0001-44'),
+      });
+    });
+
+    it.each([
+      [
+        'on one line',
+        ['COMPOST VERDE LTDA., CPF/CNPJ 77.888.999/0003-22 certifica que'],
+      ],
+      [
+        'wrapped after the label',
+        ['COMPOST VERDE LTDA., CPF/CNPJ', '77.888.999/0003-22 certifica que'],
+      ],
+      [
+        'when the recycler name contains "nome"',
+        ['RENOME RECICLAGEM LTDA., CPF/CNPJ 77.888.999/0003-22 certifica que'],
+      ],
+    ])(
+      'should not take the recycler preamble CNPJ %s as the generator tax id',
+      (_case, preamble) => {
+        const withGeneratorTaxId = [
+          'CDF n° 4001234/2025',
+          ...preamble,
+          'Identificacao do Gerador',
+          'Razao Social Alimentos Exemplo Brasil Ltda',
+          'CNPJ/CPF',
+          '11.222.333/0001-44',
+        ].join('\n');
+        const withoutGeneratorTaxId = [
+          'CDF n° 4001234/2025',
+          ...preamble,
+          'Identificacao do Gerador',
+          'Razao Social Alimentos Exemplo Brasil Ltda',
+          'Identificacao dos Residuos',
+        ].join('\n');
+
+        expect(
+          parser.parse(stubTextExtractionResult(withGeneratorTaxId)).data
+            .generator?.taxId.parsed,
+        ).toBe('11.222.333/0001-44');
+
+        const missing = parser.parse(
+          stubTextExtractionResult(withoutGeneratorTaxId),
+        ).data.generator;
+
+        expect(missing?.taxId.parsed).not.toBe('77.888.999/0003-22');
+        expect(missing?.taxId.confidence).toBe('low');
+      },
+    );
+
+    it('should not take a CNPJ after the generator block as the generator tax id', () => {
+      const text = [
+        'CDF n° 4001234/2025',
+        'Identificacao do Gerador',
+        'Razao Social Alimentos Exemplo Brasil Ltda',
+        'CNPJ/CPF',
+        '123.456.789-09',
+        'Identificacao dos Residuos',
+        'Transportador',
+        'CNPJ 99888777000166',
+        'Nome do Responsavel',
+        'Fulano de Tal',
+        'CPF/CNPJ 88777666000155',
+      ].join('\n');
+
+      const result = parser.parse(stubTextExtractionResult(text));
+
+      expect(result.data.generator?.taxId.parsed).toBe('');
+      expect(result.data.generator?.taxId.confidence).toBe('low');
     });
 
     it('should extract generator address from multi-line OCR layout', () => {

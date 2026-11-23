@@ -46,8 +46,9 @@ const CDF_SINIR_CONFIG: CdfParseConfig = {
     // eslint-disable-next-line sonarjs/slow-regex
     generatorName: /(?:Razao\s*Social|Nome)\s*:?\s*\n?\s*(.+?)(?=\n|$)/im,
     generatorTaxId:
-      // eslint-disable-next-line sonarjs/slow-regex
-      /(?:CPF\/CNPJ|CNPJ\/CPF|CNPJ)\s*:\s*\n?\s*(\d{14}|\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2})/i,
+      // Bounded to the generator block so the recycler preamble or a later participant's CNPJ never matches.
+      // eslint-disable-next-line sonarjs/slow-regex, sonarjs/regex-complexity
+      /^[^\S\n]*(?:Razao\s*Social|Nome(?!\s+do\s+Responsavel))\b(?:(?!Identificacao\s+dos\s+Residuos)[\s\S])*?(?:CPF\/CNPJ|CNPJ\/CPF|CNPJ)\s*:?\s*(\d{14}|\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2})/im,
     processingPeriod:
       // eslint-disable-next-line sonarjs/slow-regex
       /Periodo\s*:?\s*(\d{2}\/\d{2}\/\d{4}\s+(?:a|ate)\s+\d{2}\/\d{2}\/\d{4})/is,
