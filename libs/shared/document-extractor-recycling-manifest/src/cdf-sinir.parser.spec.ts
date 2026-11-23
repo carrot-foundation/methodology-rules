@@ -334,11 +334,14 @@ describe('CdfSinirParser', () => {
         'Identificacao dos Residuos',
         'Transportador',
         'CNPJ 99888777000166',
+        'Nome do Responsavel',
+        'Fulano de Tal',
+        'CPF/CNPJ 88777666000155',
       ].join('\n');
 
       const result = parser.parse(stubTextExtractionResult(text));
 
-      expect(result.data.generator?.taxId.parsed).not.toBe('99888777000166');
+      expect(result.data.generator?.taxId.parsed).toBe('');
       expect(result.data.generator?.taxId.confidence).toBe('low');
     });
 
