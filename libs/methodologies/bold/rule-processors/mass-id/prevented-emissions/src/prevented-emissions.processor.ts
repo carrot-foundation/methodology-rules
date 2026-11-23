@@ -67,7 +67,10 @@ import {
   type PreventedEmissionsRuleSubject,
   PreventedEmissionsRuleSubjectSchema,
 } from './prevented-emissions.rule-subject';
-import { type GeneratorCarbonCharacterization } from './prevented-emissions.types';
+import {
+  type GeneratorCarbonCharacterization,
+  type MissingBaselineEvidence,
+} from './prevented-emissions.types';
 
 const { EXCEEDING_EMISSION_COEFFICIENT } = BoldAttributeName;
 const { PICK_UP } = BoldDocumentEventName;
@@ -151,6 +154,11 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
           'FAILED.MISSING_RECYCLING_BASELINE_FOR_WASTE_SUBTYPE',
           wasteSubtype,
         ),
+        resultContent: {
+          crossValidation: {
+            subtype: wasteSubtype,
+          } satisfies MissingBaselineEvidence,
+        },
         resultStatus: 'FAILED',
       };
     }

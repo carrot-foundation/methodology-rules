@@ -13,6 +13,7 @@ import { type AnyObject } from '@carrot-fndn/shared/types';
 
 import { RESULT_COMMENTS } from './mass-id-qualifications.constants';
 import { MassIDQualificationsProcessorErrors } from './mass-id-qualifications.errors';
+import { getWasteTypeEvidence } from './mass-id-qualifications.helpers';
 
 const massIDStubs = new BoldStubsBuilder()
   .createMassIDDocuments()
@@ -20,17 +21,21 @@ const massIDStubs = new BoldStubsBuilder()
   .build();
 const processorErrors = new MassIDQualificationsProcessorErrors();
 
-const subtypeEvidenceContent = (subtype: string): AnyObject => ({
-  crossValidation: getWasteSubtypeClassificationEvidence({
-    localWasteClassificationId: getEventAttributeValue(
-      massIDStubs.massIDDocument.externalEvents?.find(
-        eventNameIsAnyOf([BoldDocumentEventName.PICK_UP]),
-      ),
-      BoldAttributeName.LOCAL_WASTE_CLASSIFICATION_ID,
-    ),
+const localWasteClassificationId = getEventAttributeValue(
+  massIDStubs.massIDDocument.externalEvents?.find(
+    eventNameIsAnyOf([BoldDocumentEventName.PICK_UP]),
+  ),
+  BoldAttributeName.LOCAL_WASTE_CLASSIFICATION_ID,
+);
+
+const subtypeEvidence = (subtype: string) =>
+  getWasteSubtypeClassificationEvidence({
+    localWasteClassificationId,
     subtype,
-  }),
-});
+  });
+
+const typeEvidence = (type: string) =>
+  getWasteTypeEvidence({ localWasteClassificationId, type });
 
 interface MassIDQualificationsTestCase extends RuleTestCase {
   massIDDocument: BoldDocument;
@@ -65,6 +70,7 @@ export const massIDQualificationsTestCases: MassIDQualificationsTestCase[] = [
       type: 'INVALID_TYPE',
     },
     resultComment: RESULT_COMMENTS.failed.INVALID_TYPE('INVALID_TYPE'),
+    resultContent: { crossValidation: typeEvidence('INVALID_TYPE') },
     resultStatus: 'FAILED',
     scenario: 'The type is not ORGANIC',
   },
@@ -99,7 +105,7 @@ export const massIDQualificationsTestCases: MassIDQualificationsTestCase[] = [
       subtype: 'Invalid Subtype',
     },
     resultComment: RESULT_COMMENTS.failed.INVALID_SUBTYPE('Invalid Subtype'),
-    resultContent: subtypeEvidenceContent('Invalid Subtype'),
+    resultContent: { crossValidation: subtypeEvidence('Invalid Subtype') },
     resultStatus: 'FAILED',
     scenario: 'The subtype is defined but not in the allowed list',
   },
@@ -129,7 +135,12 @@ export const massIDQualificationsTestCases: MassIDQualificationsTestCase[] = [
       RESULT_COMMENTS.failed.INVALID_TYPE('INVALID_TYPE'),
       RESULT_COMMENTS.failed.INVALID_SUBTYPE('INVALID_SUBTYPE'),
     ].join(' '),
-    resultContent: subtypeEvidenceContent('INVALID_SUBTYPE'),
+    resultContent: {
+      crossValidation: {
+        ...typeEvidence('INVALID_TYPE'),
+        ...subtypeEvidence('INVALID_SUBTYPE'),
+      },
+    },
     resultStatus: 'FAILED',
     scenario: 'Multiple errors were found',
   },

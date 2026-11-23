@@ -156,19 +156,82 @@ describe('MassIDQualificationsProcessor', () => {
     });
   });
 
-  it('should attach no subtype evidence when the subtype is valid', async () => {
+  it('should report the sent type and Ibama code, without subtype evidence, when only the type is invalid', async () => {
+    const { massIDDocument } = new BoldStubsBuilder()
+      .createMassIDDocuments({
+        externalEventsMap: {
+          [BoldDocumentEventName.PICK_UP]: stubBoldMassIDPickUpEvent({
+            metadataAttributes: [
+              [BoldAttributeName.LOCAL_WASTE_CLASSIFICATION_ID, '02 01 03'],
+            ],
+          }),
+        },
+      })
+      .build();
+
+    documentLoaderService.mockResolvedValueOnce({
+      ...massIDDocument,
+      subtype: MassIDOrganicSubtype.TOBACCO,
+      type: 'Loss',
+    });
+
+    const ruleOutput = await ruleDataProcessor.process(stubRuleInput());
+
+    expect(ruleOutput.resultContent?.['crossValidation']).toStrictEqual({
+      localWasteClassificationId: '02 01 03',
+      type: 'Loss',
+    });
+  });
+
+  it('should report only the sent type when the pick-up has no classification code', async () => {
     const { massIDDocument } = new BoldStubsBuilder()
       .createMassIDDocuments()
       .build();
 
     documentLoaderService.mockResolvedValueOnce({
       ...massIDDocument,
-      type: 'INVALID_TYPE',
+      externalEvents: massIDDocument.externalEvents?.filter(
+        ({ name }) => name !== BoldDocumentEventName.PICK_UP.toString(),
+      ),
+      type: 'Loss',
+    });
+
+    const ruleOutput = await ruleDataProcessor.process(stubRuleInput());
+
+    expect(ruleOutput.resultContent?.['crossValidation']).toStrictEqual({
+      type: 'Loss',
+    });
+  });
+
+  it('should attach no cross-validation when only the measurement unit is invalid', async () => {
+    const { massIDDocument } = new BoldStubsBuilder()
+      .createMassIDDocuments()
+      .build();
+
+    documentLoaderService.mockResolvedValueOnce({
+      ...massIDDocument,
+      measurementUnit: 'INVALID_UNIT',
     });
 
     const ruleOutput = await ruleDataProcessor.process(stubRuleInput());
 
     expect(ruleOutput.resultContent).not.toHaveProperty('crossValidation');
+  });
+
+  it('should declare the type and Ibama code as the invalid type evidence', () => {
+    const declaration = MASS_ID_QUALIFICATIONS_FINDINGS.declarations.find(
+      ({ finding }) =>
+        finding.code === 'mass-id-qualifications.FAILED.INVALID_TYPE',
+    );
+
+    expect(declaration?.meta.evidence).toStrictEqual([
+      { field: 'type', label: 'Tipo enviado', source: 'CROSS_VALIDATION' },
+      {
+        field: 'localWasteClassificationId',
+        label: 'Código Ibama',
+        source: 'CROSS_VALIDATION',
+      },
+    ]);
   });
 
   it('should return one finding per joined failure message in the same order', async () => {

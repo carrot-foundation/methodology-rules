@@ -1,9 +1,13 @@
 import { MassIDActorType } from '@carrot-fndn/shared/methodologies/bold/types';
-import { defineRuleFindings } from '@carrot-fndn/shared/rule/result';
+import {
+  crossValidationEvidence,
+  defineRuleFindings,
+} from '@carrot-fndn/shared/rule/result';
 
 import { RESULT_COMMENTS } from './prevented-emissions.constants';
 import { PreventedEmissionsProcessorErrors } from './prevented-emissions.errors';
 import { ruleDefinition } from './prevented-emissions.rule-definition';
+import { type MissingBaselineEvidence } from './prevented-emissions.types';
 
 export const PREVENTED_EMISSIONS_FINDINGS = defineRuleFindings(
   ruleDefinition.slug,
@@ -110,6 +114,7 @@ export const PREVENTED_EMISSIONS_FINDINGS = defineRuleFindings(
       dependsOnAccreditation: MassIDActorType.RECYCLER,
       description:
         'O credenciamento do reciclador não tem linha de base válida para o subtipo do resíduo.',
+      evidence: [crossValidationEvidence<MissingBaselineEvidence>('subtype')],
       guidance:
         'Oriente o reciclador a incluir no credenciamento a linha de base do subtipo.',
       title: 'Linha de base ausente para o subtipo',

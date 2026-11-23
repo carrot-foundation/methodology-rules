@@ -123,6 +123,22 @@ describe('PreventedEmissionsProcessor', () => {
       ]);
     });
 
+    it('should declare the waste subtype as the missing recycling baseline evidence', () => {
+      const declaration = PREVENTED_EMISSIONS_FINDINGS.declarations.find(
+        ({ finding }) =>
+          finding.code ===
+          'prevented-emissions.FAILED.MISSING_RECYCLING_BASELINE_FOR_WASTE_SUBTYPE',
+      );
+
+      expect(declaration?.meta.evidence).toStrictEqual([
+        {
+          field: 'subtype',
+          label: 'Subtipo enviado',
+          source: 'CROSS_VALIDATION',
+        },
+      ]);
+    });
+
     it('should not mark the missing exceeding emission coefficient as dependent on the Recycler accreditation', async () => {
       const { ruleOutput } = await processTestCase(
         findTestCase(

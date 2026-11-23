@@ -970,6 +970,36 @@ describe('MtrSigorParser', () => {
       ]);
     });
 
+    it.each([
+      [
+        'should exclude the transport block "ONU 200108 ..." from the waste description',
+        '200108 - Residuos biodegradaveis de cozinha e cantinas ONU 200108 Residuos Biodegradaveis 3 III',
+        'Residuos biodegradaveis de cozinha e cantinas',
+      ],
+      [
+        'should exclude the transport block "ONU: 3077 ..." from the waste description',
+        '200108 - Residuos biodegradaveis de cozinha e cantinas ONU: 3077 Substancia que apresenta risco para o meio ambiente 9 III',
+        'Residuos biodegradaveis de cozinha e cantinas',
+      ],
+      [
+        'should keep a description that mentions ONU without a UN number',
+        '200108 - Residuos de cozinha conforme ONU',
+        'Residuos de cozinha conforme ONU',
+      ],
+    ])('%s', (_title, text, description) => {
+      const result = parser.parse(
+        stubTextExtractionResultWithBlocks('CETESB', [
+          ...sigorHeaderBlocks,
+          { boundingBox: stubBoundingBox(0.048, 0.4), text: '1' },
+          { boundingBox: stubBoundingBox(0.098, 0.4), text },
+        ]),
+      );
+
+      expect(result.data.wasteTypes?.map(toWasteTypeEntryData)).toEqual([
+        { code: '200108', description },
+      ]);
+    });
+
     it('should not read a waste code from discarded observation metadata', () => {
       const result = parser.parse(
         stubTextExtractionResultWithBlocks('CETESB', [

@@ -353,6 +353,9 @@ export const preventedEmissionsTestCases: PreventedEmissionsTestCase[] = [
         MassIDOrganicSubtype.DOMESTIC_SLUDGE,
       ),
     resultContent: {
+      crossValidation: {
+        subtype: MassIDOrganicSubtype.DOMESTIC_SLUDGE,
+      },
       ruleSubject: {
         baseline: undefined,
         exceedingEmissionCoefficient,
