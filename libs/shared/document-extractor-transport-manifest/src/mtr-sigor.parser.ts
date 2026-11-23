@@ -285,6 +285,9 @@ const alignWasteTableBlocks = (
 
 const WASTE_CODE_PATTERN = /\b(\d{6})(?:\s*\(\*\))?\s*[-–]\s*/;
 
+// OCR can drop the hyphen; without it, only a code opening the cell counts.
+const LEADING_WASTE_CODE_PATTERN = /^(\d{6})(?:\s*\(\*\))?\s+/;
+
 const RESIDUE_METADATA_PATTERN =
   /(?:\b[A-Z]\d{3}\s*[-–]|Observa[cç][aã]o\s+Res[ií]duo\s*:).*/i;
 
@@ -309,7 +312,9 @@ const parseWasteRow = (
   }
 
   const description = stripResidueMetadata(rawDescription);
-  const codeMatch = WASTE_CODE_PATTERN.exec(description);
+  const codeMatch =
+    WASTE_CODE_PATTERN.exec(description) ??
+    LEADING_WASTE_CODE_PATTERN.exec(description);
 
   const entry: WasteTypeEntryData = codeMatch?.[1]
     ? {

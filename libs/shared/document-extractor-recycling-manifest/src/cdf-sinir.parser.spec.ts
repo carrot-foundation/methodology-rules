@@ -242,6 +242,84 @@ describe('CdfSinirParser', () => {
       expect(result.data.issueDate?.confidence).toBe('high');
     });
 
+    it('should extract generator when OCR drops the label colons', () => {
+      const text = [
+        'CDF n° 4001234/2025',
+        'Periodo : 20/10/2025 ate 25/10/2025',
+        'COMPOST VERDE LTDA., CPF/CNPJ 77.888.999/0003-22 certifica que recebeu, em sua unidade de',
+        'Gerador indicado e no periodo relacionado, para tratamento e destinacao final, os residuos listados abaixo.',
+        'Identificacao do Gerador',
+        'Razao Social Alimentos Exemplo Brasil Ltda',
+        'CNPJ/CPF',
+        '11.222.333/0001-44',
+        'Endereco',
+        ':',
+        'Rua das Flores ,100',
+        'Municipio :',
+        'CIDADE MODELO',
+        'UF',
+        'SP',
+        'Identificacao dos Residuos',
+        'Cidade Industrial, 29/10/2025',
+        'Responsavel Tecnico',
+      ].join('\n');
+
+      const result = parser.parse(stubTextExtractionResult(text));
+
+      expect(result.data.generator?.name.parsed).toBe(
+        'Alimentos Exemplo Brasil Ltda',
+      );
+      expect(result.data.generator?.name.confidence).toBe('high');
+      expect(result.data.generator?.taxId.parsed).toBe('11.222.333/0001-44');
+      expect(result.data.generator?.taxId.confidence).toBe('high');
+      expect(result.data.generator?.address.parsed).toBe('Rua das Flores ,100');
+      expect(result.data.generator?.city.parsed).toBe('CIDADE MODELO');
+      expect(result.data.generator?.state.parsed).toBe('SP');
+      expect(result.data.lowConfidenceFields).not.toContain('generator.taxId');
+    });
+
+    it.each([
+      [
+        'on one line',
+        ['COMPOST VERDE LTDA., CPF/CNPJ 77.888.999/0003-22 certifica que'],
+      ],
+      [
+        'wrapped after the label',
+        ['COMPOST VERDE LTDA., CPF/CNPJ', '77.888.999/0003-22 certifica que'],
+      ],
+    ])(
+      'should not take the recycler preamble CNPJ %s as the generator tax id',
+      (_case, preamble) => {
+        const withGeneratorTaxId = [
+          'CDF n° 4001234/2025',
+          ...preamble,
+          'Identificacao do Gerador',
+          'Razao Social Alimentos Exemplo Brasil Ltda',
+          'CNPJ/CPF',
+          '11.222.333/0001-44',
+        ].join('\n');
+        const withoutGeneratorTaxId = [
+          'CDF n° 4001234/2025',
+          ...preamble,
+          'Identificacao do Gerador',
+          'Razao Social Alimentos Exemplo Brasil Ltda',
+          'Identificacao dos Residuos',
+        ].join('\n');
+
+        expect(
+          parser.parse(stubTextExtractionResult(withGeneratorTaxId)).data
+            .generator?.taxId.parsed,
+        ).toBe('11.222.333/0001-44');
+
+        const missing = parser.parse(
+          stubTextExtractionResult(withoutGeneratorTaxId),
+        ).data.generator;
+
+        expect(missing?.taxId.parsed).not.toBe('77.888.999/0003-22');
+        expect(missing?.taxId.confidence).toBe('low');
+      },
+    );
+
     it('should extract generator address from multi-line OCR layout', () => {
       const text = [
         'CDF n° 2834634/2024',
