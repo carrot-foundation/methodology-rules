@@ -411,10 +411,18 @@ const HIGHWAY_STREET_TYPES: ReadonlySet<string> = new Set([
   'rua',
 ]);
 
-// With a km marker on either side, a leading "rua" or "estrada" names the same road as "rodovia".
-const canonicalizeHighwayStreetType = (tokens: string[]): void => {
-  if (HIGHWAY_STREET_TYPES.has(tokens[0]!)) {
-    tokens[0] = 'rodovia';
+// With a km marker on either side, a leading "rua", "estrada" or "rodovia" names the same road.
+const alignHighwayStreetTypes = (
+  tokensA: string[],
+  tokensB: string[],
+): void => {
+  if (
+    tokensA[0] !== tokensB[0] &&
+    HIGHWAY_STREET_TYPES.has(tokensA[0]!) &&
+    HIGHWAY_STREET_TYPES.has(tokensB[0]!)
+  ) {
+    tokensA[0] = 'rodovia';
+    tokensB[0] = 'rodovia';
   }
 };
 
@@ -436,8 +444,7 @@ export const isAddressMatch = (
   const tokensB = normalizeAddress(b).split(' ');
 
   if (hasKilometerMarker) {
-    canonicalizeHighwayStreetType(tokensA);
-    canonicalizeHighwayStreetType(tokensB);
+    alignHighwayStreetTypes(tokensA, tokensB);
   }
 
   const normalizedA = tokensA.join(' ');
