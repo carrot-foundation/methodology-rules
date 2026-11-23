@@ -22,6 +22,7 @@ const BRAZILIAN_ADDRESS_ABBREVIATIONS = new Map<string, string>([
   ['cj', 'conjunto'],
   ['cond', 'condominio'],
   ['est', 'estrada'],
+  ['jorn', 'jornalista'],
   ['pc', 'praca'],
   ['pca', 'praca'],
   ['r', 'rua'],
@@ -170,7 +171,9 @@ export const normalizeAddress = (value: string): string => {
     return '';
   }
 
-  const tokens = normalized.split(' ');
+  const tokens = normalized
+    .split(' ')
+    .map((t) => (isNumericToken(t) ? stripLeadingZeros(t) : t));
   const expanded = expandAddressAbbreviations(tokens);
   const deduped = deduplicateConsecutiveTokens(expanded);
 
@@ -412,6 +415,41 @@ const HIGHWAY_STREET_TYPES: ReadonlySet<string> = new Set([
   'rua',
 ]);
 
+const STREET_TYPES: ReadonlySet<string> = new Set([
+  'alameda',
+  'avenida',
+  'estrada',
+  'praca',
+  'rodovia',
+  'rua',
+  'travessa',
+]);
+
+const canDropStreetType = (typed: string[], untyped: string[]): boolean => {
+  const firstNameWord = typed
+    .slice(1)
+    .find((t) => t.length >= 3 && !isNumericToken(t));
+
+  return (
+    STREET_TYPES.has(typed[0]!) &&
+    !untyped.some((t) => STREET_TYPES.has(t)) &&
+    firstNameWord !== undefined &&
+    untyped.some((t) => isTokenMatch(firstNameWord, t))
+  );
+};
+
+// A document often omits the street type: drop it when the other side names no type and starts the same street name.
+const dropUnmatchedStreetType = (
+  tokensA: string[],
+  tokensB: string[],
+): void => {
+  if (canDropStreetType(tokensA, tokensB)) {
+    tokensA.shift();
+  } else if (canDropStreetType(tokensB, tokensA)) {
+    tokensB.shift();
+  }
+};
+
 // With a km marker on either side, a leading "rua", "estrada" or "rodovia" names the same road.
 const alignHighwayStreetTypes = (
   tokensA: string[],
@@ -447,6 +485,8 @@ export const isAddressMatch = (
   if (hasKilometerMarker) {
     alignHighwayStreetTypes(tokensA, tokensB);
   }
+
+  dropUnmatchedStreetType(tokensA, tokensB);
 
   const normalizedA = tokensA.join(' ');
   const normalizedB = tokensB.join(' ');

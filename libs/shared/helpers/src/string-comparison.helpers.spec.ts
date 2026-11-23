@@ -443,6 +443,14 @@ describe('string-comparison.helpers', () => {
         'BR 999 km 147 Colonia Inventada, Cidade Inventada, PR',
         'BR, 999, Cidade Inventada, PR',
       ],
+      [
+        'PRESIDENTE INVENTADO BRANCO, 32501 Km 32,5 BAIRRO NORTE, CIDADE INVENTADA, SP',
+        'RODOVIA PRESIDENTE INVENTADO BRANCO, S/N, CIDADE INVENTADA, SP',
+      ],
+      [
+        'TAPIR INVENTADO, KM 26 + 900 METROS VILA NOVA, CIDADE INVENTADA, SP',
+        'RODOVIA TAPIR INVENTADO, S/N, CIDADE INVENTADA, SP',
+      ],
     ])('should match the same highway address %s and %s', (first, second) => {
       expect(isAddressMatch(first, second).isMatch).toBe(true);
       expect(isAddressMatch(second, first).isMatch).toBe(true);
@@ -489,6 +497,50 @@ describe('string-comparison.helpers', () => {
       ['Rua das Flores, AP-12, Cidade, SP', 'Rua das Flores, Km 5, Cidade, SP'],
     ])(
       'should not match the different addresses %s and %s',
+      (first, second) => {
+        expect(isAddressMatch(first, second).isMatch).toBe(false);
+        expect(isAddressMatch(second, first).isMatch).toBe(false);
+      },
+    );
+
+    it.each([
+      [
+        'PAPA INVENTADO II, 06 JARDIM NORTE, CIDADE INVENTADA, SP',
+        'RUA PAPA INVENTADO II, 6, CIDADE INVENTADA, SP',
+      ],
+      [
+        'RODOVIA JORN. JOSE INVENTADO SILVA, ROD. SP 999 KM 09 CHACARA NORTE, CIDADE INVENTADA, SP',
+        'RODOVIA JORNALISTA JOSÉ INVENTADO SILVA, s/n, CIDADE INVENTADA, SP',
+      ],
+      [
+        'NUCLEO VILA INVENTADA DE CIMA, 0 BAIRRO NORTE, CIDADE INVENTADA, SP',
+        'RUA VILA INVENTADA DE CIMA, s/n, CIDADE INVENTADA, SP',
+      ],
+    ])(
+      'should match the same street without a street type, leading zeros or a number %s and %s',
+      (first, second) => {
+        expect(isAddressMatch(first, second).isMatch).toBe(true);
+        expect(isAddressMatch(second, first).isMatch).toBe(true);
+      },
+    );
+
+    it.each([
+      ['Rua Inventada, 278, Cidade, SP', 'Rua Inventada, 268, Cidade, SP'],
+      ['Rua Inventada, 2872, Cidade, SP', 'Rua Inventada, 2782, Cidade, SP'],
+      ['Rua Inventada, 1900, Cidade, SP', 'Rua Inventada, 1090, Cidade, SP'],
+      ['Rua Inventada, 1, Cidade, SP', 'Rua Inventada, 2629, Cidade, SP'],
+      ['Rua Inventada, 0, Cidade, SP', 'Rua Inventada, 120, Cidade, SP'],
+      ['Inventada, 06, Cidade, SP', 'Rua Inventada, 60, Cidade, SP'],
+      [
+        'RUA PASSEIO DO CEDRO, 52, CIDADE INVENTADA, SP',
+        'RUA VINTE DE ABRIL, 52, CIDADE INVENTADA, SP',
+      ],
+      [
+        'INVENTADA BARRETO, 42 BAIRRO NORTE, SAO PAULO, SP',
+        'AVENIDA INVENTADA BARRETO, 42, SANTO ANDRÉ, SP',
+      ],
+    ])(
+      'should keep the different addresses %s and %s apart',
       (first, second) => {
         expect(isAddressMatch(first, second).isMatch).toBe(false);
         expect(isAddressMatch(second, first).isMatch).toBe(false);
