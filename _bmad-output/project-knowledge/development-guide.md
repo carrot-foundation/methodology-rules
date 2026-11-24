@@ -17,12 +17,13 @@ pnpm install
 
 All targets run through Nx. Scope to one project, or use the affected/all variants.
 
-| Task | Single project | Affected | All |
-|---|---|---|---|
-| Test (Vitest) | `pnpm test <project>` | `pnpm test:affected` | `pnpm test:all` |
-| Lint (+fix) | `pnpm lint <project>` | `pnpm lint:affected` | `pnpm lint:all` |
-| Type-check | `pnpm ts <project>` | `pnpm ts:affected` | `pnpm ts:all` |
-| Build Lambda | `pnpm build-lambda <project>` | `pnpm build-lambda:affected` | `pnpm build-lambda:all` |
+| Task             | Single project                | Affected                     | All                     |
+| ---------------- | ----------------------------- | ---------------------------- | ----------------------- |
+| Test (Vitest)    | `pnpm test <project>`         | `pnpm test:affected`         | `pnpm test:all`         |
+| Lint (read-only) | `pnpm lint <project>`         | `pnpm lint:affected`         | `pnpm lint:all`         |
+| Lint (+fix)      | `pnpm lint <project> --fix`   | `pnpm lint:affected:fix`     | `pnpm lint:all:fix`     |
+| Type-check       | `pnpm ts <project>`           | `pnpm ts:affected`           | `pnpm ts:all`           |
+| Build Lambda     | `pnpm build-lambda <project>` | `pnpm build-lambda:affected` | `pnpm build-lambda:all` |
 
 Run a single test file: `pnpm nx test <project> --testFile=<path>`.
 

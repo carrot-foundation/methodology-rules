@@ -74,7 +74,8 @@ pnpm test:all                        # Test all projects
 
 # Linting & type-checking
 pnpm lint <project-name>             # Lint a single project
-pnpm lint:affected                   # Lint and auto-fix changed projects
+pnpm lint:affected                   # Lint changed projects (read-only)
+pnpm lint:affected:fix               # Lint changed projects and auto-fix them
 pnpm ts <project-name>              # Type-check a single project
 
 # Building
