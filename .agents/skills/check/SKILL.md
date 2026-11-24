@@ -19,4 +19,8 @@ pnpm nx ts <project-name>
 pnpm nx test <project-name>
 ```
 
+The gate is read-only: `pnpm lint:affected` reports problems and never rewrites files. To apply
+auto-fixes, run `pnpm lint:affected:fix` (or `pnpm nx lint <project-name> --fix`) as a separate
+step that modifies the working tree, review the diff, then re-run the read-only gate.
+
 All three checks must pass before the work is considered complete.
