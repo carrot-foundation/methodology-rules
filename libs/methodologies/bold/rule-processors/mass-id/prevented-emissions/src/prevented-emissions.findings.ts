@@ -7,7 +7,10 @@ import {
 import { RESULT_COMMENTS } from './prevented-emissions.constants';
 import { PreventedEmissionsProcessorErrors } from './prevented-emissions.errors';
 import { ruleDefinition } from './prevented-emissions.rule-definition';
-import { type MissingBaselineEvidence } from './prevented-emissions.types';
+import {
+  type CarbonFractionCodeEvidence,
+  type MissingBaselineEvidence,
+} from './prevented-emissions.types';
 
 export const PREVENTED_EMISSIONS_FINDINGS = defineRuleFindings(
   ruleDefinition.slug,
@@ -124,6 +127,11 @@ export const PREVENTED_EMISSIONS_FINDINGS = defineRuleFindings(
       defaultOwner: 'RECYCLER',
       description:
         'Não há fração de carbono definida para o código de classificação "Others (if organic)" nem fração válida registrada para o gerador.',
+      evidence: [
+        crossValidationEvidence<CarbonFractionCodeEvidence>(
+          'localWasteClassificationId',
+        ),
+      ],
       guidance:
         'Oriente o reciclador a providenciar o laudo de fração de carbono do gerador.',
       title: 'Fração de carbono indisponível',
@@ -133,6 +141,11 @@ export const PREVENTED_EMISSIONS_FINDINGS = defineRuleFindings(
       defaultOwner: 'RECYCLER',
       description:
         'Não há fração de carbono disponível para o código "Others (if organic)"; o cálculo aguarda o laudo.',
+      evidence: [
+        crossValidationEvidence<CarbonFractionCodeEvidence>(
+          'localWasteClassificationId',
+        ),
+      ],
       guidance:
         'Oriente o reciclador a enviar o laudo de fração de carbono do gerador.',
       title: 'Fração de carbono aguardando laudo',
@@ -142,6 +155,11 @@ export const PREVENTED_EMISSIONS_FINDINGS = defineRuleFindings(
       defaultOwner: 'RECYCLER',
       description:
         'A fração de carbono registrada para o gerador venceu: o laudo tem validade de 2 anos a partir da análise.',
+      evidence: [
+        crossValidationEvidence<CarbonFractionCodeEvidence>(
+          'localWasteClassificationId',
+        ),
+      ],
       guidance:
         'Oriente o reciclador a enviar um novo laudo de fração de carbono do gerador.',
       title: 'Fração de carbono vencida',

@@ -4,6 +4,10 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { NonEmptyString, PercentageString } from '@carrot-fndn/shared/types';
 
+export interface CarbonFractionCodeEvidence {
+  localWasteClassificationId: string;
+}
+
 export interface GeneratorCarbonCharacterization {
   analysisDate: NonEmptyString;
   carbonFraction: PercentageString;

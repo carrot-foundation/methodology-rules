@@ -139,6 +139,24 @@ describe('PreventedEmissionsProcessor', () => {
       ]);
     });
 
+    it.each([
+      'FAILED.OTHERS_IF_ORGANIC_NO_CARBON_FRACTION',
+      'REVIEW_REQUIRED.OTHERS_IF_ORGANIC_AWAITING_LAUDO',
+      'REVIEW_REQUIRED.OTHERS_IF_ORGANIC_EXPIRED_FRACTION',
+    ])('should declare the Ibama code as the %s evidence', (key) => {
+      const declaration = PREVENTED_EMISSIONS_FINDINGS.declarations.find(
+        ({ finding }) => finding.code === `prevented-emissions.${key}`,
+      );
+
+      expect(declaration?.meta.evidence).toStrictEqual([
+        {
+          field: 'localWasteClassificationId',
+          label: 'Código Ibama',
+          source: 'CROSS_VALIDATION',
+        },
+      ]);
+    });
+
     it('should not mark the missing exceeding emission coefficient as dependent on the Recycler accreditation', async () => {
       const { ruleOutput } = await processTestCase(
         findTestCase(
@@ -471,6 +489,9 @@ describe('PreventedEmissionsProcessor', () => {
             defaultOwner: 'RECYCLER',
           },
         ]);
+        expect(ruleOutput.resultContent?.['crossValidation']).toStrictEqual({
+          localWasteClassificationId: '20 01 99',
+        });
       });
 
       it('returns REVIEW_REQUIRED with the expired comment when the fraction is stale', async () => {
@@ -501,6 +522,9 @@ describe('PreventedEmissionsProcessor', () => {
             defaultOwner: 'RECYCLER',
           },
         ]);
+        expect(ruleOutput.resultContent?.['crossValidation']).toStrictEqual({
+          localWasteClassificationId: '20 01 99',
+        });
       });
     });
   });
