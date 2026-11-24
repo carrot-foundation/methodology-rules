@@ -29,6 +29,7 @@ import {
   collectResults,
   compareDateField,
   compareEntity,
+  compareIssueDate,
   compareStringField,
   compareWasteQuantity,
   compareWasteType,
@@ -96,19 +97,11 @@ export const validateMtrExtractedData = (
     },
   );
 
-  const issueDate = compareDateField(extractedData.issueDate, eventIssueDate, {
-    acceptedWindow: { max: 0, min: 0 },
-    notExtractedReason: REVIEW_REASONS.FIELD_NOT_EXTRACTED({
-      field: 'issue date',
-    }),
-    onMismatch: ({ event, extracted }) =>
-      REVIEW_REASONS.ISSUE_DATE_MISMATCH({
-        eventIssueDate: event,
-        extractedIssueDate: extracted,
-      }),
-    reviewWindow: { max: 0, min: 0 },
-    timezone: recyclerTimezone,
-  });
+  const issueDate = compareIssueDate(
+    extractedData.issueDate,
+    eventIssueDate,
+    recyclerTimezone,
+  );
 
   const vehiclePlate = compareStringField(
     extractedData.vehiclePlate,

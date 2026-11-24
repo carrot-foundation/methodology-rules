@@ -20,6 +20,7 @@ import type {
 } from '../document-manifest-data.result-content.types';
 import type { FieldValidationResult } from './cross-validation.helpers';
 
+import { REVIEW_REASONS } from '../document-manifest-data.constants';
 import {
   buildAddressString,
   formatScoreAsPercent,
@@ -204,6 +205,25 @@ export const compareDateField = (
 
   return { debug, validation: [{ reviewReason: reasonWithComparedFields }] };
 };
+
+export const compareIssueDate = (
+  field: ExtractedField<string> | undefined,
+  eventIssueDate: string | undefined,
+  timezone: string,
+): ComparisonOutput<FieldComparison> =>
+  compareDateField(field, eventIssueDate, {
+    acceptedWindow: { max: 0, min: 0 },
+    notExtractedReason: REVIEW_REASONS.FIELD_NOT_EXTRACTED({
+      field: 'issue date',
+    }),
+    onMismatch: ({ event, extracted }) =>
+      REVIEW_REASONS.ISSUE_DATE_MISMATCH({
+        eventIssueDate: event,
+        extractedIssueDate: extracted,
+      }),
+    reviewWindow: { max: 0, min: 0 },
+    timezone,
+  });
 
 const buildEntityNotExtractedReasons = (
   eventNames: readonly string[] | undefined,
