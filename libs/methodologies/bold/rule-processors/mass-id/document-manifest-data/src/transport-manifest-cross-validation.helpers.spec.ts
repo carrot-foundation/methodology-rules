@@ -639,74 +639,83 @@ describe('transport-manifest-cross-validation.helpers', () => {
       expect(result.failMessages).toHaveLength(0);
     });
 
-    it('should fail when transport date differs by more than 3 days', () => {
-      const extractionResult = createExtractionResult({
-        transportDate: {
-          confidence: 'high',
-          parsed: '01/01/2024' as never,
-          rawMatch: 'Data de Transporte: 01/01/2024',
-        },
-      });
+    it.each([
+      { eventDate: '2024-01-08', expected: 'none', signedDiff: 7 },
+      { eventDate: '2024-01-07', expected: 'review', signedDiff: 8 },
+      { eventDate: '2024-01-14', expected: 'none', signedDiff: 1 },
+      { eventDate: '2024-01-15', expected: 'none', signedDiff: 0 },
+      { eventDate: '2024-01-16', expected: 'review', signedDiff: -1 },
+      { eventDate: '2024-01-18', expected: 'review', signedDiff: -3 },
+      { eventDate: '2024-01-19', expected: 'fail', signedDiff: -4 },
+    ])(
+      'should return $expected when the MTR transport date is $signedDiff day(s) from Pick-up',
+      ({ eventDate, expected, signedDiff }) => {
+        const extractionResult = createExtractionResult({
+          transportDate: {
+            confidence: 'high',
+            parsed: '15/01/2024' as never,
+            rawMatch: 'Data de Transporte: 15/01/2024',
+          },
+        });
 
-      const eventData: MtrCrossValidationEventData = {
-        ...baseEventData,
-        pickUpEvent: {
-          address: STUB_BR_ADDRESS,
-          externalCreatedAt: '2024-01-10',
-        } as unknown as BoldDocumentEvent,
-      };
+        const eventData: MtrCrossValidationEventData = {
+          ...baseEventData,
+          pickUpEvent: {
+            address: STUB_BR_ADDRESS,
+            externalCreatedAt: eventDate,
+          } as unknown as BoldDocumentEvent,
+        };
 
-      const result = validateMtrExtractedData(extractionResult, eventData);
+        const result = validateMtrExtractedData(extractionResult, eventData);
 
-      expect(result.failMessages.length).toBeGreaterThan(0);
-      expect(result.failMessages[0]).toContain('transport date');
-    });
+        expect(
+          (result.crossValidation as MtrCrossValidation).transportDate.daysDiff,
+        ).toBe(Math.abs(signedDiff));
+        expect(
+          result.failMessages.some((message) =>
+            message.includes('transport date'),
+          ),
+        ).toBe(expected === 'fail');
+        expect(result.reviewRequired).toBe(expected === 'review');
+      },
+    );
 
-    it('should set reviewRequired when transport date differs by 1-3 days', () => {
-      const extractionResult = createExtractionResult({
-        transportDate: {
-          confidence: 'high',
-          parsed: '01/01/2024' as never,
-          rawMatch: 'Data de Transporte: 01/01/2024',
-        },
-      });
+    it.each([
+      { eventDate: '2024-01-05', expected: 'none', signedDiff: 10 },
+      { eventDate: '2024-01-04', expected: 'review', signedDiff: 11 },
+      { eventDate: '2024-01-16', expected: 'none', signedDiff: -1 },
+      { eventDate: '2024-01-17', expected: 'review', signedDiff: -2 },
+      { eventDate: '2024-03-15', expected: 'review', signedDiff: -60 },
+    ])(
+      'should return $expected when the MTR receiving date is $signedDiff day(s) from Drop-off',
+      ({ eventDate, expected, signedDiff }) => {
+        const extractionResult = createExtractionResult({
+          receivingDate: {
+            confidence: 'high',
+            parsed: '15/01/2024' as never,
+            rawMatch: 'Data de Recebimento: 15/01/2024',
+          },
+        });
 
-      const eventData: MtrCrossValidationEventData = {
-        ...baseEventData,
-        pickUpEvent: {
-          address: STUB_BR_ADDRESS,
-          externalCreatedAt: '2024-01-03',
-        } as unknown as BoldDocumentEvent,
-      };
+        const eventData: MtrCrossValidationEventData = {
+          ...baseEventData,
+          dropOffEvent: {
+            address: STUB_BR_ADDRESS,
+            externalCreatedAt: eventDate,
+          } as unknown as BoldDocumentEvent,
+        };
 
-      const result = validateMtrExtractedData(extractionResult, eventData);
+        const result = validateMtrExtractedData(extractionResult, eventData);
 
-      expect(result.reviewRequired).toBe(true);
-      expect(result.failMessages).toHaveLength(0);
-    });
-
-    it('should fail when receiving date differs by more than 3 days', () => {
-      const extractionResult = createExtractionResult({
-        receivingDate: {
-          confidence: 'high',
-          parsed: '01/01/2024' as never,
-          rawMatch: 'Data de Recebimento: 01/01/2024',
-        },
-      });
-
-      const eventData: MtrCrossValidationEventData = {
-        ...baseEventData,
-        dropOffEvent: {
-          address: STUB_BR_ADDRESS,
-          externalCreatedAt: '2024-01-10',
-        } as unknown as BoldDocumentEvent,
-      };
-
-      const result = validateMtrExtractedData(extractionResult, eventData);
-
-      expect(result.failMessages.length).toBeGreaterThan(0);
-      expect(result.failMessages[0]).toContain('receiving date');
-    });
+        expect(
+          (result.crossValidation as MtrCrossValidation).receivingDate.daysDiff,
+        ).toBe(Math.abs(signedDiff));
+        expect(result.failMessages).toHaveLength(0);
+        expect(result.reviewReasons?.map(({ code }) => code) ?? []).toEqual(
+          expected === 'review' ? ['RECEIVING_DATE_MISMATCH'] : [],
+        );
+      },
+    );
 
     it('should skip vehicle plate validation when pickUpEvent has no plate attribute', () => {
       const extractionResult = createExtractionResult({

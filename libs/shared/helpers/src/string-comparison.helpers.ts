@@ -691,7 +691,7 @@ export const normalizeDateToISO = (value: string): string | undefined => {
 };
 
 /**
- * Computes the absolute difference in days between two date strings.
+ * Computes the signed difference in days (dateA minus dateB) between two date strings.
  * Accepts any format supported by normalizeDateToISO.
  * Returns undefined if either date is unparseable.
  */
@@ -706,5 +706,5 @@ export const dateDifferenceInDays = (
     return undefined;
   }
 
-  return Math.abs(differenceInDays(parseISO(isoA), parseISO(isoB)));
+  return differenceInDays(parseISO(isoA), parseISO(isoB));
 };

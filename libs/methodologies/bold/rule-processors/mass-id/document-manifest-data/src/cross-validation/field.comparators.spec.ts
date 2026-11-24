@@ -1,5 +1,7 @@
 import type { ReviewReason } from '@carrot-fndn/shared/document-extractor';
 
+import type { FieldValidationResult } from './cross-validation.helpers';
+
 import {
   stubEntity,
   stubEntityWithAddress,
@@ -10,7 +12,7 @@ import {
   compareDateField,
   compareEntity,
   compareStringField,
-  DATE_TOLERANCE_DAYS,
+  type DayDifferenceWindow,
 } from './field.comparators';
 
 const mismatchReason = ({
@@ -28,6 +30,22 @@ const notExtractedReason: ReviewReason = {
   code: 'NOT_EXTRACTED',
   description: 'Field not extracted',
 };
+
+const exactWindow: DayDifferenceWindow = { max: 0, min: 0 };
+
+const dateWindows = {
+  acceptedWindow: { max: 2, min: -1 },
+  reviewWindow: { max: 5, min: -3 },
+};
+
+const highConfidenceDate = (parsed: string) => ({
+  confidence: 'high' as const,
+  parsed,
+  rawMatch: parsed,
+});
+
+const toOutcome = ({ failReason }: FieldValidationResult) =>
+  failReason === undefined ? 'review' : 'fail';
 
 const onDateMismatch = ({
   daysDiff,
@@ -218,9 +236,9 @@ describe('cross-validation field comparators', () => {
   describe('compareDateField', () => {
     it('should return match when dates are the same', () => {
       const result = compareDateField(
-        { confidence: 'high', parsed: '2024-01-15', rawMatch: '15/01/2024' },
+        highConfidenceDate('2024-01-15'),
         '2024-01-15T00:00:00Z',
-        { onMismatch: onDateMismatch },
+        { ...dateWindows, onMismatch: onDateMismatch },
       );
 
       expect(result.debug.isMatch).toBe(true);
@@ -228,62 +246,55 @@ describe('cross-validation field comparators', () => {
       expect(result.validation).toEqual([]);
     });
 
-    it('should return failReason when daysDiff exceeds tolerance', () => {
-      const result = compareDateField(
-        { confidence: 'high', parsed: '2024-01-01', rawMatch: '01/01/2024' },
-        '2024-01-10T00:00:00Z',
-        { onMismatch: onDateMismatch },
-      );
+    it.each([
+      { expected: 'none', extracted: '2024-01-17', signedDiff: 2 },
+      { expected: 'review', extracted: '2024-01-18', signedDiff: 3 },
+      { expected: 'review', extracted: '2024-01-20', signedDiff: 5 },
+      { expected: 'fail', extracted: '2024-01-21', signedDiff: 6 },
+      { expected: 'none', extracted: '2024-01-14', signedDiff: -1 },
+      { expected: 'review', extracted: '2024-01-13', signedDiff: -2 },
+      { expected: 'review', extracted: '2024-01-12', signedDiff: -3 },
+      { expected: 'fail', extracted: '2024-01-11', signedDiff: -4 },
+    ])(
+      'should return $expected when the extracted date is $signedDiff day(s) from the event date',
+      ({ expected, extracted, signedDiff }) => {
+        const result = compareDateField(
+          highConfidenceDate(extracted),
+          '2024-01-15T00:00:00Z',
+          { ...dateWindows, onMismatch: onDateMismatch },
+        );
 
-      expect(result.debug.isMatch).toBe(false);
-      expect(result.validation).toHaveLength(1);
-      expect(result.validation[0]?.failReason).toBeDefined();
-      expect(result.validation[0]?.failReason?.code).toBe('DATE_MISMATCH');
-      expect(
-        result.validation[0]?.failReason?.comparedFields?.[0]?.similarity,
-      ).toContain('days');
-    });
+        expect(result.debug.daysDiff).toBe(Math.abs(signedDiff));
+        expect(result.debug.isMatch).toBe(false);
+        expect(result.validation.map((item) => toOutcome(item))).toEqual(
+          expected === 'none' ? [] : [expected],
+        );
+      },
+    );
 
-    it('should return reviewReason when daysDiff is within tolerance', () => {
+    it('should return failReason for any mismatch when both windows are exact', () => {
       const result = compareDateField(
-        { confidence: 'high', parsed: '2024-01-01', rawMatch: '01/01/2024' },
+        highConfidenceDate('2024-01-01'),
         '2024-01-02T00:00:00Z',
-        { onMismatch: onDateMismatch },
-      );
-
-      expect(result.debug.isMatch).toBe(false);
-      expect(result.validation).toHaveLength(1);
-      expect(result.validation[0]?.reviewReason).toBeDefined();
-    });
-
-    it('should return failReason for any mismatch when tolerance is 0', () => {
-      const result = compareDateField(
-        { confidence: 'high', parsed: '2024-01-01', rawMatch: '01/01/2024' },
-        '2024-01-02T00:00:00Z',
-        { onMismatch: onDateMismatch, tolerance: 0 },
+        {
+          acceptedWindow: exactWindow,
+          onMismatch: onDateMismatch,
+          reviewWindow: exactWindow,
+        },
       );
 
       expect(result.validation).toHaveLength(1);
-      expect(result.validation[0]?.failReason).toBeDefined();
-    });
-
-    it('should use default tolerance of DATE_TOLERANCE_DAYS', () => {
-      const result = compareDateField(
-        { confidence: 'high', parsed: '2024-01-01', rawMatch: '01/01/2024' },
-        '2024-01-04T00:00:00Z',
-        { onMismatch: onDateMismatch },
-      );
-
-      expect(result.validation).toHaveLength(1);
-      expect(result.validation[0]?.reviewReason).toBeDefined();
-      expect(DATE_TOLERANCE_DAYS).toBe(3);
+      expect(result.validation[0]?.failReason).toMatchObject({
+        code: 'DATE_MISMATCH',
+        comparedFields: [{ field: 'date', similarity: '1 days' }],
+      });
     });
 
     it('should skip validation when confidence is low', () => {
       const result = compareDateField(
         { confidence: 'low', parsed: '2024-01-01', rawMatch: '01/01/2024' },
         '2024-02-01T00:00:00Z',
-        { onMismatch: onDateMismatch },
+        { ...dateWindows, onMismatch: onDateMismatch },
       );
 
       expect(result.debug.isMatch).toBe(false);
@@ -292,6 +303,7 @@ describe('cross-validation field comparators', () => {
 
     it('should return null isMatch when field is missing', () => {
       const result = compareDateField(undefined, '2024-01-01T00:00:00Z', {
+        ...dateWindows,
         notExtractedReason,
         onMismatch: onDateMismatch,
       });
@@ -303,9 +315,9 @@ describe('cross-validation field comparators', () => {
 
     it('should return empty validation when event date is missing', () => {
       const result = compareDateField(
-        { confidence: 'high', parsed: '2024-01-01', rawMatch: '01/01/2024' },
+        highConfidenceDate('2024-01-01'),
         undefined,
-        { onMismatch: onDateMismatch },
+        { ...dateWindows, onMismatch: onDateMismatch },
       );
 
       expect(result.debug.isMatch).toBeNull();

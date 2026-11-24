@@ -113,41 +113,50 @@ export const compareStringField = (
   };
 };
 
-export const DATE_TOLERANCE_DAYS = 3;
+export interface DayDifferenceWindow {
+  max: number;
+  min: number;
+}
+
+const isWithinWindow = (daysDiff: number, window: DayDifferenceWindow) =>
+  daysDiff >= window.min && daysDiff <= window.max;
 
 export const compareDateField = (
   field: ExtractedField<string> | undefined,
   eventDate: string | undefined,
   options: {
+    acceptedWindow: DayDifferenceWindow;
     notExtractedReason?: ReviewReason;
     onMismatch: (parameters: {
       daysDiff: number;
       event: string;
       extracted: string;
     }) => ReviewReason;
+    reviewWindow: DayDifferenceWindow;
     timezone?: string;
-    tolerance?: number;
   },
 ): ComparisonOutput<FieldComparison> => {
   const timezone = options.timezone ?? 'UTC';
-  const tolerance = options.tolerance ?? DATE_TOLERANCE_DAYS;
 
   const localEventDate =
     eventDate === undefined
       ? undefined
       : utcIsoToLocalDate(eventDate, timezone);
 
-  const daysDiff =
+  const signedDaysDiff =
     field?.parsed !== undefined && localEventDate !== undefined
       ? dateDifferenceInDays(field.parsed, localEventDate)
-      : null;
+      : undefined;
+
+  const daysDiff =
+    signedDaysDiff === undefined ? null : Math.abs(signedDaysDiff);
 
   const debug: FieldComparison = {
     confidence: field?.confidence ?? null,
-    daysDiff: daysDiff ?? null,
+    daysDiff,
     event: eventDate ?? null,
     extracted: field?.parsed ?? null,
-    isMatch: daysDiff == null ? null : daysDiff === 0,
+    isMatch: daysDiff === null ? null : daysDiff === 0,
   };
 
   if (!field) {
@@ -164,12 +173,16 @@ export const compareDateField = (
     return { debug, validation: [] };
   }
 
-  if (daysDiff == null || daysDiff === 0) {
+  if (
+    signedDaysDiff === undefined ||
+    signedDaysDiff === 0 ||
+    isWithinWindow(signedDaysDiff, options.acceptedWindow)
+  ) {
     return { debug, validation: [] };
   }
 
   const reason = options.onMismatch({
-    daysDiff,
+    daysDiff: Math.abs(signedDaysDiff),
     event: eventDate!,
     extracted: field.parsed,
   });
@@ -181,12 +194,12 @@ export const compareDateField = (
         event: eventDate!,
         extracted: field.parsed,
         field: 'date',
-        similarity: `${daysDiff} days`,
+        similarity: `${Math.abs(signedDaysDiff)} days`,
       },
     ],
   };
 
-  if (daysDiff > tolerance) {
+  if (!isWithinWindow(signedDaysDiff, options.reviewWindow)) {
     return { debug, validation: [{ failReason: reasonWithComparedFields }] };
   }
 

@@ -817,13 +817,13 @@ describe('string-comparison.helpers', () => {
       expect(dateDifferenceInDays('2024-12-25', '2024-12-25')).toBe(0);
     });
 
-    it('should return absolute difference', () => {
-      expect(dateDifferenceInDays('2024-12-25', '2024-12-28')).toBe(3);
+    it('should return the signed difference of the first date minus the second', () => {
+      expect(dateDifferenceInDays('2024-12-25', '2024-12-28')).toBe(-3);
       expect(dateDifferenceInDays('2024-12-28', '2024-12-25')).toBe(3);
     });
 
     it('should handle mixed formats', () => {
-      expect(dateDifferenceInDays('25/12/2024', '2024-12-28')).toBe(3);
+      expect(dateDifferenceInDays('28/12/2024', '2024-12-25')).toBe(3);
     });
 
     it('should handle ISO datetime vs Brazilian date', () => {

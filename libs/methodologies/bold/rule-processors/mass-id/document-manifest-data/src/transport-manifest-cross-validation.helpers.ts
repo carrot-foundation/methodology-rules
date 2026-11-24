@@ -97,6 +97,7 @@ export const validateMtrExtractedData = (
   );
 
   const issueDate = compareDateField(extractedData.issueDate, eventIssueDate, {
+    acceptedWindow: { max: 0, min: 0 },
     notExtractedReason: REVIEW_REASONS.FIELD_NOT_EXTRACTED({
       field: 'issue date',
     }),
@@ -105,8 +106,8 @@ export const validateMtrExtractedData = (
         eventIssueDate: event,
         extractedIssueDate: extracted,
       }),
+    reviewWindow: { max: 0, min: 0 },
     timezone: recyclerTimezone,
-    tolerance: 0,
   });
 
   const vehiclePlate = compareStringField(
@@ -238,6 +239,7 @@ export const validateMtrExtractedData = (
     extractedData.transportDate,
     eventData.pickUpEvent?.externalCreatedAt,
     {
+      acceptedWindow: { max: 7, min: 0 },
       notExtractedReason: REVIEW_REASONS.FIELD_NOT_EXTRACTED({
         context: 'Pick-up event',
         field: 'transport date',
@@ -248,6 +250,7 @@ export const validateMtrExtractedData = (
           eventDate: event,
           extractedDate: extracted,
         }),
+      reviewWindow: { max: Number.POSITIVE_INFINITY, min: -3 },
       timezone: pickUpTimezone,
     },
   );
@@ -256,6 +259,7 @@ export const validateMtrExtractedData = (
     extractedData.receivingDate,
     eventData.dropOffEvent?.externalCreatedAt,
     {
+      acceptedWindow: { max: 10, min: -1 },
       notExtractedReason: REVIEW_REASONS.FIELD_NOT_EXTRACTED({
         context: 'Drop-off event',
         field: 'receiving date',
@@ -266,6 +270,10 @@ export const validateMtrExtractedData = (
           eventDate: event,
           extractedDate: extracted,
         }),
+      reviewWindow: {
+        max: Number.POSITIVE_INFINITY,
+        min: Number.NEGATIVE_INFINITY,
+      },
       timezone: dropOffTimezone,
     },
   );

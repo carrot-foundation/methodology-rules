@@ -150,6 +150,7 @@ export const validateCdfExtractedData = (
   );
 
   const issueDate = compareDateField(extractedData.issueDate, eventIssueDate, {
+    acceptedWindow: { max: 0, min: 0 },
     notExtractedReason: REVIEW_REASONS.FIELD_NOT_EXTRACTED({
       field: 'issue date',
     }),
@@ -158,8 +159,8 @@ export const validateCdfExtractedData = (
         eventIssueDate: event,
         extractedIssueDate: extracted,
       }),
+    reviewWindow: { max: 0, min: 0 },
     timezone: recyclerTimezone,
-    tolerance: 0,
   });
 
   const recyclerReasons: EntityComparisonReasons = {
