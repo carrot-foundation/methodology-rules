@@ -68,6 +68,7 @@ import {
   PreventedEmissionsRuleSubjectSchema,
 } from './prevented-emissions.rule-subject';
 import {
+  type CarbonFractionCodeEvidence,
   type GeneratorCarbonCharacterization,
   type MissingBaselineEvidence,
 } from './prevented-emissions.types';
@@ -297,8 +298,18 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
     code: NonEmptyString,
     reviewRequiredResult: RuleFindingsResult,
   ): EvaluateResultOutput {
+    const resultContent = {
+      crossValidation: {
+        localWasteClassificationId: code,
+      } satisfies CarbonFractionCodeEvidence,
+    };
+
     if (getEnableReviewRequired()) {
-      return { ...reviewRequiredResult, resultStatus: 'REVIEW_REQUIRED' };
+      return {
+        ...reviewRequiredResult,
+        resultContent,
+        resultStatus: 'REVIEW_REQUIRED',
+      };
     }
 
     return {
@@ -306,6 +317,7 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
         'FAILED.OTHERS_IF_ORGANIC_NO_CARBON_FRACTION',
         code,
       ),
+      resultContent,
       resultStatus: 'FAILED',
     };
   }

@@ -516,6 +516,9 @@ export const preventedEmissionsTestCases: PreventedEmissionsTestCase[] = [
     resultComment:
       RESULT_COMMENTS.failed.OTHERS_IF_ORGANIC_NO_CARBON_FRACTION('20 01 99'),
     resultContent: {
+      crossValidation: {
+        localWasteClassificationId: '20 01 99',
+      },
       ruleSubject: {
         baseline,
         exceedingEmissionCoefficient,
@@ -557,6 +560,9 @@ export const preventedEmissionsTestCases: PreventedEmissionsTestCase[] = [
     resultComment:
       RESULT_COMMENTS.failed.OTHERS_IF_ORGANIC_NO_CARBON_FRACTION('20 01 99'),
     resultContent: {
+      crossValidation: {
+        localWasteClassificationId: '20 01 99',
+      },
       ruleSubject: {
         baseline,
         exceedingEmissionCoefficient,
