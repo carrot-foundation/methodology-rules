@@ -283,8 +283,8 @@ describe('recycling-manifest-cross-validation.helpers', () => {
         const extractionResult = createExtractionResult({
           issueDate: {
             confidence: 'high',
-            parsed: '2024-02-15',
-            rawMatch: '15/02/2024',
+            parsed: '2024-01-02',
+            rawMatch: '02/01/2024',
           },
         });
 

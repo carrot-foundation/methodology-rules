@@ -175,7 +175,6 @@ export const compareDateField = (
 
   if (
     signedDaysDiff === undefined ||
-    signedDaysDiff === 0 ||
     isWithinWindow(signedDaysDiff, options.acceptedWindow)
   ) {
     return { debug, validation: [] };

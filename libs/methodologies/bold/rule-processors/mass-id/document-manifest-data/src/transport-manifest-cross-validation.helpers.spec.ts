@@ -642,6 +642,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
     it.each([
       { eventDate: '2024-01-08', expected: 'none', signedDiff: 7 },
       { eventDate: '2024-01-07', expected: 'review', signedDiff: 8 },
+      { eventDate: '2023-11-16', expected: 'review', signedDiff: 60 },
       { eventDate: '2024-01-14', expected: 'none', signedDiff: 1 },
       { eventDate: '2024-01-15', expected: 'none', signedDiff: 0 },
       { eventDate: '2024-01-16', expected: 'review', signedDiff: -1 },
@@ -683,6 +684,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
     it.each([
       { eventDate: '2024-01-05', expected: 'none', signedDiff: 10 },
       { eventDate: '2024-01-04', expected: 'review', signedDiff: 11 },
+      { eventDate: '2023-11-16', expected: 'review', signedDiff: 60 },
       { eventDate: '2024-01-16', expected: 'none', signedDiff: -1 },
       { eventDate: '2024-01-17', expected: 'review', signedDiff: -2 },
       { eventDate: '2024-03-15', expected: 'review', signedDiff: -60 },
@@ -956,8 +958,8 @@ describe('transport-manifest-cross-validation.helpers', () => {
       const extractionResult = createExtractionResult({
         issueDate: {
           confidence: 'high' as const,
-          parsed: '2024-06-15' as never,
-          rawMatch: '15/06/2024',
+          parsed: '2024-01-02' as never,
+          rawMatch: '02/01/2024',
         },
       });
 
@@ -974,7 +976,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
 
       expect(result.failMessages).toHaveLength(1);
       expect(result.failMessages[0]).toContain('2024-01-01T12:00:00.000Z');
-      expect(result.failMessages[0]).toContain('2024-06-15');
+      expect(result.failMessages[0]).toContain('2024-01-02');
     });
 
     it('should add review reason when event has issueDateAttribute but issue date was not extracted', () => {
