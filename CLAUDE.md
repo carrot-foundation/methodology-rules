@@ -199,8 +199,11 @@ pnpm build-lambda <project-name>       # nx build-lambda <project-name>
 # Test all affected projects
 pnpm test:affected                     # nx affected --target test
 
-# Lint all affected projects
-pnpm lint:affected                     # nx affected --target lint --fix
+# Lint all affected projects (read-only)
+pnpm lint:affected                     # nx affected --target lint
+
+# Lint all affected projects and rewrite files with auto-fixes (mutates the tree)
+pnpm lint:affected:fix                 # nx affected --target lint --fix
 
 # TypeScript check all affected
 pnpm ts:affected                       # nx affected --target ts
@@ -215,8 +218,11 @@ pnpm build-lambda:affected             # nx affected --target build-lambda
 # Test all projects
 pnpm test:all                          # nx run-many --target test
 
-# Lint all projects
-pnpm lint:all                          # nx run-many --target lint --fix
+# Lint all projects (read-only)
+pnpm lint:all                          # nx run-many --target lint
+
+# Lint all projects and rewrite files with auto-fixes (mutates the tree)
+pnpm lint:all:fix                      # nx run-many --target lint --fix
 
 # TypeScript check all
 pnpm ts:all                            # nx run-many --target ts
