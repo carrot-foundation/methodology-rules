@@ -48,6 +48,23 @@ const mtrDateWithinToleranceObservation = ({
   title: `${title} difere do MTR dentro da janela aceita`,
 });
 
+const MTR_DATE_OBSERVATIONS = {
+  'CROSS_VALIDATION.RECEIVING_DATE_WITHIN_TOLERANCE':
+    mtrDateWithinToleranceObservation({
+      acceptedWindow: 'de 1 dia antes a 10 dias depois',
+      eventName: 'Drop-off',
+      field: 'receivingDate',
+      title: 'Data de recebimento',
+    }),
+  'CROSS_VALIDATION.TRANSPORT_DATE_WITHIN_TOLERANCE':
+    mtrDateWithinToleranceObservation({
+      acceptedWindow: 'até 7 dias depois',
+      eventName: 'Pick-up',
+      field: 'transportDate',
+      title: 'Data de transporte',
+    }),
+} as const;
+
 export const DOCUMENT_MANIFEST_DATA_FINDINGS = defineRuleFindings(
   ruleDefinition.slug,
   {
@@ -57,6 +74,7 @@ export const DOCUMENT_MANIFEST_DATA_FINDINGS = defineRuleFindings(
     RESULT: RESULT_COMMENTS,
   },
   {
+    ...MTR_DATE_OBSERVATIONS,
     'CROSS_VALIDATION.DOCUMENT_EXTRACTION_CONFIDENCE_LOW': {
       category: 'DOCUMENT_READING',
       defaultOwner: 'CARROT',
@@ -181,13 +199,6 @@ export const DOCUMENT_MANIFEST_DATA_FINDINGS = defineRuleFindings(
         'Confira a data do evento "Drop-off" e o MTR anexado, confirme qual está correto e corrija na origem.',
       title: 'Data de recebimento diverge do MTR',
     },
-    'CROSS_VALIDATION.RECEIVING_DATE_WITHIN_TOLERANCE':
-      mtrDateWithinToleranceObservation({
-        acceptedWindow: 'de 1 dia antes a 10 dias depois',
-        eventName: 'Drop-off',
-        field: 'receivingDate',
-        title: 'Data de recebimento',
-      }),
     'CROSS_VALIDATION.RECYCLER_TAX_ID_MISMATCH': {
       category: 'DOCUMENT_DIVERGENCE',
       defaultOwner: 'TO_CONFIRM',
@@ -232,13 +243,6 @@ export const DOCUMENT_MANIFEST_DATA_FINDINGS = defineRuleFindings(
         'Confira a data do evento "Pick-up" e o MTR anexado, confirme qual está correto e corrija na origem.',
       title: 'Data de transporte diverge do MTR',
     },
-    'CROSS_VALIDATION.TRANSPORT_DATE_WITHIN_TOLERANCE':
-      mtrDateWithinToleranceObservation({
-        acceptedWindow: 'até 7 dias depois',
-        eventName: 'Pick-up',
-        field: 'transportDate',
-        title: 'Data de transporte',
-      }),
     'CROSS_VALIDATION.VEHICLE_PLATE_MISMATCH': {
       category: 'DOCUMENT_DIVERGENCE',
       defaultOwner: 'INTEGRATOR',
