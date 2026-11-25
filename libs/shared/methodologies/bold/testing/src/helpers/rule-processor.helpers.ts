@@ -24,6 +24,7 @@ interface CreateBoldStubsParameters {
 
 interface ExpectedRuleFindings {
   codes: ReadonlySet<string>;
+  declarations: readonly FindingDeclaration[];
 }
 
 interface ProcessRuleTestParameters {
@@ -104,17 +105,21 @@ export async function createRuleTestFixture({
 
 export function expectRuleFindings(
   ruleOutput: RuleOutput,
-  { codes }: ExpectedRuleFindings,
+  { codes, declarations }: ExpectedRuleFindings,
 ): RuleOutput {
   const { resultContent = {}, ...ruleOutputWithoutContent } = ruleOutput;
+  const isPassed = ruleOutput.resultStatus === 'PASSED';
 
-  if (ruleOutput.resultStatus === 'PASSED') {
-    expect(resultContent).not.toHaveProperty('findings');
-
+  if (isPassed && !Object.hasOwn(resultContent, 'findings')) {
     return ruleOutput;
   }
 
-  const knownCodes = [...codes, ...SHARED_FINDINGS.codes];
+  // A PASSED result may carry only observations
+  const knownCodes = isPassed
+    ? declarations
+        .filter(({ meta }) => meta.category === 'OBSERVATION')
+        .map(({ finding }) => finding.code)
+    : [...codes, ...SHARED_FINDINGS.codes];
   const findingsSchema = z
     .array(RuleFindingSchema.extend({ code: z.enum(knownCodes) }))
     .nonempty();

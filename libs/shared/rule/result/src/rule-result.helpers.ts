@@ -73,10 +73,9 @@ export const mapToRuleOutput = (
     resultFindings?: RuleFinding[] | undefined;
   } = {},
 ): RuleOutput => {
-  const isNonPassing = resultStatus !== 'PASSED';
   const hasFindings = isNonEmptyArray(resultFindings);
 
-  if (isNonPassing && !hasFindings) {
+  if (resultStatus !== 'PASSED' && !hasFindings) {
     logger.error(
       {
         requestId: ruleInput.requestId,
@@ -92,10 +91,9 @@ export const mapToRuleOutput = (
     responseToken: ruleInput.responseToken,
     responseUrl: ruleInput.responseUrl,
     resultComment,
-    resultContent:
-      isNonPassing && hasFindings
-        ? { ...resultContent, findings: resultFindings }
-        : resultContent,
+    resultContent: hasFindings
+      ? { ...resultContent, findings: resultFindings }
+      : resultContent,
     resultStatus,
   });
 };

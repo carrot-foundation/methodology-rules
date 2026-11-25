@@ -15,6 +15,7 @@ export type FindingCategory =
   | 'METHODOLOGY_REQUIREMENT'
   | 'MISSING_DATA'
   | 'MISSING_EVENT'
+  | 'OBSERVATION'
   | 'PRIVACY'
   | 'PROCESSING_ERROR';
 

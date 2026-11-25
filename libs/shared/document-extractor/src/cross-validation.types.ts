@@ -48,6 +48,7 @@ export interface CrossValidationResult<
   extractionMetadata: Record<string, ExtractionMetadata>;
   failMessages: string[];
   failReasons: ReviewReason[];
+  observations: ReviewReason[];
   passMessages: string[];
   reviewReasons: ReviewReason[];
   reviewRequired: boolean;
@@ -60,6 +61,7 @@ export interface CrossValidationValidateResult<
   extractionMetadata?: Record<string, unknown>;
   failMessages: string[];
   failReasons?: ReviewReason[];
+  observations?: ReviewReason[];
   passMessage?: string;
   reviewReasons?: ReviewReason[];
   reviewRequired?: boolean;
