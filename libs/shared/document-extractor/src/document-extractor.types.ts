@@ -4,6 +4,7 @@ import type { NonEmptyString } from '@carrot-fndn/shared/types';
 import type { ReviewReason } from './cross-validation.types';
 
 export interface BaseExtractedData {
+  blankFields?: string[];
   documentType: BoldDocumentType;
   extractionConfidence: ExtractionConfidence;
   lowConfidenceFields: string[];
@@ -30,6 +31,7 @@ export interface DocumentParser<T extends BaseExtractedData> {
 }
 
 export interface ExtractedField<T> {
+  blank?: true;
   confidence: ExtractionConfidence;
   parsed: T;
   rawMatch?: string;

@@ -7,12 +7,14 @@ import type {
 } from './document-extractor.types';
 
 import {
+  collectBlankFields,
   collectLowConfidenceFields,
+  fieldReviewReasons,
   isExtractedEntityGroup,
   isExtractedField,
-  lowConfidenceReviewReason,
 } from './confidence.helpers';
 import {
+  BLANK_FIELD_REASON_CODE_PREFIX,
   DOCUMENT_EXTRACTION_COMMENTS,
   type DocumentExtractionCommentKey,
   LOW_CONFIDENCE_REASON_CODE_PREFIX,
@@ -126,9 +128,15 @@ export const mergeTextLayerFields = <T extends BaseExtractedData>(
     return { outcome: 'unverified' };
   }
 
+  const rest = Object.fromEntries(
+    Object.entries(merged).filter(([key]) => key !== 'blankFields'),
+  );
+  const blankFields = collectBlankFields(merged, Object.keys(merged));
+
   return {
     data: {
-      ...merged,
+      ...rest,
+      ...(blankFields.length > 0 && { blankFields }),
       lowConfidenceFields: collectLowConfidenceFields(
         merged,
         Object.keys(merged),
@@ -164,11 +172,11 @@ export const applyTextLayerMerge = <T extends BaseExtractedData>(
 
   const reviewReasons = [
     ...output.reviewReasons.filter(
-      ({ code }) => !code.startsWith(LOW_CONFIDENCE_REASON_CODE_PREFIX),
+      ({ code }) =>
+        !code.startsWith(LOW_CONFIDENCE_REASON_CODE_PREFIX) &&
+        !code.startsWith(BLANK_FIELD_REASON_CODE_PREFIX),
     ),
-    ...merge.data.lowConfidenceFields.map((field) =>
-      lowConfidenceReviewReason(field),
-    ),
+    ...fieldReviewReasons(merge.data),
   ];
 
   return {

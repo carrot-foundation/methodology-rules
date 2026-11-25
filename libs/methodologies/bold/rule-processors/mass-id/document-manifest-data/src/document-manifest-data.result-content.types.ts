@@ -9,6 +9,7 @@ import type {
 export type AttachmentCrossValidation = CdfCrossValidation | MtrCrossValidation;
 
 export interface CdfCrossValidation {
+  blankFields?: string[];
   documentNumber: FieldComparison;
   generator: EntityComparison | null;
   issueDate: FieldComparison;
@@ -50,6 +51,7 @@ export interface FieldComparison extends FieldComparisonBase {
 }
 
 export interface MtrCrossValidation {
+  blankFields?: string[];
   documentNumber: FieldComparison;
   generator: EntityComparison | null;
   hauler: EntityComparison | null;

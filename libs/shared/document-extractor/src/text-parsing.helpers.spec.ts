@@ -9,9 +9,29 @@ import {
   extractSection,
   extractStringField,
   isBrazilianStateCode,
+  isLabelValueBlank,
   parseBrazilianNumber,
   stripAccents,
 } from './text-parsing.helpers';
+
+const line = (
+  text: string,
+  overrides: { confidence?: number; left?: number; top?: number } = {},
+) => ({
+  blockType: 'LINE',
+  boundingBox: {
+    height: 0.01,
+    left: overrides.left ?? 0.5,
+    top: overrides.top ?? 0.1,
+    width: 0.2,
+  },
+  confidence: overrides.confidence ?? 99,
+  id: `${text}-${String(overrides.top ?? 0.1)}`,
+  text,
+});
+
+const labelLine = line('Data:');
+const captionBelow = line('assinatura', { left: 0.52, top: 0.15 });
 
 describe('text-parsing.helpers', () => {
   describe('stripAccents', () => {
@@ -236,6 +256,140 @@ describe('text-parsing.helpers', () => {
       );
 
       expect(result).toBeUndefined();
+    });
+
+    it('should return a blank field when the label has nothing written next to or below it', () => {
+      const result = extractFieldWithLabelFallback(
+        'Data:\nassinatura',
+        valuePattern,
+        labelPattern,
+        [labelLine, captionBelow],
+      );
+
+      expect(result).toEqual({ blank: true, confidence: 'low', parsed: '' });
+    });
+
+    it('should keep a low confidence field when a value sits below the label', () => {
+      const result = extractFieldWithLabelFallback(
+        'Data:\n15/O3/2024\nassinatura',
+        valuePattern,
+        labelPattern,
+        [
+          labelLine,
+          line('15/O3/2024', { confidence: 55, top: 0.13 }),
+          captionBelow,
+        ],
+      );
+
+      expect(result).toEqual({ confidence: 'low', parsed: '' });
+    });
+  });
+
+  describe('isLabelValueBlank', () => {
+    const labelPattern = /Data\s*:/i;
+
+    it('should be blank when nothing follows the label on its row or below it in its column', () => {
+      expect(isLabelValueBlank([labelLine, captionBelow], labelPattern)).toBe(
+        true,
+      );
+    });
+
+    it('should not be blank when no printed line below bounds the label column', () => {
+      expect(isLabelValueBlank([labelLine], labelPattern)).toBe(false);
+    });
+
+    it('should only look below the label on its own page', () => {
+      const page = { blockType: 'PAGE', id: 'page' };
+      const word = { ...captionBelow, blockType: 'WORD', id: 'word' };
+
+      expect(
+        isLabelValueBlank(
+          [
+            page,
+            labelLine,
+            line('1S/O3/2024', { confidence: 40, top: 0.14 }),
+            word,
+            page,
+            line('Observacoes', { top: 0.12 }),
+          ],
+          labelPattern,
+        ),
+      ).toBe(false);
+    });
+
+    it('should not be blank when the label is read with low confidence', () => {
+      expect(
+        isLabelValueBlank(
+          [{ ...labelLine, confidence: 60 }, captionBelow],
+          labelPattern,
+        ),
+      ).toBe(false);
+    });
+
+    it('should not be blank when the label line carries more text', () => {
+      expect(
+        isLabelValueBlank(
+          [{ ...labelLine, text: 'Data: 1S/O3' }, captionBelow],
+          labelPattern,
+        ),
+      ).toBe(false);
+    });
+
+    it('should not be blank when a line follows the label on its row', () => {
+      expect(
+        isLabelValueBlank(
+          [labelLine, line('15/03/2024', { left: 0.75, top: 0.1 })],
+          labelPattern,
+        ),
+      ).toBe(false);
+    });
+
+    it('should not be blank when the first line below has digits', () => {
+      expect(
+        isLabelValueBlank(
+          [labelLine, line('15/03/2024', { top: 0.13 }), captionBelow],
+          labelPattern,
+        ),
+      ).toBe(false);
+    });
+
+    it('should not be blank when the first line below is read with low confidence', () => {
+      expect(
+        isLabelValueBlank(
+          [labelLine, line('Joao', { confidence: 40, top: 0.13 })],
+          labelPattern,
+        ),
+      ).toBe(false);
+    });
+
+    it('should ignore lines in other columns', () => {
+      expect(
+        isLabelValueBlank(
+          [
+            labelLine,
+            line('Telefone: 1234', { left: 0.1, top: 0.13 }),
+            captionBelow,
+          ],
+          labelPattern,
+        ),
+      ).toBe(true);
+    });
+
+    it('should not be blank when the label carries no confidence', () => {
+      const withoutConfidence = {
+        blockType: 'LINE',
+        boundingBox: labelLine.boundingBox,
+        id: 'label',
+        text: 'Data:',
+      };
+
+      expect(
+        isLabelValueBlank([withoutConfidence, captionBelow], labelPattern),
+      ).toBe(false);
+    });
+
+    it('should not be blank when the label is not among the lines', () => {
+      expect(isLabelValueBlank([captionBelow], labelPattern)).toBe(false);
     });
   });
 

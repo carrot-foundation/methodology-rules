@@ -1,3 +1,4 @@
+import type { TextExtractionResult } from '@carrot-fndn/shared/text-extractor';
 import type { NonEmptyString } from '@carrot-fndn/shared/types';
 
 import type { ExtractedField } from './document-extractor.types';
@@ -9,8 +10,10 @@ import type {
 } from './extraction-result.types';
 
 import {
+  createBlankField,
   createHighConfidenceField,
   createLowConfidenceField,
+  MATCH_THRESHOLDS,
 } from './confidence.helpers';
 
 export const stripAccents = (text: string): string =>
@@ -89,10 +92,92 @@ export const extractSection = (
   return lines.slice(sectionStartIndex, sectionEndIndex).join('\n');
 };
 
+type BoxedLine = Required<Pick<TextBlock, 'boundingBox' | 'text'>> & TextBlock;
+type TextBlock = TextExtractionResult['blocks'][number];
+
+const isBoxedLine = (block: TextBlock): block is BoxedLine =>
+  block.blockType === 'LINE' &&
+  block.text !== undefined &&
+  block.boundingBox !== undefined;
+
+// Coordinates restart per page; both text sources open each page with a PAGE block
+const linesByPage = (blocks: TextExtractionResult['blocks']): BoxedLine[][] => {
+  let page: BoxedLine[] = [];
+  const pages = [page];
+
+  for (const block of blocks) {
+    if (block.blockType === 'PAGE') {
+      page = [];
+      pages.push(page);
+    } else if (isBoxedLine(block)) {
+      page.push(block);
+    }
+  }
+
+  return pages;
+};
+
+const isReliable = (block: TextBlock): boolean =>
+  (block.confidence ?? 0) >= MATCH_THRESHOLDS.textractConfidence;
+
+// A hand-filled value sits right of the label or below it; the next printed line below has no digits.
+export const isLabelValueBlank = (
+  blocks: TextExtractionResult['blocks'],
+  labelPattern: RegExp,
+): boolean => {
+  const lines =
+    linesByPage(blocks).find((pageLines) =>
+      pageLines.some((line) => labelPattern.test(line.text)),
+    ) ?? [];
+  const label = lines.find((line) => labelPattern.test(line.text));
+
+  if (!label || !isReliable(label)) {
+    return false;
+  }
+
+  if (label.text.replace(labelPattern, '').replaceAll(/[\s:]/g, '') !== '') {
+    return false;
+  }
+
+  const { height, left, top, width } = label.boundingBox;
+  const bottom = top + height;
+  const right = left + width;
+
+  const hasValueOnRow = lines.some((line) => {
+    const box = line.boundingBox;
+    const centerY = box.top + box.height / 2;
+
+    return (
+      line !== label && box.left >= right && centerY >= top && centerY <= bottom
+    );
+  });
+
+  if (hasValueOnRow) {
+    return false;
+  }
+
+  const firstBelow = lines
+    .filter(
+      (line) =>
+        line.boundingBox.top >= bottom &&
+        line.boundingBox.left < right &&
+        line.boundingBox.left + line.boundingBox.width > left,
+    )
+    .toSorted((first, second) => first.boundingBox.top - second.boundingBox.top)
+    .at(0);
+
+  return (
+    firstBelow !== undefined &&
+    isReliable(firstBelow) &&
+    !/\d/.test(firstBelow.text)
+  );
+};
+
 export const extractFieldWithLabelFallback = (
   text: string,
   valuePattern: RegExp,
   labelPattern: RegExp,
+  blocks?: TextExtractionResult['blocks'],
 ): ExtractedField<NonEmptyString> | undefined => {
   const extracted = extractStringField(text, valuePattern);
 
@@ -100,11 +185,13 @@ export const extractFieldWithLabelFallback = (
     return createHighConfidenceField(extracted.value, extracted.rawMatch);
   }
 
-  if (labelPattern.test(text)) {
-    return createLowConfidenceField('' as NonEmptyString);
+  if (!labelPattern.test(text)) {
+    return undefined;
   }
 
-  return undefined;
+  return blocks && isLabelValueBlank(blocks, labelPattern)
+    ? createBlankField('' as NonEmptyString)
+    : createLowConfidenceField('' as NonEmptyString);
 };
 
 export const createExtractedEntity = (

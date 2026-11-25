@@ -22,7 +22,10 @@ vi.mock('@carrot-fndn/shared/document-extractor', async (importOriginal) => ({
 }));
 
 // eslint-disable-next-line import/first -- Must import after mock is set up
-import { NoMatchingLayoutError } from '@carrot-fndn/shared/document-extractor';
+import {
+  blankFieldReviewReason,
+  NoMatchingLayoutError,
+} from '@carrot-fndn/shared/document-extractor';
 // eslint-disable-next-line import/first -- Must import after mock is set up
 import {
   pdfTextLayerExtractor,
@@ -50,6 +53,21 @@ const noRelatedEvents: {
   recyclerEvent: undefined,
   wasteGeneratorEvent: undefined,
   weighingEvents: [],
+};
+
+const mtrManifestEvent: DocumentManifestEventSubject = {
+  attachment: { attachmentId: 'att-1' } as never,
+  documentNumber: '12345',
+  documentType: 'MTR',
+  eventAddressId: 'addr-1',
+  eventValue: 100,
+  exemptionJustification: undefined,
+  hasWrongLabelAttachment: false,
+  issueDateAttribute: {
+    name: 'Issue Date',
+    value: '2024-01-01',
+  } as never,
+  recyclerCountryCode: 'BR',
 };
 
 describe('crossValidateWithTextract', () => {
@@ -337,26 +355,81 @@ describe('crossValidateWithTextract', () => {
     expect(result.failMessages[0]).toContain('Unknown error');
   });
 
+  describe('when MTR fields are blank on the document', () => {
+    const blankDate = { blank: true, confidence: 'low', parsed: '' };
+
+    const runWithBlankFields = async (blankFields: string[]) => {
+      mockExtract.mockResolvedValue({
+        data: {
+          blankFields,
+          documentNumber: { confidence: 'high', parsed: '12345' },
+          extractionConfidence: 'high',
+          issueDate: { confidence: 'high', parsed: '01/01/2024' },
+          lowConfidenceFields: [],
+          receivingDate: { confidence: 'high', parsed: '01/01/2024' },
+          ...Object.fromEntries(blankFields.map((field) => [field, blankDate])),
+        },
+        reviewReasons: blankFields.map((field) =>
+          blankFieldReviewReason(field),
+        ),
+        reviewRequired: true,
+      });
+
+      return crossValidateWithTextract({
+        attachmentInfos: [
+          { attachmentId: 'att-1', s3Bucket: 'bucket', s3Key: 'key' },
+        ],
+        documentManifestEvents: [mtrManifestEvent],
+        ...noRelatedEvents,
+        dropOffEvent: {
+          address: STUB_BR_ADDRESS,
+          externalCreatedAt: '2024-01-01T12:00:00.000Z',
+        } as unknown as BoldDocumentEvent,
+        pickUpEvent: {
+          address: STUB_BR_ADDRESS,
+          externalCreatedAt: '2024-01-01T12:00:00.000Z',
+          metadata: { attributes: [] },
+        } as unknown as BoldDocumentEvent,
+      });
+    };
+
+    it('should accept a blank transport date without a review reason', async () => {
+      const result = await runWithBlankFields(['transportDate']);
+
+      expect(result.reviewReasons).toEqual([]);
+      expect(result.reviewRequired).toBe(false);
+      expect(result.crossValidation).toMatchObject({
+        blankFields: ['transportDate'],
+        transportDate: { extracted: '', isMatch: null },
+      });
+    });
+
+    it('should report any other blank field as a blank field finding', async () => {
+      const result = await runWithBlankFields([
+        'transportDate',
+        'receivingDate',
+      ]);
+
+      expect(result.reviewRequired).toBe(true);
+      expect(result.reviewReasons).toEqual([
+        blankFieldReviewReason('receivingDate'),
+      ]);
+      expect(
+        result.reviewReasons.map((reason) => toCrossValidationFinding(reason)),
+      ).toEqual([
+        {
+          code: 'document-manifest-data.DOCUMENT_EXTRACTION.BLANK_FIELD',
+          defaultOwner: 'RECYCLER',
+        },
+      ]);
+    });
+  });
+
   it('should enrich MTR events with related events for cross-validation', async () => {
     const attachmentInfos: AttachmentInfo[] = [
       { attachmentId: 'att-1', s3Bucket: 'bucket', s3Key: 'key' },
     ];
-    const documentManifestEvents: DocumentManifestEventSubject[] = [
-      {
-        attachment: { attachmentId: 'att-1' } as never,
-        documentNumber: '12345',
-        documentType: 'MTR',
-        eventAddressId: 'addr-1',
-        eventValue: 100,
-        exemptionJustification: undefined,
-        hasWrongLabelAttachment: false,
-        issueDateAttribute: {
-          name: 'Issue Date',
-          value: '2024-01-01',
-        } as never,
-        recyclerCountryCode: 'BR',
-      },
-    ];
+    const documentManifestEvents = [mtrManifestEvent];
 
     const pickUpEvent = {
       address: STUB_BR_ADDRESS,
@@ -403,20 +476,7 @@ describe('crossValidateWithTextract', () => {
       { attachmentId: 'att-1', s3Bucket: 'bucket', s3Key: 'key' },
     ];
     const documentManifestEvents: DocumentManifestEventSubject[] = [
-      {
-        attachment: { attachmentId: 'att-1' } as never,
-        documentNumber: '12345',
-        documentType: 'CDF',
-        eventAddressId: 'addr-1',
-        eventValue: 100,
-        exemptionJustification: undefined,
-        hasWrongLabelAttachment: false,
-        issueDateAttribute: {
-          name: 'Issue Date',
-          value: '2024-01-01',
-        } as never,
-        recyclerCountryCode: 'BR',
-      },
+      { ...mtrManifestEvent, documentType: 'CDF' },
     ];
 
     const pickUpEvent = {

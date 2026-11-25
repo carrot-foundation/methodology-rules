@@ -1,6 +1,7 @@
 import type { RuleFinding } from '@carrot-fndn/shared/rule/types';
 
 import {
+  BLANK_FIELD_REASON_CODE_PREFIX,
   DOCUMENT_EXTRACTION_COMMENTS,
   LOW_CONFIDENCE_REASON_CODE_PREFIX,
   type ReviewReason,
@@ -287,6 +288,15 @@ export const DOCUMENT_MANIFEST_DATA_FINDINGS = defineRuleFindings(
         'Confira a classificação do resíduo enviada e o MTR anexado, confirme qual está correto e corrija na origem.',
       title: 'Resíduo do MTR diverge da classificação',
     },
+    'DOCUMENT_EXTRACTION.BLANK_FIELD': {
+      category: 'MISSING_DATA',
+      defaultOwner: 'RECYCLER',
+      description: 'Um campo do documento anexado está em branco.',
+      evidence: [crossValidationEvidence('blankFields')],
+      guidance:
+        'Oriente o reciclador a anexar o documento com o campo preenchido.',
+      title: 'Campo em branco no documento',
+    },
     'DOCUMENT_EXTRACTION.EXTRACTION_FAILED': {
       category: 'DOCUMENT_READING',
       defaultOwner: 'CARROT',
@@ -466,6 +476,14 @@ const isKeyOf = <T extends object>(
   key: string,
 ): key is Extract<keyof T, string> => Object.hasOwn(object, key);
 
+const FIELD_REASON_FINDINGS = [
+  [BLANK_FIELD_REASON_CODE_PREFIX, 'DOCUMENT_EXTRACTION.BLANK_FIELD'],
+  [
+    LOW_CONFIDENCE_REASON_CODE_PREFIX,
+    'DOCUMENT_EXTRACTION.LOW_CONFIDENCE_FIELD',
+  ],
+] as const;
+
 export const toCrossValidationFinding = ({
   code,
 }: ReviewReason): RuleFinding => {
@@ -473,10 +491,12 @@ export const toCrossValidationFinding = ({
     return DOCUMENT_MANIFEST_DATA_FINDINGS.finding(`CROSS_VALIDATION.${code}`);
   }
 
-  if (code.startsWith(LOW_CONFIDENCE_REASON_CODE_PREFIX)) {
-    return DOCUMENT_MANIFEST_DATA_FINDINGS.finding(
-      'DOCUMENT_EXTRACTION.LOW_CONFIDENCE_FIELD',
-    );
+  const fieldFinding = FIELD_REASON_FINDINGS.find(([prefix]) =>
+    code.startsWith(prefix),
+  );
+
+  if (fieldFinding) {
+    return DOCUMENT_MANIFEST_DATA_FINDINGS.finding(fieldFinding[1]);
   }
 
   if (isKeyOf(DOCUMENT_EXTRACTION_COMMENTS, code)) {

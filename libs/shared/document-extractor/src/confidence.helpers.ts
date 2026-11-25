@@ -10,6 +10,7 @@ import type {
 } from './document-extractor.types';
 
 import {
+  BLANK_FIELD_REASON_CODE_PREFIX,
   DOCUMENT_EXTRACTION_COMMENTS,
   type DocumentExtractionCommentKey,
   LOW_CONFIDENCE_REASON_CODE_PREFIX,
@@ -46,6 +47,12 @@ export const createLowConfidenceField = <T>(
   rawMatch?: string,
 ): ExtractedField<T> => createExtractedField(value, 'low', rawMatch);
 
+export const createBlankField = <T>(value: T): ExtractedField<T> => ({
+  blank: true,
+  confidence: 'low',
+  parsed: value,
+});
+
 export const textractConfidenceToExtraction = (
   confidence: number,
 ): ExtractionConfidence =>
@@ -75,7 +82,8 @@ export const calculateOverallConfidence = (
   fields: Array<ExtractedField<unknown> | undefined>,
 ): ExtractionConfidence => {
   const definedFields = fields.filter(
-    (field): field is ExtractedField<unknown> => field !== undefined,
+    (field): field is ExtractedField<unknown> =>
+      field !== undefined && field.blank !== true,
   );
 
   if (definedFields.length === 0) {
@@ -114,13 +122,16 @@ const isExtractedEntityGroupArray = (
   value.length > 0 &&
   value.every((item) => isExtractedEntityGroup(item));
 
+const isLowConfidenceRead = (field: unknown): boolean =>
+  isExtractedField(field) && field.confidence === 'low' && field.blank !== true;
+
 const collectLowConfidenceFromGroup = (
   group: Record<string, unknown>,
   prefix: string,
   result: string[],
 ): void => {
   for (const [subKey, subField] of Object.entries(group)) {
-    if (isExtractedField(subField) && subField.confidence === 'low') {
+    if (isLowConfidenceRead(subField)) {
       result.push(`${prefix}.${subKey}`);
     }
   }
@@ -163,7 +174,7 @@ export const collectLowConfidenceFields = (
     const field = data[fieldName];
 
     if (isExtractedField(field)) {
-      if (field.confidence === 'low') {
+      if (isLowConfidenceRead(field)) {
         result.push(fieldName);
       }
     } else if (Array.isArray(field) && isExtractedEntityGroupArray(field)) {
@@ -181,6 +192,16 @@ export const collectLowConfidenceFields = (
 
   return result;
 };
+
+export const collectBlankFields = (
+  data: Record<string, unknown>,
+  fieldNames: readonly string[],
+): string[] =>
+  fieldNames.filter((fieldName) => {
+    const field = data[fieldName];
+
+    return isExtractedField(field) && field.blank === true;
+  });
 
 export const collectMissingRequiredFields = (
   data: Record<string, unknown>,
@@ -203,13 +224,21 @@ export const lowConfidenceReviewReason = (field: string): ReviewReason => ({
   description: DOCUMENT_EXTRACTION_COMMENTS.LOW_CONFIDENCE_FIELD(field),
 });
 
+export const blankFieldReviewReason = (field: string): ReviewReason => ({
+  code: `${BLANK_FIELD_REASON_CODE_PREFIX}${toUpperSnakeCase(field)}`,
+  description: DOCUMENT_EXTRACTION_COMMENTS.BLANK_FIELD(field),
+});
+
+export const fieldReviewReasons = (data: BaseExtractedData): ReviewReason[] => [
+  ...data.lowConfidenceFields.map((field) => lowConfidenceReviewReason(field)),
+  ...(data.blankFields ?? []).map((field) => blankFieldReviewReason(field)),
+];
+
 export const buildExtractionOutput = <T extends BaseExtractedData>(
   data: T,
   layoutMatchScore: number,
 ): ExtractionOutput<T> => {
-  const reviewReasons: ReviewReason[] = data.lowConfidenceFields.map((field) =>
-    lowConfidenceReviewReason(field),
-  );
+  const reviewReasons = fieldReviewReasons(data);
 
   if (layoutMatchScore < LAYOUT_REVIEW_THRESHOLD) {
     reviewReasons.push({
@@ -274,10 +303,12 @@ export const finalizeExtraction = <T extends BaseExtractedData>(
   const lowConfidenceFields = collectLowConfidenceFields(partialData, [
     ...allFields,
   ]);
+  const blankFields = collectBlankFields(partialData, allFields);
   const extractionConfidence = calculateOverallConfidence(confidenceFields);
 
   const data: T = {
     ...partialData,
+    ...(blankFields.length > 0 && { blankFields }),
     documentType,
     extractionConfidence,
     lowConfidenceFields,

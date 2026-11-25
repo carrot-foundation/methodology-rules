@@ -6,7 +6,6 @@ import {
   createHighConfidenceField,
   type DocumentParser,
   extractAllStringFields,
-  extractFieldWithLabelFallback,
   type ExtractionOutput,
   extractStringField,
   parseBrazilianNumber,
@@ -17,9 +16,9 @@ import {
 import {
   createExtractedWasteTypeEntry,
   extractHaulerFields,
+  extractMtrDates,
   extractMtrEntityWithAddress,
   finalizeMtrExtraction,
-  MTR_DEFAULT_LABEL_PATTERNS,
   MTR_DEFAULT_PATTERNS,
   MTR_DEFAULT_SECTION_PATTERNS,
 } from './mtr-shared.helpers';
@@ -29,7 +28,6 @@ import {
 } from './transport-manifest.types';
 
 const MTR_PATTERNS = { ...MTR_DEFAULT_PATTERNS } as const;
-const LABEL_PATTERNS = { ...MTR_DEFAULT_LABEL_PATTERNS } as const;
 const SECTION_PATTERNS = { ...MTR_DEFAULT_SECTION_PATTERNS } as const;
 
 const SIGNATURE_PATTERNS = [
@@ -81,35 +79,7 @@ export class MtrSinirParser implements DocumentParser<MtrExtractedData> {
       );
     }
 
-    const issueDate = extractFieldWithLabelFallback(
-      text,
-      MTR_PATTERNS.issueDate,
-      LABEL_PATTERNS.issueDate,
-    );
-
-    if (issueDate) {
-      partialData.issueDate = issueDate;
-    }
-
-    const transportDate = extractFieldWithLabelFallback(
-      text,
-      MTR_PATTERNS.transportDate,
-      LABEL_PATTERNS.transportDate,
-    );
-
-    if (transportDate) {
-      partialData.transportDate = transportDate;
-    }
-
-    const receivingDate = extractFieldWithLabelFallback(
-      text,
-      MTR_PATTERNS.receivingDate,
-      LABEL_PATTERNS.receivingDate,
-    );
-
-    if (receivingDate) {
-      partialData.receivingDate = receivingDate;
-    }
+    extractMtrDates(text, extractionResult.blocks, partialData);
 
     partialData.generator = extractMtrEntityWithAddress(
       text,
