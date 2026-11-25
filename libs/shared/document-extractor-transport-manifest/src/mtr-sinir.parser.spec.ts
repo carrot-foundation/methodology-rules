@@ -1,4 +1,7 @@
-import { clearRegistry } from '@carrot-fndn/shared/document-extractor';
+import {
+  clearRegistry,
+  createBlankField,
+} from '@carrot-fndn/shared/document-extractor';
 import { stubTextExtractionResult } from '@carrot-fndn/shared/text-extractor';
 
 import { toWasteTypeEntryData } from './mtr-shared.helpers';
@@ -447,11 +450,7 @@ IBAMA`;
 
       const result = parser.parse(stubTextExtractionResult(text));
 
-      expect(result.data.driverName).toEqual({
-        blank: true,
-        confidence: 'low',
-        parsed: '',
-      });
+      expect(result.data.driverName).toEqual(createBlankField(''));
       expect(result.data.blankFields).toContain('driverName');
       expect(result.data.vehiclePlate?.parsed).toBe('');
       expect(result.data.vehiclePlate?.confidence).toBe('low');

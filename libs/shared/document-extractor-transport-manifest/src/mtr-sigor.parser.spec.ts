@@ -1,5 +1,6 @@
 import {
   clearRegistry,
+  createBlankField,
   DocumentExtractor,
   registerParser,
 } from '@carrot-fndn/shared/document-extractor';
@@ -377,11 +378,7 @@ describe('MtrSigorParser', () => {
 
       const result = parser.parse(stubTextExtractionResult(noValueText));
 
-      expect(result.data.driverName).toEqual({
-        blank: true,
-        confidence: 'low',
-        parsed: '',
-      });
+      expect(result.data.driverName).toEqual(createBlankField(''));
       expect(result.data.blankFields).toContain('driverName');
       expect(result.data.vehiclePlate?.parsed).toBe('');
       expect(result.data.vehiclePlate?.confidence).toBe('low');
