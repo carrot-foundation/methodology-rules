@@ -8,6 +8,7 @@ import {
 import { BoldReportType } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
   defineRuleFindings,
+  type FindingMeta,
   crossValidationEvidence as selectCrossValidationEvidence,
 } from '@carrot-fndn/shared/rule/result';
 
@@ -26,6 +27,26 @@ import { ruleDefinition } from './document-manifest-data.rule-definition';
 const crossValidationEvidence = selectCrossValidationEvidence<
   CdfCrossValidation & MtrCrossValidation
 >;
+
+const mtrDateWithinToleranceObservation = ({
+  acceptedWindow,
+  eventName,
+  field,
+  title,
+}: {
+  acceptedWindow: string;
+  eventName: string;
+  field: 'receivingDate' | 'transportDate';
+  title: string;
+}): FindingMeta => ({
+  category: 'OBSERVATION',
+  defaultOwner: 'TO_CONFIRM',
+  description: `A ${title.toLowerCase()} lida no MTR difere da data do evento "${eventName}", mas fica dentro da janela aceita: ${acceptedWindow}.`,
+  documentKinds: [BoldReportType.MTR],
+  evidence: [crossValidationEvidence(field)],
+  guidance: `Nenhuma correção é necessária para a aprovação. Para evitar a observação, confira a data do evento "${eventName}" e o MTR anexado e alinhe as datas na origem.`,
+  title: `${title} difere do MTR dentro da janela aceita`,
+});
 
 export const DOCUMENT_MANIFEST_DATA_FINDINGS = defineRuleFindings(
   ruleDefinition.slug,
@@ -160,17 +181,13 @@ export const DOCUMENT_MANIFEST_DATA_FINDINGS = defineRuleFindings(
         'Confira a data do evento "Drop-off" e o MTR anexado, confirme qual está correto e corrija na origem.',
       title: 'Data de recebimento diverge do MTR',
     },
-    'CROSS_VALIDATION.RECEIVING_DATE_WITHIN_TOLERANCE': {
-      category: 'OBSERVATION',
-      defaultOwner: 'TO_CONFIRM',
-      description:
-        'A data de recebimento lida no MTR difere da data do evento "Drop-off", mas fica dentro da janela aceita: de 1 dia antes a 10 dias depois.',
-      documentKinds: [BoldReportType.MTR],
-      evidence: [crossValidationEvidence('receivingDate')],
-      guidance:
-        'Nenhuma correção é necessária para a aprovação. Para evitar a observação, confira a data do evento "Drop-off" e o MTR anexado e alinhe as datas na origem.',
-      title: 'Data de recebimento difere do MTR dentro da janela aceita',
-    },
+    'CROSS_VALIDATION.RECEIVING_DATE_WITHIN_TOLERANCE':
+      mtrDateWithinToleranceObservation({
+        acceptedWindow: 'de 1 dia antes a 10 dias depois',
+        eventName: 'Drop-off',
+        field: 'receivingDate',
+        title: 'Data de recebimento',
+      }),
     'CROSS_VALIDATION.RECYCLER_TAX_ID_MISMATCH': {
       category: 'DOCUMENT_DIVERGENCE',
       defaultOwner: 'TO_CONFIRM',
@@ -215,17 +232,13 @@ export const DOCUMENT_MANIFEST_DATA_FINDINGS = defineRuleFindings(
         'Confira a data do evento "Pick-up" e o MTR anexado, confirme qual está correto e corrija na origem.',
       title: 'Data de transporte diverge do MTR',
     },
-    'CROSS_VALIDATION.TRANSPORT_DATE_WITHIN_TOLERANCE': {
-      category: 'OBSERVATION',
-      defaultOwner: 'TO_CONFIRM',
-      description:
-        'A data de transporte lida no MTR difere da data do evento "Pick-up", mas fica dentro da janela aceita: até 7 dias depois.',
-      documentKinds: [BoldReportType.MTR],
-      evidence: [crossValidationEvidence('transportDate')],
-      guidance:
-        'Nenhuma correção é necessária para a aprovação. Para evitar a observação, confira a data do evento "Pick-up" e o MTR anexado e alinhe as datas na origem.',
-      title: 'Data de transporte difere do MTR dentro da janela aceita',
-    },
+    'CROSS_VALIDATION.TRANSPORT_DATE_WITHIN_TOLERANCE':
+      mtrDateWithinToleranceObservation({
+        acceptedWindow: 'até 7 dias depois',
+        eventName: 'Pick-up',
+        field: 'transportDate',
+        title: 'Data de transporte',
+      }),
     'CROSS_VALIDATION.VEHICLE_PLATE_MISMATCH': {
       category: 'DOCUMENT_DIVERGENCE',
       defaultOwner: 'INTEGRATOR',
