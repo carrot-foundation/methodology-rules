@@ -9,7 +9,6 @@ import {
   calculateMatchScore,
   createHighConfidenceField,
   type DocumentParser,
-  extractFieldWithLabelFallback,
   type ExtractionOutput,
   extractStringField,
   parseBrazilianNumber,
@@ -25,9 +24,9 @@ import {
 import {
   createExtractedWasteTypeEntry,
   extractHaulerFields,
+  extractMtrDates,
   extractMtrEntityWithAddress,
   finalizeMtrExtraction,
-  MTR_DEFAULT_LABEL_PATTERNS,
   MTR_DEFAULT_PATTERNS,
   MTR_DEFAULT_SECTION_PATTERNS,
 } from './mtr-shared.helpers';
@@ -41,7 +40,6 @@ const MTR_PATTERNS = {
   // eslint-disable-next-line sonarjs/slow-regex
   documentNumber: /MTR\s*(?:n[°º])?\s*(\d{10})\b/i,
 } as const;
-const LABEL_PATTERNS = { ...MTR_DEFAULT_LABEL_PATTERNS } as const;
 const SECTION_PATTERNS = { ...MTR_DEFAULT_SECTION_PATTERNS } as const;
 
 const SIGNATURE_PATTERNS = [
@@ -173,38 +171,7 @@ export class MtrSinfatParser implements DocumentParser<MtrExtractedData> {
       );
     }
 
-    const issueDate = extractFieldWithLabelFallback(
-      text,
-      MTR_PATTERNS.issueDate,
-      LABEL_PATTERNS.issueDate,
-      extractionResult.blocks,
-    );
-
-    if (issueDate) {
-      partialData.issueDate = issueDate;
-    }
-
-    const transportDate = extractFieldWithLabelFallback(
-      text,
-      MTR_PATTERNS.transportDate,
-      LABEL_PATTERNS.transportDate,
-      extractionResult.blocks,
-    );
-
-    if (transportDate) {
-      partialData.transportDate = transportDate;
-    }
-
-    const receivingDate = extractFieldWithLabelFallback(
-      text,
-      MTR_PATTERNS.receivingDate,
-      LABEL_PATTERNS.receivingDate,
-      extractionResult.blocks,
-    );
-
-    if (receivingDate) {
-      partialData.receivingDate = receivingDate;
-    }
+    extractMtrDates(text, extractionResult.blocks, partialData);
 
     partialData.generator = extractMtrEntityWithAddress(
       text,

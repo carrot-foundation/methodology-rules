@@ -10,57 +10,41 @@ describe('toCrossValidationFinding', () => {
   it.each([
     {
       code: 'MTR_NUMBER_NOT_IN_CDF',
-      expectedFinding: DOCUMENT_MANIFEST_DATA_FINDINGS.finding(
-        'CROSS_VALIDATION.MTR_NUMBER_NOT_IN_CDF',
-      ),
+      findingKey: 'CROSS_VALIDATION.MTR_NUMBER_NOT_IN_CDF',
     },
     {
       code: 'LOW_CONFIDENCE_RECEIVING_DATE',
-      expectedFinding: DOCUMENT_MANIFEST_DATA_FINDINGS.finding(
-        'DOCUMENT_EXTRACTION.LOW_CONFIDENCE_FIELD',
-      ),
+      findingKey: 'DOCUMENT_EXTRACTION.LOW_CONFIDENCE_FIELD',
     },
     {
       code: 'LOW_CONFIDENCE_GENERATOR.TAX_ID',
-      expectedFinding: DOCUMENT_MANIFEST_DATA_FINDINGS.finding(
-        'DOCUMENT_EXTRACTION.LOW_CONFIDENCE_FIELD',
-      ),
+      findingKey: 'DOCUMENT_EXTRACTION.LOW_CONFIDENCE_FIELD',
     },
     {
       code: 'BLANK_FIELD_RECEIVING_DATE',
-      expectedFinding: DOCUMENT_MANIFEST_DATA_FINDINGS.finding(
-        'DOCUMENT_EXTRACTION.BLANK_FIELD',
-      ),
+      findingKey: 'DOCUMENT_EXTRACTION.BLANK_FIELD',
     },
     {
       code: 'LOW_LAYOUT_MATCH_SCORE',
-      expectedFinding: DOCUMENT_MANIFEST_DATA_FINDINGS.finding(
-        'DOCUMENT_EXTRACTION.LOW_LAYOUT_MATCH_SCORE',
-      ),
+      findingKey: 'DOCUMENT_EXTRACTION.LOW_LAYOUT_MATCH_SCORE',
     },
     {
       code: 'TEXT_LAYER_MISMATCH',
-      expectedFinding: DOCUMENT_MANIFEST_DATA_FINDINGS.finding(
-        'DOCUMENT_EXTRACTION.TEXT_LAYER_MISMATCH',
-      ),
+      findingKey: 'DOCUMENT_EXTRACTION.TEXT_LAYER_MISMATCH',
     },
     {
       code: 'UNKNOWN_DOCUMENT_TYPE',
-      expectedFinding: DOCUMENT_MANIFEST_DATA_FINDINGS.finding(
-        'DOCUMENT_EXTRACTION.UNKNOWN_DOCUMENT_TYPE',
-      ),
+      findingKey: 'DOCUMENT_EXTRACTION.UNKNOWN_DOCUMENT_TYPE',
     },
     {
       code: 'EXTRACTION_FAILED',
-      expectedFinding: DOCUMENT_MANIFEST_DATA_FINDINGS.finding(
-        'DOCUMENT_EXTRACTION.EXTRACTION_FAILED',
-      ),
+      findingKey: 'DOCUMENT_EXTRACTION.EXTRACTION_FAILED',
     },
-  ])(
+  ] as const)(
     'should map the $code reason to its finding',
-    ({ code, expectedFinding }) => {
+    ({ code, findingKey }) => {
       expect(toCrossValidationFinding({ code, description: code })).toEqual(
-        expectedFinding,
+        DOCUMENT_MANIFEST_DATA_FINDINGS.finding(findingKey),
       );
     },
   );

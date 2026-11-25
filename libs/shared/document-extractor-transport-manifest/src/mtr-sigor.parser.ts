@@ -11,7 +11,6 @@ import {
   createHighConfidenceField,
   type DocumentParser,
   type EntityWithAddressInfo,
-  extractFieldWithLabelFallback,
   type ExtractionOutput,
   extractSection,
   parseBrazilianNumber,
@@ -27,6 +26,7 @@ import {
   createExtractedWasteTypeEntry,
   extractAddressFields,
   extractHaulerFields,
+  extractMtrDates,
   finalizeMtrExtraction,
   MTR_ADDRESS_PATTERNS,
   MTR_DEFAULT_LABEL_PATTERNS,
@@ -373,9 +373,7 @@ export class MtrSigorParser implements DocumentParser<MtrExtractedData> {
     };
 
     this.extractDocumentNumber(text, partialData);
-    this.extractIssueDate(text, partialData, extractionResult.blocks);
-    this.extractTransportDate(text, partialData, extractionResult.blocks);
-    this.extractReceivingDate(text, partialData, extractionResult.blocks);
+    extractMtrDates(text, extractionResult.blocks, partialData);
     this.extractEntities(text, partialData, extractionResult.blocks);
     extractHaulerFields(text, partialData, {
       allSectionPatterns: ALL_SECTION_PATTERNS,
@@ -430,57 +428,6 @@ export class MtrSigorParser implements DocumentParser<MtrExtractedData> {
     );
 
     partialData.receiver = createExtractedEntityWithAddress(receiverExtracted);
-  }
-
-  private extractIssueDate(
-    rawText: string,
-    partialData: Partial<MtrExtractedData>,
-    blocks: TextExtractionResult['blocks'],
-  ): void {
-    const issueDate = extractFieldWithLabelFallback(
-      rawText,
-      MTR_PATTERNS.issueDate,
-      LABEL_PATTERNS.issueDate,
-      blocks,
-    );
-
-    if (issueDate) {
-      partialData.issueDate = issueDate;
-    }
-  }
-
-  private extractReceivingDate(
-    rawText: string,
-    partialData: Partial<MtrExtractedData>,
-    blocks: TextExtractionResult['blocks'],
-  ): void {
-    const receivingDate = extractFieldWithLabelFallback(
-      rawText,
-      MTR_PATTERNS.receivingDate,
-      LABEL_PATTERNS.receivingDate,
-      blocks,
-    );
-
-    if (receivingDate) {
-      partialData.receivingDate = receivingDate;
-    }
-  }
-
-  private extractTransportDate(
-    rawText: string,
-    partialData: Partial<MtrExtractedData>,
-    blocks: TextExtractionResult['blocks'],
-  ): void {
-    const transportDate = extractFieldWithLabelFallback(
-      rawText,
-      MTR_PATTERNS.transportDate,
-      LABEL_PATTERNS.transportDate,
-      blocks,
-    );
-
-    if (transportDate) {
-      partialData.transportDate = transportDate;
-    }
   }
 
   private extractWasteFields(

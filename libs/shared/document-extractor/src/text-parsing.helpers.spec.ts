@@ -294,8 +294,27 @@ describe('text-parsing.helpers', () => {
       );
     });
 
-    it('should be blank when the label is the last line in its column', () => {
-      expect(isLabelValueBlank([labelLine], labelPattern)).toBe(true);
+    it('should not be blank when no printed line below bounds the label column', () => {
+      expect(isLabelValueBlank([labelLine], labelPattern)).toBe(false);
+    });
+
+    it('should only look below the label on its own page', () => {
+      const page = { blockType: 'PAGE', id: 'page' };
+      const word = { ...captionBelow, blockType: 'WORD', id: 'word' };
+
+      expect(
+        isLabelValueBlank(
+          [
+            page,
+            labelLine,
+            line('1S/O3/2024', { confidence: 40, top: 0.14 }),
+            word,
+            page,
+            line('Observacoes', { top: 0.12 }),
+          ],
+          labelPattern,
+        ),
+      ).toBe(false);
     });
 
     it('should not be blank when the label is read with low confidence', () => {
@@ -346,7 +365,11 @@ describe('text-parsing.helpers', () => {
     it('should ignore lines in other columns', () => {
       expect(
         isLabelValueBlank(
-          [labelLine, line('Telefone: 1234', { left: 0.1, top: 0.13 })],
+          [
+            labelLine,
+            line('Telefone: 1234', { left: 0.1, top: 0.13 }),
+            captionBelow,
+          ],
           labelPattern,
         ),
       ).toBe(true);

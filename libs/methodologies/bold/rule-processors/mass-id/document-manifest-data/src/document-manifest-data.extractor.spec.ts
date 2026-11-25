@@ -55,6 +55,21 @@ const noRelatedEvents: {
   weighingEvents: [],
 };
 
+const mtrManifestEvent: DocumentManifestEventSubject = {
+  attachment: { attachmentId: 'att-1' } as never,
+  documentNumber: '12345',
+  documentType: 'MTR',
+  eventAddressId: 'addr-1',
+  eventValue: 100,
+  exemptionJustification: undefined,
+  hasWrongLabelAttachment: false,
+  issueDateAttribute: {
+    name: 'Issue Date',
+    value: '2024-01-01',
+  } as never,
+  recyclerCountryCode: 'BR',
+};
+
 describe('crossValidateWithTextract', () => {
   it('should opt in to the PDF text-layer fallback', () => {
     expect(createDocumentExtractorArguments).toEqual([
@@ -341,22 +356,6 @@ describe('crossValidateWithTextract', () => {
   });
 
   describe('when MTR fields are blank on the document', () => {
-    const mtrEvents: DocumentManifestEventSubject[] = [
-      {
-        attachment: { attachmentId: 'att-1' } as never,
-        documentNumber: '12345',
-        documentType: 'MTR',
-        eventAddressId: 'addr-1',
-        eventValue: 100,
-        exemptionJustification: undefined,
-        hasWrongLabelAttachment: false,
-        issueDateAttribute: {
-          name: 'Issue Date',
-          value: '2024-01-01',
-        } as never,
-        recyclerCountryCode: 'BR',
-      },
-    ];
     const blankDate = { blank: true, confidence: 'low', parsed: '' };
 
     const runWithBlankFields = async (blankFields: string[]) => {
@@ -380,7 +379,7 @@ describe('crossValidateWithTextract', () => {
         attachmentInfos: [
           { attachmentId: 'att-1', s3Bucket: 'bucket', s3Key: 'key' },
         ],
-        documentManifestEvents: mtrEvents,
+        documentManifestEvents: [mtrManifestEvent],
         ...noRelatedEvents,
         dropOffEvent: {
           address: STUB_BR_ADDRESS,
@@ -430,22 +429,7 @@ describe('crossValidateWithTextract', () => {
     const attachmentInfos: AttachmentInfo[] = [
       { attachmentId: 'att-1', s3Bucket: 'bucket', s3Key: 'key' },
     ];
-    const documentManifestEvents: DocumentManifestEventSubject[] = [
-      {
-        attachment: { attachmentId: 'att-1' } as never,
-        documentNumber: '12345',
-        documentType: 'MTR',
-        eventAddressId: 'addr-1',
-        eventValue: 100,
-        exemptionJustification: undefined,
-        hasWrongLabelAttachment: false,
-        issueDateAttribute: {
-          name: 'Issue Date',
-          value: '2024-01-01',
-        } as never,
-        recyclerCountryCode: 'BR',
-      },
-    ];
+    const documentManifestEvents = [mtrManifestEvent];
 
     const pickUpEvent = {
       address: STUB_BR_ADDRESS,
@@ -492,20 +476,7 @@ describe('crossValidateWithTextract', () => {
       { attachmentId: 'att-1', s3Bucket: 'bucket', s3Key: 'key' },
     ];
     const documentManifestEvents: DocumentManifestEventSubject[] = [
-      {
-        attachment: { attachmentId: 'att-1' } as never,
-        documentNumber: '12345',
-        documentType: 'CDF',
-        eventAddressId: 'addr-1',
-        eventValue: 100,
-        exemptionJustification: undefined,
-        hasWrongLabelAttachment: false,
-        issueDateAttribute: {
-          name: 'Issue Date',
-          value: '2024-01-01',
-        } as never,
-        recyclerCountryCode: 'BR',
-      },
+      { ...mtrManifestEvent, documentType: 'CDF' },
     ];
 
     const pickUpEvent = {

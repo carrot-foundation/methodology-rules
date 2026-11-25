@@ -100,6 +100,23 @@ const isBoxedLine = (block: TextBlock): block is BoxedLine =>
   block.text !== undefined &&
   block.boundingBox !== undefined;
 
+// Coordinates restart per page; both text sources open each page with a PAGE block
+const linesByPage = (blocks: TextExtractionResult['blocks']): BoxedLine[][] => {
+  let page: BoxedLine[] = [];
+  const pages = [page];
+
+  for (const block of blocks) {
+    if (block.blockType === 'PAGE') {
+      page = [];
+      pages.push(page);
+    } else if (isBoxedLine(block)) {
+      page.push(block);
+    }
+  }
+
+  return pages;
+};
+
 const isReliable = (block: TextBlock): boolean =>
   (block.confidence ?? 0) >= MATCH_THRESHOLDS.textractConfidence;
 
@@ -108,7 +125,10 @@ export const isLabelValueBlank = (
   blocks: TextExtractionResult['blocks'],
   labelPattern: RegExp,
 ): boolean => {
-  const lines = blocks.filter((block) => isBoxedLine(block));
+  const lines =
+    linesByPage(blocks).find((pageLines) =>
+      pageLines.some((line) => labelPattern.test(line.text)),
+    ) ?? [];
   const label = lines.find((line) => labelPattern.test(line.text));
 
   if (!label || !isReliable(label)) {
@@ -147,8 +167,9 @@ export const isLabelValueBlank = (
     .at(0);
 
   return (
-    firstBelow === undefined ||
-    (isReliable(firstBelow) && !/\d/.test(firstBelow.text))
+    firstBelow !== undefined &&
+    isReliable(firstBelow) &&
+    !/\d/.test(firstBelow.text)
   );
 };
 

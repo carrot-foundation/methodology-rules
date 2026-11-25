@@ -476,6 +476,14 @@ const isKeyOf = <T extends object>(
   key: string,
 ): key is Extract<keyof T, string> => Object.hasOwn(object, key);
 
+const FIELD_REASON_FINDINGS = [
+  [BLANK_FIELD_REASON_CODE_PREFIX, 'DOCUMENT_EXTRACTION.BLANK_FIELD'],
+  [
+    LOW_CONFIDENCE_REASON_CODE_PREFIX,
+    'DOCUMENT_EXTRACTION.LOW_CONFIDENCE_FIELD',
+  ],
+] as const;
+
 export const toCrossValidationFinding = ({
   code,
 }: ReviewReason): RuleFinding => {
@@ -483,16 +491,12 @@ export const toCrossValidationFinding = ({
     return DOCUMENT_MANIFEST_DATA_FINDINGS.finding(`CROSS_VALIDATION.${code}`);
   }
 
-  if (code.startsWith(BLANK_FIELD_REASON_CODE_PREFIX)) {
-    return DOCUMENT_MANIFEST_DATA_FINDINGS.finding(
-      'DOCUMENT_EXTRACTION.BLANK_FIELD',
-    );
-  }
+  const fieldFinding = FIELD_REASON_FINDINGS.find(([prefix]) =>
+    code.startsWith(prefix),
+  );
 
-  if (code.startsWith(LOW_CONFIDENCE_REASON_CODE_PREFIX)) {
-    return DOCUMENT_MANIFEST_DATA_FINDINGS.finding(
-      'DOCUMENT_EXTRACTION.LOW_CONFIDENCE_FIELD',
-    );
+  if (fieldFinding) {
+    return DOCUMENT_MANIFEST_DATA_FINDINGS.finding(fieldFinding[1]);
   }
 
   if (isKeyOf(DOCUMENT_EXTRACTION_COMMENTS, code)) {

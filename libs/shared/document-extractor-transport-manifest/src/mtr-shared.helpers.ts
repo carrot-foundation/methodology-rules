@@ -1,3 +1,5 @@
+import type { TextExtractionResult } from '@carrot-fndn/shared/text-extractor';
+
 import {
   createExtractedEntityWithAddress,
   createHighConfidenceField,
@@ -5,6 +7,7 @@ import {
   type ExtractedEntityWithAddressInfo,
   type ExtractedField,
   extractEntityFromSection,
+  extractFieldWithLabelFallback,
   type ExtractionOutput,
   extractSection,
   finalizeExtraction,
@@ -466,6 +469,31 @@ export const extractHaulerFields = (
 
   if (labelPatterns.vehiclePlate.test(rawText)) {
     partialData.vehiclePlate = createLowConfidenceField('');
+  }
+};
+
+const MTR_DATE_FIELDS = [
+  'issueDate',
+  'transportDate',
+  'receivingDate',
+] as const;
+
+export const extractMtrDates = (
+  text: string,
+  blocks: TextExtractionResult['blocks'],
+  partialData: Partial<MtrExtractedData>,
+): void => {
+  for (const field of MTR_DATE_FIELDS) {
+    const extracted = extractFieldWithLabelFallback(
+      text,
+      MTR_DEFAULT_PATTERNS[field],
+      MTR_DEFAULT_LABEL_PATTERNS[field],
+      blocks,
+    );
+
+    if (extracted) {
+      partialData[field] = extracted;
+    }
   }
 };
 
