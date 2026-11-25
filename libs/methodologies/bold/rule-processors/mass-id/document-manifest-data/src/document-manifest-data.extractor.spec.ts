@@ -73,9 +73,11 @@ const mtrManifestEvent: DocumentManifestEventSubject = {
 
 const runWithExtraction = async ({
   data,
+  pickUpAttributes = [],
   reviewReasons,
 }: {
   data: Record<string, unknown>;
+  pickUpAttributes?: { name: string; value: string }[];
   reviewReasons: ReturnType<typeof blankFieldReviewReason>[];
 }) => {
   mockExtract.mockResolvedValue({
@@ -85,6 +87,7 @@ const runWithExtraction = async ({
       issueDate: { confidence: 'high', parsed: '01/01/2024' },
       lowConfidenceFields: [],
       receivingDate: { confidence: 'high', parsed: '01/01/2024' },
+      transportDate: { confidence: 'high', parsed: '01/01/2024' },
       ...data,
     },
     reviewReasons,
@@ -104,10 +107,16 @@ const runWithExtraction = async ({
     pickUpEvent: {
       address: STUB_BR_ADDRESS,
       externalCreatedAt: '2024-01-01T12:00:00.000Z',
-      metadata: { attributes: [] },
+      metadata: {
+        attributes: pickUpAttributes.map((attribute) => ({
+          isPublic: true,
+          ...attribute,
+        })),
+      },
     } as unknown as BoldDocumentEvent,
   });
 };
+
 describe('crossValidateWithTextract', () => {
   it('should opt in to the PDF text-layer fallback', () => {
     expect(createDocumentExtractorArguments).toEqual([
@@ -440,6 +449,85 @@ describe('crossValidateWithTextract', () => {
         lowConfidenceReviewReason('transportDate'),
       ]);
       expect(result.observations).toEqual([]);
+    });
+
+    describe('when the MTR driver name is blank', () => {
+      const exemptionJustification = {
+        name: 'Driver Identifier Exemption Justification',
+        value: 'The driver is not identified on this transport.',
+      };
+
+      it.each([
+        {
+          expectedFindings: [],
+          expectedObservations: [
+            'document-manifest-data.CROSS_VALIDATION.DRIVER_NAME_BLANK',
+          ],
+          justification: 'present',
+          pickUpAttributes: [exemptionJustification],
+        },
+        {
+          expectedFindings: [
+            'document-manifest-data.DOCUMENT_EXTRACTION.BLANK_FIELD',
+          ],
+          expectedObservations: [],
+          justification: 'absent',
+          pickUpAttributes: [],
+        },
+        {
+          expectedFindings: [
+            'document-manifest-data.DOCUMENT_EXTRACTION.BLANK_FIELD',
+          ],
+          expectedObservations: [],
+          justification: 'empty',
+          pickUpAttributes: [{ ...exemptionJustification, value: '' }],
+        },
+      ])(
+        'should report the expected findings when the Pick-up exemption justification is $justification',
+        async ({
+          expectedFindings,
+          expectedObservations,
+          pickUpAttributes,
+        }) => {
+          const result = await runWithExtraction({
+            data: {
+              blankFields: ['driverName'],
+              driverName: { blank: true, confidence: 'low', parsed: '' },
+            },
+            pickUpAttributes,
+            reviewReasons: [blankFieldReviewReason('driverName')],
+          });
+
+          expect(result.reviewRequired).toBe(expectedFindings.length > 0);
+          expect(
+            result.reviewReasons.map(
+              (reason) => toCrossValidationFinding(reason).code,
+            ),
+          ).toEqual(expectedFindings);
+          expect(
+            result.observations.map(
+              (reason) => toCrossValidationFinding(reason).code,
+            ),
+          ).toEqual(expectedObservations);
+        },
+      );
+
+      it('should keep a low-confidence driver name read as a review reason even with the exemption justification', async () => {
+        const result = await runWithExtraction({
+          data: {
+            driverName: { confidence: 'low', parsed: 'J0SE' },
+            lowConfidenceFields: ['driverName'],
+          },
+          pickUpAttributes: [exemptionJustification],
+          reviewReasons: [lowConfidenceReviewReason('driverName')],
+        });
+
+        expect(result.reviewRequired).toBe(true);
+        expect(result.reviewReasons).toEqual([
+          lowConfidenceReviewReason('driverName'),
+        ]);
+        expect(result.observations).toEqual([]);
+      });
     });
 
     it('should report any other blank field as a blank field finding', async () => {

@@ -67,6 +67,8 @@ export const CROSS_VALIDATION_COMMENTS = {
     extractedDocumentNumber: string;
   }) =>
     `The "${DOCUMENT_NUMBER}" declared in the event ("${eventDocumentNumber}") does not match the extracted value from the document ("${extractedDocumentNumber}").`,
+  DRIVER_NAME_BLANK:
+    'The driver name is blank on the MTR, accepted because the Pick-up event carries a driver identifier exemption justification.',
   DROP_OFF_DATE_OUTSIDE_PERIOD: ({
     dropOffDate,
     periodEnd,
@@ -233,6 +235,7 @@ export const REVIEW_REASONS = {
     'DOCUMENT_EXTRACTION_CONFIDENCE_LOW',
   ),
   DOCUMENT_NUMBER_MISMATCH: reviewReason('DOCUMENT_NUMBER_MISMATCH'),
+  DRIVER_NAME_BLANK: staticReviewReason('DRIVER_NAME_BLANK'),
   DROP_OFF_DATE_OUTSIDE_PERIOD: reviewReason('DROP_OFF_DATE_OUTSIDE_PERIOD'),
   FIELD_NOT_EXTRACTED: reviewReason('FIELD_NOT_EXTRACTED'),
   GENERATOR_ADDRESS_MISMATCH: reviewReason('GENERATOR_ADDRESS_MISMATCH'),

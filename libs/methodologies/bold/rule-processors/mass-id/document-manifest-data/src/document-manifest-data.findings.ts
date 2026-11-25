@@ -106,6 +106,17 @@ export const DOCUMENT_MANIFEST_DATA_FINDINGS = defineRuleFindings(
         'Envie o número exatamente como consta no documento anexado, ou anexe o documento correto.',
       title: 'Número do documento diverge do anexo',
     },
+    'CROSS_VALIDATION.DRIVER_NAME_BLANK': {
+      category: 'OBSERVATION',
+      defaultOwner: 'TO_CONFIRM',
+      description:
+        'O MTR não identifica o motorista; aceito porque o evento "Pick-up" traz a justificativa de ausência de motorista.',
+      documentKinds: [BoldReportType.MTR],
+      evidence: [crossValidationEvidence('blankFields')],
+      guidance:
+        'Nenhuma correção é necessária para a aprovação. Para evitar a observação, emita o MTR com o nome do motorista preenchido.',
+      title: 'Nome do motorista em branco no MTR',
+    },
     'CROSS_VALIDATION.DROP_OFF_DATE_OUTSIDE_PERIOD': {
       category: 'DOCUMENT_DIVERGENCE',
       defaultOwner: 'TO_CONFIRM',

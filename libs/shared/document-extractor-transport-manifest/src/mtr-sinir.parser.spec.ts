@@ -423,13 +423,17 @@ IBAMA`;
       expect(result.data.transportDate?.confidence).toBe('low');
       expect(result.data.receivingDate?.parsed).toBe('');
       expect(result.data.receivingDate?.confidence).toBe('low');
-      expect(result.data.driverName?.parsed).toBe('');
-      expect(result.data.driverName?.confidence).toBe('low');
+      expect(result.data.driverName).toEqual({
+        blank: true,
+        confidence: 'low',
+        parsed: '',
+      });
+      expect(result.data.blankFields).toContain('driverName');
       expect(result.data.vehiclePlate?.parsed).toBe('');
       expect(result.data.vehiclePlate?.confidence).toBe('low');
     });
 
-    it('should set low confidence when labels exist but no valid values follow', () => {
+    it('should mark the driver name blank and the plate low confidence when labels exist but no valid values follow', () => {
       const text = `MANIFESTO DE TRANSPORTE DE RESÍDUOS - MTR
 MTR Nº: 123456789
 Data de Emissão: 15/03/2024
@@ -447,8 +451,12 @@ IBAMA`;
 
       const result = parser.parse(stubTextExtractionResult(text));
 
-      expect(result.data.driverName?.parsed).toBe('');
-      expect(result.data.driverName?.confidence).toBe('low');
+      expect(result.data.driverName).toEqual({
+        blank: true,
+        confidence: 'low',
+        parsed: '',
+      });
+      expect(result.data.blankFields).toContain('driverName');
       expect(result.data.vehiclePlate?.parsed).toBe('');
       expect(result.data.vehiclePlate?.confidence).toBe('low');
     });

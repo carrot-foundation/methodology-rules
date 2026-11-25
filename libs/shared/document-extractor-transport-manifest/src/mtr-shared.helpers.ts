@@ -1,6 +1,7 @@
 import type { TextExtractionResult } from '@carrot-fndn/shared/text-extractor';
 
 import {
+  createBlankField,
   createExtractedEntityWithAddress,
   createHighConfidenceField,
   createLowConfidenceField,
@@ -443,7 +444,7 @@ export const extractHaulerFields = (
         `Nome do Motorista\n${driverName}`,
       );
     } else if (labelPatterns.driverName.test(haulerSection)) {
-      partialData.driverName = createLowConfidenceField('');
+      partialData.driverName = createBlankField('');
     }
 
     if (vehiclePlate) {
@@ -464,7 +465,7 @@ export const extractHaulerFields = (
   }
 
   if (labelPatterns.driverName.test(rawText)) {
-    partialData.driverName = createLowConfidenceField('');
+    partialData.driverName = createBlankField('');
   }
 
   if (labelPatterns.vehiclePlate.test(rawText)) {
