@@ -645,9 +645,10 @@ describe('transport-manifest-cross-validation.helpers', () => {
       { eventDate: '2023-11-16', expected: 'review', signedDiff: 60 },
       { eventDate: '2024-01-14', expected: 'observation', signedDiff: 1 },
       { eventDate: '2024-01-15', expected: 'none', signedDiff: 0 },
-      { eventDate: '2024-01-16', expected: 'review', signedDiff: -1 },
-      { eventDate: '2024-01-18', expected: 'review', signedDiff: -3 },
-      { eventDate: '2024-01-19', expected: 'fail', signedDiff: -4 },
+      { eventDate: '2024-01-16', expected: 'observation', signedDiff: -1 },
+      { eventDate: '2024-01-22', expected: 'observation', signedDiff: -7 },
+      { eventDate: '2024-01-23', expected: 'fail', signedDiff: -8 },
+      { eventDate: '2024-03-15', expected: 'fail', signedDiff: -60 },
     ])(
       'should return $expected when the MTR transport date is $signedDiff day(s) from Pick-up',
       ({ eventDate, expected, signedDiff }) => {

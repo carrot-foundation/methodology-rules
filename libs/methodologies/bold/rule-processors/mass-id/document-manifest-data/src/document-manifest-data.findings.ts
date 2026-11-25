@@ -57,9 +57,20 @@ const MTR_DATE_OBSERVATIONS = {
       field: 'receivingDate',
       title: 'Data de recebimento',
     }),
+  'CROSS_VALIDATION.TRANSPORT_DATE_BLANK': {
+    category: 'OBSERVATION',
+    defaultOwner: 'TO_CONFIRM',
+    description:
+      'A data de transporte está em branco no MTR anexado. O campo em branco é aceito porque os sistemas de MTR permitem preenchê-lo à mão no despacho.',
+    documentKinds: [BoldReportType.MTR],
+    evidence: [crossValidationEvidence('transportDate')],
+    guidance:
+      'Nenhuma correção é necessária para a aprovação. Para evitar a observação, emita o MTR com a data de transporte preenchida.',
+    title: 'Data de transporte em branco no MTR',
+  },
   'CROSS_VALIDATION.TRANSPORT_DATE_WITHIN_TOLERANCE':
     mtrDateWithinToleranceObservation({
-      acceptedWindow: 'até 7 dias depois',
+      acceptedWindow: 'de 7 dias antes a 7 dias depois',
       eventName: 'Pick-up',
       field: 'transportDate',
       title: 'Data de transporte',
@@ -237,7 +248,7 @@ export const DOCUMENT_MANIFEST_DATA_FINDINGS = defineRuleFindings(
       category: 'DOCUMENT_DIVERGENCE',
       defaultOwner: 'TO_CONFIRM',
       description:
-        'A data de transporte lida no MTR é anterior à data do evento "Pick-up" ou mais de 7 dias posterior a ela.',
+        'A data de transporte lida no MTR difere da data do evento "Pick-up" em mais de 7 dias.',
       documentKinds: [BoldReportType.MTR],
       evidence: [crossValidationEvidence('transportDate')],
       guidance:
