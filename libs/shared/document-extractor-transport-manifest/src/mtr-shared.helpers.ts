@@ -299,12 +299,15 @@ const isPlateLine = (line: string): boolean =>
 // Only a driver label followed by nothing but a plate is blank; any other unparsed line may be a misread name
 const markBlankDriverName = (
   result: DriverAndVehicle,
-  valueLines: string[],
-  hasDriverLabel: boolean,
+  lines: string[],
+  driverLabelIndex: number,
 ): DriverAndVehicle =>
-  hasDriverLabel &&
+  driverLabelIndex !== -1 &&
   result.driverName === undefined &&
-  valueLines.every((line) => isPlateLine(line))
+  lines
+    .slice(driverLabelIndex + 1)
+    .filter((line) => isValueLine(line))
+    .every((line) => isPlateLine(line))
     ? { ...result, isDriverNameBlank: true }
     : result;
 
@@ -344,13 +347,13 @@ export const extractDriverAndVehicle = (section: string): DriverAndVehicle => {
       result.isVehiclePlateAmbiguous = true;
     }
 
-    return markBlankDriverName(result, valueLines, true);
+    return markBlankDriverName(result, lines, driverLabelIndex);
   }
 
   return markBlankDriverName(
     extractFromSingleLabel(valueLines, driverLabelIndex !== -1),
-    valueLines,
-    driverLabelIndex !== -1,
+    lines,
+    driverLabelIndex,
   );
 };
 

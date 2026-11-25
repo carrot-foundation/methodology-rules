@@ -246,6 +246,29 @@ describe('MTR shared helpers', () => {
       expect(extractDriverAndVehicle('Random text')).toEqual({});
     });
 
+    it('should not mark the driver name blank when a name sits between the driver and plate labels', () => {
+      const section = [
+        'Nome do Motorista',
+        'JOAO',
+        'Placa do Veiculo',
+        'FKE2B34',
+      ].join('\n');
+
+      expect(extractDriverAndVehicle(section)).not.toHaveProperty(
+        'isDriverNameBlank',
+      );
+    });
+
+    it('should mark the driver name blank when only a truncated plate follows the labels', () => {
+      const section = ['Nome do Motorista', 'Placa do Veiculo', 'FK2B34'].join(
+        '\n',
+      );
+
+      expect(extractDriverAndVehicle(section)).toMatchObject({
+        isDriverNameBlank: true,
+      });
+    });
+
     it('should mark the driver name blank when labels have no following values', () => {
       const section = ['Nome do Motorista', 'Placa do Veiculo', ''].join('\n');
 
