@@ -115,6 +115,16 @@ export const CROSS_VALIDATION_COMMENTS = {
     extractedDate: string;
   }) =>
     `The receiving date extracted from the document ("${extractedDate}") differs from the Drop-off event date ("${eventDate}") by ${daysDiff} day(s).`,
+  RECEIVING_DATE_WITHIN_TOLERANCE: ({
+    daysDiff,
+    eventDate,
+    extractedDate,
+  }: {
+    daysDiff: number;
+    eventDate: string;
+    extractedDate: string;
+  }) =>
+    `The receiving date extracted from the document ("${extractedDate}") differs from the Drop-off event date ("${eventDate}") by ${daysDiff} day(s), within the accepted window.`,
   RECYCLER_TAX_ID_MISMATCH: `The recycler tax ID extracted from the recycling manifest does not match the "${RECYCLER}" participant tax ID.`,
   RECYCLING_MANIFEST_WASTE_QUANTITY_WEIGHT_MISMATCH: ({
     extractedQuantityKg,
@@ -142,6 +152,16 @@ export const CROSS_VALIDATION_COMMENTS = {
     extractedDate: string;
   }) =>
     `The transport date extracted from the document ("${extractedDate}") differs from the Pick-up event date ("${eventDate}") by ${daysDiff} day(s).`,
+  TRANSPORT_DATE_WITHIN_TOLERANCE: ({
+    daysDiff,
+    eventDate,
+    extractedDate,
+  }: {
+    daysDiff: number;
+    eventDate: string;
+    extractedDate: string;
+  }) =>
+    `The transport date extracted from the document ("${extractedDate}") differs from the Pick-up event date ("${eventDate}") by ${daysDiff} day(s), within the accepted window.`,
   VEHICLE_PLATE_MISMATCH: `The vehicle plate extracted from the document does not match the Pick-up event value.`,
   WASTE_QUANTITY_FAR_BELOW_WEIGHING: ({
     extractedQuantityKg,
@@ -221,6 +241,9 @@ export const REVIEW_REASONS = {
   RECEIVER_ADDRESS_MISMATCH: reviewReason('RECEIVER_ADDRESS_MISMATCH'),
   RECEIVER_TAX_ID_MISMATCH: staticReviewReason('RECEIVER_TAX_ID_MISMATCH'),
   RECEIVING_DATE_MISMATCH: reviewReason('RECEIVING_DATE_MISMATCH'),
+  RECEIVING_DATE_WITHIN_TOLERANCE: reviewReason(
+    'RECEIVING_DATE_WITHIN_TOLERANCE',
+  ),
   RECYCLER_TAX_ID_MISMATCH: staticReviewReason('RECYCLER_TAX_ID_MISMATCH'),
   RECYCLING_MANIFEST_WASTE_QUANTITY_WEIGHT_MISMATCH: reviewReason(
     'RECYCLING_MANIFEST_WASTE_QUANTITY_WEIGHT_MISMATCH',
@@ -229,6 +252,9 @@ export const REVIEW_REASONS = {
     'RECYCLING_MANIFEST_WASTE_TYPE_MISMATCH',
   ),
   TRANSPORT_DATE_MISMATCH: reviewReason('TRANSPORT_DATE_MISMATCH'),
+  TRANSPORT_DATE_WITHIN_TOLERANCE: reviewReason(
+    'TRANSPORT_DATE_WITHIN_TOLERANCE',
+  ),
   VEHICLE_PLATE_MISMATCH: staticReviewReason('VEHICLE_PLATE_MISMATCH'),
   WASTE_QUANTITY_FAR_BELOW_WEIGHING: reviewReason(
     'WASTE_QUANTITY_FAR_BELOW_WEIGHING',

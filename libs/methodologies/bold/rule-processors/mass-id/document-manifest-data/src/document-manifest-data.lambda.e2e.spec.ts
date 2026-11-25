@@ -49,6 +49,7 @@ describe('DocumentManifestDataLambda E2E', () => {
       extractionMetadata: {},
       failMessages: [],
       failReasons: [],
+      observations: [],
       passMessages: [],
       reviewReasons: [],
       reviewRequired: false,

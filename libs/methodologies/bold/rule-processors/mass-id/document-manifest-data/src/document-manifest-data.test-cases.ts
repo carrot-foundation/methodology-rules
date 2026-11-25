@@ -36,6 +36,7 @@ import { type DocumentManifestType } from './document-manifest-data.processor';
 
 interface DocumentManifestDataTestCase extends RuleTestCase {
   crossValidationFailReasons?: ReviewReason[];
+  crossValidationObservations?: ReviewReason[];
   crossValidationPassMessages?: string[];
   crossValidationReviewReasons?: ReviewReason[];
   documentManifestType: DocumentManifestType;
@@ -114,6 +115,12 @@ const receivingDateNotExtractedReason = REVIEW_REASONS.FIELD_NOT_EXTRACTED({
   context: 'Drop-off event',
   field: 'receiving date',
 });
+const transportDateWithinToleranceReason =
+  REVIEW_REASONS.TRANSPORT_DATE_WITHIN_TOLERANCE({
+    daysDiff: 2,
+    eventDate: '2024-01-13',
+    extractedDate: '2024-01-15',
+  });
 const extractionFailedReason: ReviewReason = {
   code: 'EXTRACTION_FAILED',
   description: DOCUMENT_EXTRACTION_COMMENTS.EXTRACTION_FAILED(
@@ -455,6 +462,17 @@ export const crossValidationTestCases: DocumentManifestDataTestCase[] = [
     resultComment: 'The attachment pass message from extraction',
     resultStatus: 'PASSED',
     scenario: 'Cross-validation provides pass messages',
+  },
+  {
+    crossValidationObservations: [transportDateWithinToleranceReason],
+    crossValidationPassMessages: [
+      'The attachment pass message from extraction',
+    ],
+    documentManifestType: TRANSPORT_MANIFEST as DocumentManifestType,
+    events: crossValidatedTransportManifestEvents(),
+    resultComment: 'The attachment pass message from extraction',
+    resultStatus: 'PASSED',
+    scenario: 'Cross-validation passes with an observation',
   },
   {
     crossValidationFailReasons: [documentNumberMismatchReason],

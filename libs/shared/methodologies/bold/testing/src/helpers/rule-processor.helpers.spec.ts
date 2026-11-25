@@ -1,3 +1,7 @@
+import type {
+  FindingCategory,
+  FindingMeta,
+} from '@carrot-fndn/shared/rule/result';
 import type { RuleOutput } from '@carrot-fndn/shared/rule/types';
 
 import { stubRuleInput, stubRuleOutput } from '@carrot-fndn/shared/testing';
@@ -10,10 +14,27 @@ import {
   listAccreditationDependencies,
 } from './rule-processor.helpers';
 
-const TEST_FINDINGS = { codes: new Set(['test-rule.FAILED.MASS_MISMATCH']) };
 const TEST_FINDING = {
   code: 'test-rule.FAILED.MASS_MISMATCH',
   defaultOwner: 'RECYCLER',
+} as const;
+const TEST_OBSERVATION = {
+  code: 'test-rule.PASSED.MASS_WITHIN_TOLERANCE',
+  defaultOwner: 'TO_CONFIRM',
+} as const;
+const stubFindingMeta = (category: FindingCategory): FindingMeta => ({
+  category,
+  defaultOwner: 'CARROT',
+  description: faker.lorem.sentence(),
+  guidance: faker.lorem.sentence(),
+  title: faker.lorem.words(),
+});
+const TEST_FINDINGS = {
+  codes: new Set([TEST_FINDING.code, TEST_OBSERVATION.code]),
+  declarations: [
+    { finding: TEST_FINDING, meta: stubFindingMeta('DOCUMENT_DIVERGENCE') },
+    { finding: TEST_OBSERVATION, meta: stubFindingMeta('OBSERVATION') },
+  ],
 };
 
 describe('expectRuleFindings', () => {
@@ -84,15 +105,35 @@ describe('expectRuleFindings', () => {
     ).toThrow('Expected validation to succeed');
   });
 
-  it('should fail a PASSED output with findings', () => {
+  it('should fail a PASSED output with a finding that is not an observation', () => {
     const ruleOutput = stubRuleOutput({
       resultContent: { findings: [TEST_FINDING] },
       resultStatus: 'PASSED',
     });
 
     expect(() => expectRuleFindings(ruleOutput, TEST_FINDINGS)).toThrow(
-      'to not have property "findings"',
+      'Expected validation to succeed',
     );
+  });
+
+  it('should return a PASSED output without its observation findings', () => {
+    const ruleInput = stubRuleInput();
+    const expectedRuleOutput: RuleOutput = {
+      requestId: ruleInput.requestId,
+      responseToken: ruleInput.responseToken,
+      responseUrl: ruleInput.responseUrl,
+      resultStatus: 'PASSED',
+    };
+
+    expect(
+      expectRuleFindings(
+        {
+          ...expectedRuleOutput,
+          resultContent: { findings: [TEST_OBSERVATION] },
+        },
+        TEST_FINDINGS,
+      ),
+    ).toStrictEqual(expectedRuleOutput);
   });
 });
 

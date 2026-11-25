@@ -118,6 +118,10 @@ const processInput = async <
       result.failReasons.push(...validationResult.failReasons);
     }
 
+    if (validationResult.observations) {
+      result.observations.push(...validationResult.observations);
+    }
+
     if (validationResult.passMessage) {
       result.passMessages.push(validationResult.passMessage);
     }
@@ -157,6 +161,7 @@ export const crossValidateAttachments = async <
     extractionMetadata: {},
     failMessages: [],
     failReasons: [],
+    observations: [],
     passMessages: [],
     reviewReasons: [],
     reviewRequired: false,

@@ -119,8 +119,24 @@ export interface DayDifferenceWindow {
   min: number;
 }
 
+interface DateDifference {
+  daysDiff: number;
+  event: string;
+  extracted: string;
+}
+
 const isWithinWindow = (daysDiff: number, window: DayDifferenceWindow) =>
   daysDiff >= window.min && daysDiff <= window.max;
+
+const observeAcceptedDifference = (
+  difference: DateDifference,
+  onAcceptedDifference:
+    | ((parameters: DateDifference) => ReviewReason)
+    | undefined,
+): FieldValidationResult[] =>
+  difference.daysDiff !== 0 && onAcceptedDifference
+    ? [{ observation: onAcceptedDifference(difference) }]
+    : [];
 
 export const compareDateField = (
   field: ExtractedField<string> | undefined,
@@ -128,11 +144,8 @@ export const compareDateField = (
   options: {
     acceptedWindow: DayDifferenceWindow;
     notExtractedReason?: ReviewReason;
-    onMismatch: (parameters: {
-      daysDiff: number;
-      event: string;
-      extracted: string;
-    }) => ReviewReason;
+    onAcceptedDifference?: (parameters: DateDifference) => ReviewReason;
+    onMismatch: (parameters: DateDifference) => ReviewReason;
     reviewWindow: DayDifferenceWindow;
     timezone?: string;
   },
@@ -170,22 +183,27 @@ export const compareDateField = (
     };
   }
 
-  if (field.confidence !== 'high' || localEventDate === undefined) {
+  if (field.confidence !== 'high' || signedDaysDiff === undefined) {
     return { debug, validation: [] };
   }
 
-  if (
-    signedDaysDiff === undefined ||
-    isWithinWindow(signedDaysDiff, options.acceptedWindow)
-  ) {
-    return { debug, validation: [] };
-  }
-
-  const reason = options.onMismatch({
+  const difference: DateDifference = {
     daysDiff: Math.abs(signedDaysDiff),
     event: eventDate!,
     extracted: field.parsed,
-  });
+  };
+
+  if (isWithinWindow(signedDaysDiff, options.acceptedWindow)) {
+    return {
+      debug,
+      validation: observeAcceptedDifference(
+        difference,
+        options.onAcceptedDifference,
+      ),
+    };
+  }
+
+  const reason = options.onMismatch(difference);
 
   const reasonWithComparedFields = {
     ...reason,
@@ -194,7 +212,7 @@ export const compareDateField = (
         event: eventDate!,
         extracted: field.parsed,
         field: 'date',
-        similarity: `${Math.abs(signedDaysDiff)} days`,
+        similarity: `${difference.daysDiff} days`,
       },
     ],
   };

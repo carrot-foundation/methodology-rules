@@ -64,6 +64,7 @@ describe('DocumentManifestDataProcessor', () => {
       extractionMetadata: {},
       failMessages: [],
       failReasons: [],
+      observations: [],
       passMessages: [],
       reviewReasons: [],
       reviewRequired: false,
@@ -132,6 +133,7 @@ describe('DocumentManifestDataProcessor', () => {
 
   const processTestCase = async ({
     crossValidationFailReasons: failReasons = [],
+    crossValidationObservations: observations = [],
     crossValidationPassMessages: passMessages = [],
     crossValidationReviewReasons: reviewReasons = [],
     documentManifestType,
@@ -145,6 +147,7 @@ describe('DocumentManifestDataProcessor', () => {
       extractionMetadata: {},
       failMessages: failReasons.map(({ description }) => description),
       failReasons,
+      observations,
       passMessages,
       reviewReasons,
       reviewRequired: reviewReasons.length > 0,
@@ -240,6 +243,22 @@ describe('DocumentManifestDataProcessor', () => {
       ),
       DOCUMENT_MANIFEST_DATA_FINDINGS.finding(
         'CROSS_VALIDATION.VEHICLE_PLATE_MISMATCH',
+      ),
+    ]);
+  });
+
+  it('should return the observation findings when cross-validation passes with observations', async () => {
+    const { ruleOutput } = await processTestCase(
+      findTestCase(
+        crossValidationTestCases,
+        'Cross-validation passes with an observation',
+      ),
+    );
+
+    expect(ruleOutput.resultStatus).toBe('PASSED');
+    expect(ruleOutput.resultContent?.['findings']).toEqual([
+      DOCUMENT_MANIFEST_DATA_FINDINGS.finding(
+        'CROSS_VALIDATION.TRANSPORT_DATE_WITHIN_TOLERANCE',
       ),
     ]);
   });

@@ -110,6 +110,7 @@ describe('crossValidateAttachments', () => {
       extractionMetadata: {},
       failMessages: [],
       failReasons: [],
+      observations: [],
       passMessages: [],
       reviewReasons: [],
       reviewRequired: false,
@@ -544,6 +545,28 @@ describe('crossValidateAttachments', () => {
       ]),
     );
     expect(result.failMessages).toHaveLength(0);
+  });
+
+  it('should collect observations from validate callback without requiring review', async () => {
+    const observation = {
+      code: 'DATE_WITHIN_TOLERANCE',
+      description: 'Date differs within the accepted window',
+    };
+    const extractor = createMockExtractor(createExtractionOutput());
+    const config = createConfig({
+      validate: () => ({ failMessages: [], observations: [observation] }),
+    });
+    const inputs: CrossValidationInput<TestEventData>[] = [
+      {
+        attachmentInfo: createAttachmentInfo('att-1'),
+        eventData: createEventData('CDF', 'expected'),
+      },
+    ];
+
+    const result = await crossValidateAttachments(inputs, config, extractor);
+
+    expect(result.observations).toEqual([observation]);
+    expect(result.reviewRequired).toBe(false);
   });
 
   it('should collect passMessage from validate callback', async () => {

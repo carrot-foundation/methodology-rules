@@ -16,11 +16,14 @@ export type CrossValidationResponse = ValidationResult & {
   crossValidation?: AttachmentCrossValidation;
   extractionMetadata?: Record<string, unknown>;
   failReasons?: ReviewReason[];
+  observations?: ReviewReason[];
   reviewReasons?: ReviewReason[];
 };
 
 export interface FieldValidationResult {
   failReason?: ReviewReason;
+  // A divergence inside the accepted window: it never blocks approval
+  observation?: ReviewReason;
   reviewReason?: ReviewReason;
 }
 
@@ -41,14 +44,20 @@ export const collectResults = (
   results: FieldValidationResult[],
 ): {
   failReasons: ReviewReason[];
+  observations: ReviewReason[];
   reviewReasons: ReviewReason[];
 } => {
   const failReasons: ReviewReason[] = [];
+  const observations: ReviewReason[] = [];
   const reviewReasons: ReviewReason[] = [];
 
-  for (const { failReason, reviewReason } of results) {
+  for (const { failReason, observation, reviewReason } of results) {
     if (failReason) {
       failReasons.push(failReason);
+    }
+
+    if (observation) {
+      observations.push(observation);
     }
 
     if (reviewReason) {
@@ -56,7 +65,7 @@ export const collectResults = (
     }
   }
 
-  return { failReasons, reviewReasons };
+  return { failReasons, observations, reviewReasons };
 };
 
 const {

@@ -8,7 +8,7 @@ import type {
   FindingMeta,
 } from './rule-findings';
 
-export const FINDING_CATALOG_SCHEMA_VERSION = '1.1.0';
+export const FINDING_CATALOG_SCHEMA_VERSION = '1.2.0';
 
 export const FINDING_OWNER_LABELS: Record<FindingOwner, string> = {
   CARROT: 'Carrot',
@@ -27,6 +27,7 @@ export const FINDING_CATEGORY_LABELS: Record<FindingCategory, string> = {
   METHODOLOGY_REQUIREMENT: 'Requisito da metodologia',
   MISSING_DATA: 'Dado obrigatório ausente',
   MISSING_EVENT: 'Evento ausente',
+  OBSERVATION: 'Observação',
   PRIVACY: 'Privacidade',
   PROCESSING_ERROR: 'Falha de processamento',
 };

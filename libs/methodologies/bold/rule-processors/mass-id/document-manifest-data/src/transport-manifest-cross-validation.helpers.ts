@@ -237,6 +237,12 @@ export const validateMtrExtractedData = (
         context: 'Pick-up event',
         field: 'transport date',
       }),
+      onAcceptedDifference: ({ daysDiff, event, extracted }) =>
+        REVIEW_REASONS.TRANSPORT_DATE_WITHIN_TOLERANCE({
+          daysDiff,
+          eventDate: event,
+          extractedDate: extracted,
+        }),
       onMismatch: ({ daysDiff, event, extracted }) =>
         REVIEW_REASONS.TRANSPORT_DATE_MISMATCH({
           daysDiff,
@@ -257,6 +263,12 @@ export const validateMtrExtractedData = (
         context: 'Drop-off event',
         field: 'receiving date',
       }),
+      onAcceptedDifference: ({ daysDiff, event, extracted }) =>
+        REVIEW_REASONS.RECEIVING_DATE_WITHIN_TOLERANCE({
+          daysDiff,
+          eventDate: event,
+          extractedDate: extracted,
+        }),
       onMismatch: ({ daysDiff, event, extracted }) =>
         REVIEW_REASONS.RECEIVING_DATE_MISMATCH({
           daysDiff,
@@ -310,7 +322,7 @@ export const validateMtrExtractedData = (
     wasteType: wasteType.debug,
   };
 
-  const { failReasons, reviewReasons } = collectResults([
+  const { failReasons, observations, reviewReasons } = collectResults([
     ...documentNumber.validation,
     ...issueDate.validation,
     ...vehiclePlate.validation,
@@ -338,6 +350,7 @@ export const validateMtrExtractedData = (
   return {
     crossValidation,
     failMessages,
+    ...(observations.length > 0 && { observations }),
     reviewRequired: false,
   };
 };

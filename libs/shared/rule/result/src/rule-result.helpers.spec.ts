@@ -122,13 +122,29 @@ describe('mapToRuleOutput', () => {
     expect(result.resultContent).toEqual({ findings: resultFindings });
   });
 
-  it('should not add findings to a PASSED result', () => {
+  it('should merge the observation findings beside the result content of a PASSED result', () => {
+    const resultContent = { [faker.string.alpha(8)]: faker.string.sample() };
+    const resultFindings = [createStubFromSchema(RuleFindingSchema)];
+
+    const result = mapToRuleOutput(stubRuleInput(), 'PASSED', {
+      resultContent,
+      resultFindings,
+    });
+
+    expect(result.resultContent).toEqual({
+      ...resultContent,
+      findings: resultFindings,
+    });
+    expect(logger.error).not.toHaveBeenCalled();
+  });
+
+  it('should keep a PASSED result unchanged when it has no findings', () => {
     const ruleInput = stubRuleInput();
     const resultContent = { [faker.string.alpha(8)]: faker.string.sample() };
 
     const result = mapToRuleOutput(ruleInput, 'PASSED', {
       resultContent,
-      resultFindings: [createStubFromSchema(RuleFindingSchema)],
+      resultFindings: [],
     });
 
     expect(result).toStrictEqual({

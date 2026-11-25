@@ -8,6 +8,7 @@ import {
 import { BoldReportType } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
   defineRuleFindings,
+  type FindingMeta,
   crossValidationEvidence as selectCrossValidationEvidence,
 } from '@carrot-fndn/shared/rule/result';
 
@@ -27,6 +28,43 @@ const crossValidationEvidence = selectCrossValidationEvidence<
   CdfCrossValidation & MtrCrossValidation
 >;
 
+const mtrDateWithinToleranceObservation = ({
+  acceptedWindow,
+  eventName,
+  field,
+  title,
+}: {
+  acceptedWindow: string;
+  eventName: string;
+  field: 'receivingDate' | 'transportDate';
+  title: string;
+}): FindingMeta => ({
+  category: 'OBSERVATION',
+  defaultOwner: 'TO_CONFIRM',
+  description: `A ${title.toLowerCase()} lida no MTR difere da data do evento "${eventName}", mas fica dentro da janela aceita: ${acceptedWindow}.`,
+  documentKinds: [BoldReportType.MTR],
+  evidence: [crossValidationEvidence(field)],
+  guidance: `Nenhuma correção é necessária para a aprovação. Para evitar a observação, confira a data do evento "${eventName}" e o MTR anexado e alinhe as datas na origem.`,
+  title: `${title} difere do MTR dentro da janela aceita`,
+});
+
+const MTR_DATE_OBSERVATIONS = {
+  'CROSS_VALIDATION.RECEIVING_DATE_WITHIN_TOLERANCE':
+    mtrDateWithinToleranceObservation({
+      acceptedWindow: 'de 1 dia antes a 10 dias depois',
+      eventName: 'Drop-off',
+      field: 'receivingDate',
+      title: 'Data de recebimento',
+    }),
+  'CROSS_VALIDATION.TRANSPORT_DATE_WITHIN_TOLERANCE':
+    mtrDateWithinToleranceObservation({
+      acceptedWindow: 'até 7 dias depois',
+      eventName: 'Pick-up',
+      field: 'transportDate',
+      title: 'Data de transporte',
+    }),
+} as const;
+
 export const DOCUMENT_MANIFEST_DATA_FINDINGS = defineRuleFindings(
   ruleDefinition.slug,
   {
@@ -36,6 +74,7 @@ export const DOCUMENT_MANIFEST_DATA_FINDINGS = defineRuleFindings(
     RESULT: RESULT_COMMENTS,
   },
   {
+    ...MTR_DATE_OBSERVATIONS,
     'CROSS_VALIDATION.DOCUMENT_EXTRACTION_CONFIDENCE_LOW': {
       category: 'DOCUMENT_READING',
       defaultOwner: 'CARROT',
