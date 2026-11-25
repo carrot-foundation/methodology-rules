@@ -1,5 +1,6 @@
 import {
   clearRegistry,
+  createBlankField,
   DocumentExtractor,
   registerParser,
 } from '@carrot-fndn/shared/document-extractor';
@@ -361,7 +362,7 @@ describe('MtrSigorParser', () => {
       expect(result.data.vehiclePlate?.parsed).toBe('FKE2B34');
     });
 
-    it('should not extract driver name when labels have no following values', () => {
+    it('should mark the driver name blank when labels have no following values', () => {
       const noValueText = [
         'MTR n° 123456',
         'Data da emissão: 01/01/2024',
@@ -377,8 +378,8 @@ describe('MtrSigorParser', () => {
 
       const result = parser.parse(stubTextExtractionResult(noValueText));
 
-      expect(result.data.driverName?.parsed).toBe('');
-      expect(result.data.driverName?.confidence).toBe('low');
+      expect(result.data.driverName).toEqual(createBlankField(''));
+      expect(result.data.blankFields).toContain('driverName');
       expect(result.data.vehiclePlate?.parsed).toBe('');
       expect(result.data.vehiclePlate?.confidence).toBe('low');
     });

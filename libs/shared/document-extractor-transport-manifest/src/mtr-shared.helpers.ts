@@ -1,6 +1,7 @@
 import type { TextExtractionResult } from '@carrot-fndn/shared/text-extractor';
 
 import {
+  createBlankField,
   createExtractedEntityWithAddress,
   createHighConfidenceField,
   createLowConfidenceField,
@@ -143,6 +144,7 @@ const BOILERPLATE_PATTERN =
 
 export interface DriverAndVehicle {
   driverName?: string;
+  isDriverNameBlank?: boolean;
   isVehiclePlateAmbiguous?: boolean;
   vehiclePlate?: string;
 }
@@ -291,6 +293,32 @@ const extractFromSingleLabel = (
   return result;
 };
 
+const isBareDriverLabel = (line: string): boolean => {
+  const text = line.toLowerCase().trim();
+  const label = text.endsWith(':') ? text.slice(0, -1).trim() : text;
+
+  return (DRIVER_LABELS as readonly string[]).includes(label);
+};
+
+const isPlateLine = (line: string): boolean =>
+  VEHICLE_PLATE_FORMAT.test(line) || TRUNCATED_PLATE_FORMAT.test(line);
+
+// Only a driver label followed by nothing but a plate is blank; any other unparsed line may be a misread name
+const markBlankDriverName = (
+  result: DriverAndVehicle,
+  lines: string[],
+  driverLabelIndex: number,
+): DriverAndVehicle =>
+  driverLabelIndex !== -1 &&
+  result.driverName === undefined &&
+  isBareDriverLabel(lines[driverLabelIndex]!) &&
+  lines
+    .slice(driverLabelIndex + 1)
+    .filter((line) => isValueLine(line))
+    .every((line) => isPlateLine(line))
+    ? { ...result, isDriverNameBlank: true }
+    : result;
+
 export const extractDriverAndVehicle = (section: string): DriverAndVehicle => {
   const lines = section.split('\n').map((line) => line.trim());
 
@@ -310,7 +338,7 @@ export const extractDriverAndVehicle = (section: string): DriverAndVehicle => {
   );
 
   if (inlineResult) {
-    return inlineResult;
+    return markBlankDriverName(inlineResult, lines, driverLabelIndex);
   }
 
   const lastLabelIndex = Math.max(driverLabelIndex, plateLabelIndex);
@@ -327,10 +355,14 @@ export const extractDriverAndVehicle = (section: string): DriverAndVehicle => {
       result.isVehiclePlateAmbiguous = true;
     }
 
-    return result;
+    return markBlankDriverName(result, lines, driverLabelIndex);
   }
 
-  return extractFromSingleLabel(valueLines, driverLabelIndex !== -1);
+  return markBlankDriverName(
+    extractFromSingleLabel(valueLines, driverLabelIndex !== -1),
+    lines,
+    driverLabelIndex,
+  );
 };
 
 export const createExtractedWasteTypeEntry = (
@@ -434,14 +466,20 @@ export const extractHaulerFields = (
   );
 
   if (haulerSection) {
-    const { driverName, isVehiclePlateAmbiguous, vehiclePlate } =
-      extractDriverAndVehicle(haulerSection);
+    const {
+      driverName,
+      isDriverNameBlank,
+      isVehiclePlateAmbiguous,
+      vehiclePlate,
+    } = extractDriverAndVehicle(haulerSection);
 
     if (driverName) {
       partialData.driverName = createHighConfidenceField(
         driverName,
         `Nome do Motorista\n${driverName}`,
       );
+    } else if (isDriverNameBlank === true) {
+      partialData.driverName = createBlankField('');
     } else if (labelPatterns.driverName.test(haulerSection)) {
       partialData.driverName = createLowConfidenceField('');
     }

@@ -1,16 +1,20 @@
-import type { BoldDocumentEvent } from '@carrot-fndn/shared/methodologies/bold/types';
-
 import {
   blankFieldReviewReason,
   createDocumentExtractor,
   crossValidateAttachments,
   type CrossValidationInput,
   type CrossValidationResult,
+  type ReviewReason,
 } from '@carrot-fndn/shared/document-extractor';
+import { isNonEmptyString, logger } from '@carrot-fndn/shared/helpers';
+import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
 // Side-effect imports: parsers self-register via registerParser() at module load
 import '@carrot-fndn/shared/document-extractor-recycling-manifest';
 import '@carrot-fndn/shared/document-extractor-transport-manifest';
-import { logger } from '@carrot-fndn/shared/helpers';
+import {
+  BoldAttributeName,
+  type BoldDocumentEvent,
+} from '@carrot-fndn/shared/methodologies/bold/types';
 import {
   pdfTextLayerExtractor,
   textExtractor,
@@ -38,33 +42,57 @@ const documentExtractor = createDocumentExtractor(
   pdfTextLayerExtractor,
 );
 
-// MTR systems let the transport date be left blank and filled by hand at dispatch
-const BLANK_TRANSPORT_DATE_CODE = blankFieldReviewReason('transportDate').code;
+const { DRIVER_IDENTIFIER_EXEMPTION_JUSTIFICATION } = BoldAttributeName;
 
-const isBlankTransportDate = ({ code }: { code: string }) =>
-  code === BLANK_TRANSPORT_DATE_CODE;
+const acceptedBlankFieldObservations = (
+  pickUpEvent: BoldDocumentEvent | undefined,
+): Map<string, () => ReviewReason> => {
+  // MTR systems let the transport date be left blank and filled by hand at dispatch
+  const accepted = new Map([
+    [
+      blankFieldReviewReason('transportDate').code,
+      REVIEW_REASONS.TRANSPORT_DATE_BLANK,
+    ],
+  ]);
 
-const observeBlankTransportDates = (
+  if (
+    isNonEmptyString(
+      getEventAttributeValue(
+        pickUpEvent,
+        DRIVER_IDENTIFIER_EXEMPTION_JUSTIFICATION,
+      ),
+    )
+  ) {
+    accepted.set(
+      blankFieldReviewReason('driverName').code,
+      REVIEW_REASONS.DRIVER_NAME_BLANK,
+    );
+  }
+
+  return accepted;
+};
+
+const observeAcceptedBlankFields = (
   result: CrossValidationResult,
+  accepted: Map<string, () => ReviewReason>,
 ): CrossValidationResult => {
-  const blankTransportDates = result.reviewReasons.filter((reason) =>
-    isBlankTransportDate(reason),
-  );
+  const observations = result.reviewReasons.flatMap(({ code }) => {
+    const observation = accepted.get(code);
 
-  if (blankTransportDates.length === 0) {
+    return observation ? [observation()] : [];
+  });
+
+  if (observations.length === 0) {
     return result;
   }
 
   const reviewReasons = result.reviewReasons.filter(
-    (reason) => !isBlankTransportDate(reason),
+    ({ code }) => !accepted.has(code),
   );
 
   return {
     ...result,
-    observations: [
-      ...result.observations,
-      ...blankTransportDates.map(() => REVIEW_REASONS.TRANSPORT_DATE_BLANK()),
-    ],
+    observations: [...result.observations, ...observations],
     reviewReasons,
     reviewRequired: reviewReasons.length > 0,
   };
@@ -171,5 +199,8 @@ export const crossValidateWithTextract = async ({
     documentExtractor,
   );
 
-  return observeBlankTransportDates(result);
+  return observeAcceptedBlankFields(
+    result,
+    acceptedBlankFieldObservations(pickUpEvent),
+  );
 };

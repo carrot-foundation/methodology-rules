@@ -1,4 +1,8 @@
-import { clearRegistry } from '@carrot-fndn/shared/document-extractor';
+import {
+  clearRegistry,
+  createBlankField,
+  createLowConfidenceField,
+} from '@carrot-fndn/shared/document-extractor';
 import {
   stubTextExtractionResult,
   stubTextExtractionResultWithBlocks,
@@ -6,6 +10,25 @@ import {
 
 import { toWasteTypeEntryData } from './mtr-shared.helpers';
 import { MtrSinfatParser } from './mtr-sinfat.parser';
+
+const sinfatWithHaulerValues = (values: string[]) =>
+  [
+    'Manifesto de Transporte de Resíduos',
+    'MTR nº 0124048986',
+    'Data de Emissão: 15/03/2024',
+    '',
+    'Transportador',
+    'TRANSPORTES LTDA',
+    'CNPJ: 98.765.432/0001-10',
+    'Nome do Motorista',
+    'Placa do Veículo',
+    ...values,
+    '',
+    'Destinatário',
+    'RECICLAGEM LTDA',
+    'CNPJ: 11.222.333/0001-44',
+    'Tecnologia: Compostagem',
+  ].join('\n');
 
 describe('MtrSinfatParser', () => {
   const parser = new MtrSinfatParser();
@@ -248,26 +271,22 @@ Tecnologia: Compostagem`;
       expect(result.data.vehiclePlate?.confidence).toBe('low');
     });
 
-    it('should set low confidence when driver/plate labels exist but no values', () => {
-      const text = `Manifesto de Transporte de Resíduos
-MTR nº 0124048986
-Data de Emissão: 15/03/2024
+    it('should keep low confidence when a driver value is present but not parsed as a name', () => {
+      const result = parser.parse(
+        stubTextExtractionResult(sinfatWithHaulerValues(['JOAO'])),
+      );
 
-Transportador
-TRANSPORTES LTDA
-CNPJ: 98.765.432/0001-10
-Nome do Motorista
-Placa do Veículo
+      expect(result.data.driverName).toEqual(createLowConfidenceField(''));
+      expect(result.data.blankFields ?? []).not.toContain('driverName');
+    });
 
-Destinatário
-RECICLAGEM LTDA
-CNPJ: 11.222.333/0001-44
-Tecnologia: Compostagem`;
+    it('should mark the driver name blank and the plate low confidence when driver/plate labels exist but no values', () => {
+      const result = parser.parse(
+        stubTextExtractionResult(sinfatWithHaulerValues([])),
+      );
 
-      const result = parser.parse(stubTextExtractionResult(text));
-
-      expect(result.data.driverName?.parsed).toBe('');
-      expect(result.data.driverName?.confidence).toBe('low');
+      expect(result.data.driverName).toEqual(createBlankField(''));
+      expect(result.data.blankFields).toContain('driverName');
       expect(result.data.vehiclePlate?.parsed).toBe('');
       expect(result.data.vehiclePlate?.confidence).toBe('low');
     });

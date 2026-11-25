@@ -1,4 +1,7 @@
-import { clearRegistry } from '@carrot-fndn/shared/document-extractor';
+import {
+  clearRegistry,
+  createBlankField,
+} from '@carrot-fndn/shared/document-extractor';
 import { stubTextExtractionResult } from '@carrot-fndn/shared/text-extractor';
 
 import { toWasteTypeEntryData } from './mtr-shared.helpers';
@@ -429,7 +432,7 @@ IBAMA`;
       expect(result.data.vehiclePlate?.confidence).toBe('low');
     });
 
-    it('should set low confidence when labels exist but no valid values follow', () => {
+    it('should mark the driver name blank and the plate low confidence when labels exist but no valid values follow', () => {
       const text = `MANIFESTO DE TRANSPORTE DE RESÍDUOS - MTR
 MTR Nº: 123456789
 Data de Emissão: 15/03/2024
@@ -447,8 +450,8 @@ IBAMA`;
 
       const result = parser.parse(stubTextExtractionResult(text));
 
-      expect(result.data.driverName?.parsed).toBe('');
-      expect(result.data.driverName?.confidence).toBe('low');
+      expect(result.data.driverName).toEqual(createBlankField(''));
+      expect(result.data.blankFields).toContain('driverName');
       expect(result.data.vehiclePlate?.parsed).toBe('');
       expect(result.data.vehiclePlate?.confidence).toBe('low');
     });

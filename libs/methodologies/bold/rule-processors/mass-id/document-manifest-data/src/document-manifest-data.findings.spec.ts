@@ -111,6 +111,7 @@ describe('DOCUMENT_MANIFEST_DATA_FINDINGS catalog', () => {
       ?.contexts.map(({ documentKind }) => documentKind);
 
   const mtrOnlyKeys = [
+    'CROSS_VALIDATION.DRIVER_NAME_BLANK',
     'CROSS_VALIDATION.HAULER_TAX_ID_MISMATCH',
     'CROSS_VALIDATION.RECEIVER_ADDRESS_MISMATCH',
     'CROSS_VALIDATION.RECEIVER_TAX_ID_MISMATCH',
