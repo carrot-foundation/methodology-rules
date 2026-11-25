@@ -232,7 +232,7 @@ Tecnologia: Compostagem`;
       expect(result.data.vehiclePlate?.confidence).toBe('high');
     });
 
-    it('should mark the driver name blank and the plate low confidence when driver/plate labels are outside any section', () => {
+    it('should set low confidence when driver/plate labels are outside any section', () => {
       const text = `Manifesto de Transporte de Resíduos
 MTR nº 0124048986
 Data de Emissão: 15/03/2024
@@ -242,14 +242,33 @@ Tecnologia: Compostagem`;
 
       const result = parser.parse(stubTextExtractionResult(text));
 
-      expect(result.data.driverName).toEqual({
-        blank: true,
-        confidence: 'low',
-        parsed: '',
-      });
-      expect(result.data.blankFields).toContain('driverName');
+      expect(result.data.driverName?.parsed).toBe('');
+      expect(result.data.driverName?.confidence).toBe('low');
       expect(result.data.vehiclePlate?.parsed).toBe('');
       expect(result.data.vehiclePlate?.confidence).toBe('low');
+    });
+
+    it('should keep low confidence when a driver value is present but not parsed as a name', () => {
+      const text = `Manifesto de Transporte de Resíduos
+MTR nº 0124048986
+Data de Emissão: 15/03/2024
+
+Transportador
+TRANSPORTES LTDA
+CNPJ: 98.765.432/0001-10
+Nome do Motorista
+Placa do Veículo
+JOAO
+
+Destinatário
+RECICLAGEM LTDA
+CNPJ: 11.222.333/0001-44
+Tecnologia: Compostagem`;
+
+      const result = parser.parse(stubTextExtractionResult(text));
+
+      expect(result.data.driverName).toEqual({ confidence: 'low', parsed: '' });
+      expect(result.data.blankFields ?? []).not.toContain('driverName');
     });
 
     it('should mark the driver name blank and the plate low confidence when driver/plate labels exist but no values', () => {

@@ -144,6 +144,7 @@ const BOILERPLATE_PATTERN =
 
 export interface DriverAndVehicle {
   driverName?: string;
+  isDriverNameBlank?: boolean;
   isVehiclePlateAmbiguous?: boolean;
   vehiclePlate?: string;
 }
@@ -292,6 +293,21 @@ const extractFromSingleLabel = (
   return result;
 };
 
+const isPlateLine = (line: string): boolean =>
+  VEHICLE_PLATE_FORMAT.test(line) || TRUNCATED_PLATE_FORMAT.test(line);
+
+// Only a driver label followed by nothing but a plate is blank; any other unparsed line may be a misread name
+const markBlankDriverName = (
+  result: DriverAndVehicle,
+  valueLines: string[],
+  hasDriverLabel: boolean,
+): DriverAndVehicle =>
+  hasDriverLabel &&
+  result.driverName === undefined &&
+  valueLines.every((line) => isPlateLine(line))
+    ? { ...result, isDriverNameBlank: true }
+    : result;
+
 export const extractDriverAndVehicle = (section: string): DriverAndVehicle => {
   const lines = section.split('\n').map((line) => line.trim());
 
@@ -328,10 +344,14 @@ export const extractDriverAndVehicle = (section: string): DriverAndVehicle => {
       result.isVehiclePlateAmbiguous = true;
     }
 
-    return result;
+    return markBlankDriverName(result, valueLines, true);
   }
 
-  return extractFromSingleLabel(valueLines, driverLabelIndex !== -1);
+  return markBlankDriverName(
+    extractFromSingleLabel(valueLines, driverLabelIndex !== -1),
+    valueLines,
+    driverLabelIndex !== -1,
+  );
 };
 
 export const createExtractedWasteTypeEntry = (
@@ -435,16 +455,22 @@ export const extractHaulerFields = (
   );
 
   if (haulerSection) {
-    const { driverName, isVehiclePlateAmbiguous, vehiclePlate } =
-      extractDriverAndVehicle(haulerSection);
+    const {
+      driverName,
+      isDriverNameBlank,
+      isVehiclePlateAmbiguous,
+      vehiclePlate,
+    } = extractDriverAndVehicle(haulerSection);
 
     if (driverName) {
       partialData.driverName = createHighConfidenceField(
         driverName,
         `Nome do Motorista\n${driverName}`,
       );
-    } else if (labelPatterns.driverName.test(haulerSection)) {
+    } else if (isDriverNameBlank === true) {
       partialData.driverName = createBlankField('');
+    } else if (labelPatterns.driverName.test(haulerSection)) {
+      partialData.driverName = createLowConfidenceField('');
     }
 
     if (vehiclePlate) {
@@ -465,7 +491,7 @@ export const extractHaulerFields = (
   }
 
   if (labelPatterns.driverName.test(rawText)) {
-    partialData.driverName = createBlankField('');
+    partialData.driverName = createLowConfidenceField('');
   }
 
   if (labelPatterns.vehiclePlate.test(rawText)) {

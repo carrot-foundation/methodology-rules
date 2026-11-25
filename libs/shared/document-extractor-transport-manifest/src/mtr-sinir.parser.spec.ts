@@ -423,12 +423,8 @@ IBAMA`;
       expect(result.data.transportDate?.confidence).toBe('low');
       expect(result.data.receivingDate?.parsed).toBe('');
       expect(result.data.receivingDate?.confidence).toBe('low');
-      expect(result.data.driverName).toEqual({
-        blank: true,
-        confidence: 'low',
-        parsed: '',
-      });
-      expect(result.data.blankFields).toContain('driverName');
+      expect(result.data.driverName?.parsed).toBe('');
+      expect(result.data.driverName?.confidence).toBe('low');
       expect(result.data.vehiclePlate?.parsed).toBe('');
       expect(result.data.vehiclePlate?.confidence).toBe('low');
     });

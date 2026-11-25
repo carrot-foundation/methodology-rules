@@ -206,11 +206,27 @@ describe('MTR shared helpers', () => {
       });
     });
 
-    it('should return empty when only driver label present but no valid name lines', () => {
+    it('should mark the driver name blank when only the driver label is present with no value', () => {
       const section = ['Nome do Motorista', ''].join('\n');
 
-      expect(extractDriverAndVehicle(section)).toEqual({});
+      expect(extractDriverAndVehicle(section)).toEqual({
+        isDriverNameBlank: true,
+      });
     });
+
+    it.each([
+      { scenario: 'a one-word name', value: 'JOAO' },
+      { scenario: 'an accented name', value: 'JOSÉ' },
+    ])(
+      'should not mark the driver name blank when $scenario follows the labels but is not parsed',
+      ({ value }) => {
+        const section = ['Nome do Motorista', 'Placa do Veiculo', value].join(
+          '\n',
+        );
+
+        expect(extractDriverAndVehicle(section)).toEqual({});
+      },
+    );
 
     it('should extract only plate when only plate label is present', () => {
       const section = ['Placa do Veiculo', 'FKE2B34'].join('\n');
@@ -230,10 +246,12 @@ describe('MTR shared helpers', () => {
       expect(extractDriverAndVehicle('Random text')).toEqual({});
     });
 
-    it('should return empty when labels have no following values', () => {
+    it('should mark the driver name blank when labels have no following values', () => {
       const section = ['Nome do Motorista', 'Placa do Veiculo', ''].join('\n');
 
-      expect(extractDriverAndVehicle(section)).toEqual({});
+      expect(extractDriverAndVehicle(section)).toEqual({
+        isDriverNameBlank: true,
+      });
     });
 
     it('should handle Mercosul plate format', () => {
@@ -313,12 +331,13 @@ describe('MTR shared helpers', () => {
       });
     });
 
-    it('should extract only plate when both labels present but no name-like value', () => {
+    it('should extract only plate and mark the driver name blank when both labels present but only a plate follows', () => {
       const section = ['Nome do Motorista', 'Placa do Veiculo', 'FKE2B34'].join(
         '\n',
       );
 
       expect(extractDriverAndVehicle(section)).toEqual({
+        isDriverNameBlank: true,
         vehiclePlate: 'FKE2B34',
       });
     });
