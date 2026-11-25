@@ -110,84 +110,39 @@ describe('DOCUMENT_MANIFEST_DATA_FINDINGS catalog', () => {
       .find(({ code }) => code === `document-manifest-data.${key}`)
       ?.contexts.map(({ documentKind }) => documentKind);
 
+  const mtrOnlyKeys = [
+    'CROSS_VALIDATION.HAULER_TAX_ID_MISMATCH',
+    'CROSS_VALIDATION.RECEIVER_ADDRESS_MISMATCH',
+    'CROSS_VALIDATION.RECEIVER_TAX_ID_MISMATCH',
+    'CROSS_VALIDATION.RECEIVING_DATE_MISMATCH',
+    'CROSS_VALIDATION.RECEIVING_DATE_WITHIN_TOLERANCE',
+    'CROSS_VALIDATION.TRANSPORT_DATE_BLANK',
+    'CROSS_VALIDATION.TRANSPORT_DATE_MISMATCH',
+    'CROSS_VALIDATION.TRANSPORT_DATE_WITHIN_TOLERANCE',
+    'CROSS_VALIDATION.VEHICLE_PLATE_MISMATCH',
+    'CROSS_VALIDATION.WASTE_QUANTITY_FAR_BELOW_WEIGHING',
+    'CROSS_VALIDATION.WASTE_QUANTITY_WEIGHT_MISMATCH',
+    'CROSS_VALIDATION.WASTE_TYPE_MISMATCH',
+  ];
+  const cdfOnlyKeys = [
+    'CROSS_VALIDATION.DROP_OFF_DATE_OUTSIDE_PERIOD',
+    'CROSS_VALIDATION.MTR_NUMBER_NOT_IN_CDF',
+    'CROSS_VALIDATION.RECYCLER_TAX_ID_MISMATCH',
+    'CROSS_VALIDATION.RECYCLING_MANIFEST_WASTE_QUANTITY_WEIGHT_MISMATCH',
+    'CROSS_VALIDATION.RECYCLING_MANIFEST_WASTE_TYPE_MISMATCH',
+    'RESULT.ADDRESS_MISMATCH',
+  ];
+
   it.each([
-    {
-      expected: [BoldReportType.MTR],
-      key: 'CROSS_VALIDATION.HAULER_TAX_ID_MISMATCH',
-    },
-    {
-      expected: [BoldReportType.MTR],
-      key: 'CROSS_VALIDATION.RECEIVER_ADDRESS_MISMATCH',
-    },
-    {
-      expected: [BoldReportType.MTR],
-      key: 'CROSS_VALIDATION.RECEIVER_TAX_ID_MISMATCH',
-    },
-    {
-      expected: [BoldReportType.MTR],
-      key: 'CROSS_VALIDATION.RECEIVING_DATE_MISMATCH',
-    },
-    {
-      expected: [BoldReportType.MTR],
-      key: 'CROSS_VALIDATION.RECEIVING_DATE_WITHIN_TOLERANCE',
-    },
-    {
-      expected: [BoldReportType.MTR],
-      key: 'CROSS_VALIDATION.TRANSPORT_DATE_BLANK',
-    },
-    {
-      expected: [BoldReportType.MTR],
-      key: 'CROSS_VALIDATION.TRANSPORT_DATE_MISMATCH',
-    },
-    {
-      expected: [BoldReportType.MTR],
-      key: 'CROSS_VALIDATION.TRANSPORT_DATE_WITHIN_TOLERANCE',
-    },
-    {
-      expected: [BoldReportType.MTR],
-      key: 'CROSS_VALIDATION.VEHICLE_PLATE_MISMATCH',
-    },
-    {
-      expected: [BoldReportType.MTR],
-      key: 'CROSS_VALIDATION.WASTE_QUANTITY_FAR_BELOW_WEIGHING',
-    },
-    {
-      expected: [BoldReportType.MTR],
-      key: 'CROSS_VALIDATION.WASTE_QUANTITY_WEIGHT_MISMATCH',
-    },
-    {
-      expected: [BoldReportType.MTR],
-      key: 'CROSS_VALIDATION.WASTE_TYPE_MISMATCH',
-    },
-    {
-      expected: [BoldReportType.CDF],
-      key: 'CROSS_VALIDATION.DROP_OFF_DATE_OUTSIDE_PERIOD',
-    },
-    {
-      expected: [BoldReportType.CDF],
-      key: 'CROSS_VALIDATION.MTR_NUMBER_NOT_IN_CDF',
-    },
-    {
-      expected: [BoldReportType.CDF],
-      key: 'CROSS_VALIDATION.RECYCLER_TAX_ID_MISMATCH',
-    },
-    {
-      expected: [BoldReportType.CDF],
-      key: 'CROSS_VALIDATION.RECYCLING_MANIFEST_WASTE_QUANTITY_WEIGHT_MISMATCH',
-    },
-    {
-      expected: [BoldReportType.CDF],
-      key: 'CROSS_VALIDATION.RECYCLING_MANIFEST_WASTE_TYPE_MISMATCH',
-    },
-    { expected: [BoldReportType.CDF], key: 'RESULT.ADDRESS_MISMATCH' },
-    {
+    ...mtrOnlyKeys.map((key) => ({ expected: [BoldReportType.MTR], key })),
+    ...cdfOnlyKeys.map((key) => ({ expected: [BoldReportType.CDF], key })),
+    ...[
+      'CROSS_VALIDATION.DOCUMENT_NUMBER_MISMATCH',
+      'RESULT.MISSING_ISSUE_DATE',
+    ].map((key) => ({
       expected: [BoldReportType.CDF, BoldReportType.MTR],
-      key: 'CROSS_VALIDATION.DOCUMENT_NUMBER_MISMATCH',
-    },
-    {
-      expected: [BoldReportType.CDF, BoldReportType.MTR],
-      key: 'RESULT.MISSING_ISSUE_DATE',
-    },
+      key,
+    })),
   ])(
     'should list $key under the $expected document kinds',
     ({ expected, key }) => {
@@ -200,7 +155,7 @@ describe('DOCUMENT_MANIFEST_DATA_FINDINGS catalog', () => {
       catalog.entries
         .filter(({ contexts }) => contexts.length === 1)
         .map(({ code }) => code),
-    ).toHaveLength(18);
+    ).toHaveLength(mtrOnlyKeys.length + cdfOnlyKeys.length);
   });
 
   it('should cover every declared finding code', () => {
