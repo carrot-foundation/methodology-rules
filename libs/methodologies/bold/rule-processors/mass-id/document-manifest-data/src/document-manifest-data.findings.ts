@@ -153,7 +153,7 @@ export const DOCUMENT_MANIFEST_DATA_FINDINGS = defineRuleFindings(
       category: 'DOCUMENT_DIVERGENCE',
       defaultOwner: 'TO_CONFIRM',
       description:
-        'A data de recebimento lida no MTR difere da data do evento "Drop-off".',
+        'A data de recebimento lida no MTR fica fora da janela aceita: de 1 dia antes a 10 dias depois da data do evento "Drop-off".',
       documentKinds: [BoldReportType.MTR],
       evidence: [crossValidationEvidence('receivingDate')],
       guidance:
@@ -197,7 +197,7 @@ export const DOCUMENT_MANIFEST_DATA_FINDINGS = defineRuleFindings(
       category: 'DOCUMENT_DIVERGENCE',
       defaultOwner: 'TO_CONFIRM',
       description:
-        'A data de transporte lida no MTR difere da data do evento "Pick-up".',
+        'A data de transporte lida no MTR é anterior à data do evento "Pick-up" ou mais de 7 dias posterior a ela.',
       documentKinds: [BoldReportType.MTR],
       evidence: [crossValidationEvidence('transportDate')],
       guidance:
