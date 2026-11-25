@@ -139,7 +139,15 @@ describe('DOCUMENT_MANIFEST_DATA_FINDINGS catalog', () => {
     },
     {
       expected: [BoldReportType.MTR],
+      key: 'CROSS_VALIDATION.RECEIVING_DATE_WITHIN_TOLERANCE',
+    },
+    {
+      expected: [BoldReportType.MTR],
       key: 'CROSS_VALIDATION.TRANSPORT_DATE_MISMATCH',
+    },
+    {
+      expected: [BoldReportType.MTR],
+      key: 'CROSS_VALIDATION.TRANSPORT_DATE_WITHIN_TOLERANCE',
     },
     {
       expected: [BoldReportType.MTR],
@@ -198,7 +206,7 @@ describe('DOCUMENT_MANIFEST_DATA_FINDINGS catalog', () => {
       catalog.entries
         .filter(({ contexts }) => contexts.length === 1)
         .map(({ code }) => code),
-    ).toHaveLength(15);
+    ).toHaveLength(17);
   });
 
   it('should cover every declared finding code', () => {

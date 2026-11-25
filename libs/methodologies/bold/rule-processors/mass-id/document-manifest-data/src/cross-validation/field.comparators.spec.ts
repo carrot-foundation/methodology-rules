@@ -272,6 +272,40 @@ describe('cross-validation field comparators', () => {
       },
     );
 
+    it.each([
+      { expected: [], extracted: '2024-01-15', signedDiff: 0 },
+      {
+        expected: ['ACCEPTED_DIFFERENCE'],
+        extracted: '2024-01-17',
+        signedDiff: 2,
+      },
+      {
+        expected: ['ACCEPTED_DIFFERENCE'],
+        extracted: '2024-01-14',
+        signedDiff: -1,
+      },
+    ])(
+      'should return observations $expected when the extracted date is $signedDiff day(s) from the event date inside the accepted window',
+      ({ expected, extracted }) => {
+        const result = compareDateField(
+          highConfidenceDate(extracted),
+          '2024-01-15T00:00:00Z',
+          {
+            ...dateWindows,
+            onAcceptedDifference: ({ daysDiff }) => ({
+              code: 'ACCEPTED_DIFFERENCE',
+              description: `${daysDiff} days`,
+            }),
+            onMismatch: onDateMismatch,
+          },
+        );
+
+        expect(
+          result.validation.map(({ observation }) => observation?.code),
+        ).toEqual(expected);
+      },
+    );
+
     it('should return failReason for any mismatch when both windows are exact', () => {
       const result = compareDateField(
         highConfidenceDate('2024-01-01'),

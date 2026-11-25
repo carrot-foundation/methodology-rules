@@ -244,6 +244,9 @@ export class DocumentManifestDataProcessor extends RuleStandardDataProcessor<
         crossValidation: crossValidationResult.crossValidation,
         extractionMetadata,
       },
+      resultFindings: crossValidationResult.observations.map((reason) =>
+        toCrossValidationFinding(reason),
+      ),
       resultStatus: 'PASSED',
     };
   }

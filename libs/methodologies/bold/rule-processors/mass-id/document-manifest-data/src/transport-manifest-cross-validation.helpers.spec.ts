@@ -640,10 +640,10 @@ describe('transport-manifest-cross-validation.helpers', () => {
     });
 
     it.each([
-      { eventDate: '2024-01-08', expected: 'none', signedDiff: 7 },
+      { eventDate: '2024-01-08', expected: 'observation', signedDiff: 7 },
       { eventDate: '2024-01-07', expected: 'review', signedDiff: 8 },
       { eventDate: '2023-11-16', expected: 'review', signedDiff: 60 },
-      { eventDate: '2024-01-14', expected: 'none', signedDiff: 1 },
+      { eventDate: '2024-01-14', expected: 'observation', signedDiff: 1 },
       { eventDate: '2024-01-15', expected: 'none', signedDiff: 0 },
       { eventDate: '2024-01-16', expected: 'review', signedDiff: -1 },
       { eventDate: '2024-01-18', expected: 'review', signedDiff: -3 },
@@ -678,14 +678,18 @@ describe('transport-manifest-cross-validation.helpers', () => {
           ),
         ).toBe(expected === 'fail');
         expect(result.reviewRequired).toBe(expected === 'review');
+        expect(result.observations?.map(({ code }) => code) ?? []).toEqual(
+          expected === 'observation' ? ['TRANSPORT_DATE_WITHIN_TOLERANCE'] : [],
+        );
       },
     );
 
     it.each([
-      { eventDate: '2024-01-05', expected: 'none', signedDiff: 10 },
+      { eventDate: '2024-01-05', expected: 'observation', signedDiff: 10 },
       { eventDate: '2024-01-04', expected: 'review', signedDiff: 11 },
       { eventDate: '2023-11-16', expected: 'review', signedDiff: 60 },
-      { eventDate: '2024-01-16', expected: 'none', signedDiff: -1 },
+      { eventDate: '2024-01-15', expected: 'none', signedDiff: 0 },
+      { eventDate: '2024-01-16', expected: 'observation', signedDiff: -1 },
       { eventDate: '2024-01-17', expected: 'review', signedDiff: -2 },
       { eventDate: '2024-03-15', expected: 'review', signedDiff: -60 },
     ])(
@@ -715,6 +719,9 @@ describe('transport-manifest-cross-validation.helpers', () => {
         expect(result.failMessages).toHaveLength(0);
         expect(result.reviewReasons?.map(({ code }) => code) ?? []).toEqual(
           expected === 'review' ? ['RECEIVING_DATE_MISMATCH'] : [],
+        );
+        expect(result.observations?.map(({ code }) => code) ?? []).toEqual(
+          expected === 'observation' ? ['RECEIVING_DATE_WITHIN_TOLERANCE'] : [],
         );
       },
     );
