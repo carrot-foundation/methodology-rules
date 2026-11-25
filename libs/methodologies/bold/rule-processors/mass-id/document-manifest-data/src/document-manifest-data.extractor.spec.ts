@@ -24,6 +24,7 @@ vi.mock('@carrot-fndn/shared/document-extractor', async (importOriginal) => ({
 // eslint-disable-next-line import/first -- Must import after mock is set up
 import {
   blankFieldReviewReason,
+  lowConfidenceReviewReason,
   NoMatchingLayoutError,
 } from '@carrot-fndn/shared/document-extractor';
 // eslint-disable-next-line import/first -- Must import after mock is set up
@@ -70,6 +71,43 @@ const mtrManifestEvent: DocumentManifestEventSubject = {
   recyclerCountryCode: 'BR',
 };
 
+const runWithExtraction = async ({
+  data,
+  reviewReasons,
+}: {
+  data: Record<string, unknown>;
+  reviewReasons: ReturnType<typeof blankFieldReviewReason>[];
+}) => {
+  mockExtract.mockResolvedValue({
+    data: {
+      documentNumber: { confidence: 'high', parsed: '12345' },
+      extractionConfidence: 'high',
+      issueDate: { confidence: 'high', parsed: '01/01/2024' },
+      lowConfidenceFields: [],
+      receivingDate: { confidence: 'high', parsed: '01/01/2024' },
+      ...data,
+    },
+    reviewReasons,
+    reviewRequired: true,
+  });
+
+  return crossValidateWithTextract({
+    attachmentInfos: [
+      { attachmentId: 'att-1', s3Bucket: 'bucket', s3Key: 'key' },
+    ],
+    documentManifestEvents: [mtrManifestEvent],
+    ...noRelatedEvents,
+    dropOffEvent: {
+      address: STUB_BR_ADDRESS,
+      externalCreatedAt: '2024-01-01T12:00:00.000Z',
+    } as unknown as BoldDocumentEvent,
+    pickUpEvent: {
+      address: STUB_BR_ADDRESS,
+      externalCreatedAt: '2024-01-01T12:00:00.000Z',
+      metadata: { attributes: [] },
+    } as unknown as BoldDocumentEvent,
+  });
+};
 describe('crossValidateWithTextract', () => {
   it('should opt in to the PDF text-layer fallback', () => {
     expect(createDocumentExtractorArguments).toEqual([
@@ -358,42 +396,18 @@ describe('crossValidateWithTextract', () => {
   describe('when MTR fields are blank on the document', () => {
     const blankDate = { blank: true, confidence: 'low', parsed: '' };
 
-    const runWithBlankFields = async (blankFields: string[]) => {
-      mockExtract.mockResolvedValue({
+    const runWithBlankFields = async (blankFields: string[]) =>
+      runWithExtraction({
         data: {
           blankFields,
-          documentNumber: { confidence: 'high', parsed: '12345' },
-          extractionConfidence: 'high',
-          issueDate: { confidence: 'high', parsed: '01/01/2024' },
-          lowConfidenceFields: [],
-          receivingDate: { confidence: 'high', parsed: '01/01/2024' },
           ...Object.fromEntries(blankFields.map((field) => [field, blankDate])),
         },
         reviewReasons: blankFields.map((field) =>
           blankFieldReviewReason(field),
         ),
-        reviewRequired: true,
       });
 
-      return crossValidateWithTextract({
-        attachmentInfos: [
-          { attachmentId: 'att-1', s3Bucket: 'bucket', s3Key: 'key' },
-        ],
-        documentManifestEvents: [mtrManifestEvent],
-        ...noRelatedEvents,
-        dropOffEvent: {
-          address: STUB_BR_ADDRESS,
-          externalCreatedAt: '2024-01-01T12:00:00.000Z',
-        } as unknown as BoldDocumentEvent,
-        pickUpEvent: {
-          address: STUB_BR_ADDRESS,
-          externalCreatedAt: '2024-01-01T12:00:00.000Z',
-          metadata: { attributes: [] },
-        } as unknown as BoldDocumentEvent,
-      });
-    };
-
-    it('should accept a blank transport date without a review reason', async () => {
+    it('should accept a blank transport date with a blank transport date observation', async () => {
       const result = await runWithBlankFields(['transportDate']);
 
       expect(result.reviewReasons).toEqual([]);
@@ -402,6 +416,30 @@ describe('crossValidateWithTextract', () => {
         blankFields: ['transportDate'],
         transportDate: { extracted: '', isMatch: null },
       });
+      expect(
+        result.observations.map((reason) => toCrossValidationFinding(reason)),
+      ).toEqual([
+        {
+          code: 'document-manifest-data.CROSS_VALIDATION.TRANSPORT_DATE_BLANK',
+          defaultOwner: 'TO_CONFIRM',
+        },
+      ]);
+    });
+
+    it('should keep a low-confidence transport date read as a review reason without the blank observation', async () => {
+      const result = await runWithExtraction({
+        data: {
+          lowConfidenceFields: ['transportDate'],
+          transportDate: { confidence: 'low', parsed: '01/01/2024' },
+        },
+        reviewReasons: [lowConfidenceReviewReason('transportDate')],
+      });
+
+      expect(result.reviewRequired).toBe(true);
+      expect(result.reviewReasons).toEqual([
+        lowConfidenceReviewReason('transportDate'),
+      ]);
+      expect(result.observations).toEqual([]);
     });
 
     it('should report any other blank field as a blank field finding', async () => {

@@ -16,6 +16,7 @@ import {
   textExtractor,
 } from '@carrot-fndn/shared/text-extractor';
 
+import { REVIEW_REASONS } from './document-manifest-data.constants';
 import {
   type AttachmentInfo,
   type DocumentManifestEventSubject,
@@ -38,22 +39,35 @@ const documentExtractor = createDocumentExtractor(
 );
 
 // MTR systems let the transport date be left blank and filled by hand at dispatch
-const ACCEPTED_BLANK_FIELD_CODES = new Set([
-  blankFieldReviewReason('transportDate').code,
-]);
+const BLANK_TRANSPORT_DATE_CODE = blankFieldReviewReason('transportDate').code;
 
-const dropAcceptedBlankFields = (
+const isBlankTransportDate = ({ code }: { code: string }) =>
+  code === BLANK_TRANSPORT_DATE_CODE;
+
+const observeBlankTransportDates = (
   result: CrossValidationResult,
 ): CrossValidationResult => {
-  const reviewReasons = result.reviewReasons.filter(
-    ({ code }) => !ACCEPTED_BLANK_FIELD_CODES.has(code),
+  const blankTransportDates = result.reviewReasons.filter((reason) =>
+    isBlankTransportDate(reason),
   );
 
-  if (reviewReasons.length === result.reviewReasons.length) {
+  if (blankTransportDates.length === 0) {
     return result;
   }
 
-  return { ...result, reviewReasons, reviewRequired: reviewReasons.length > 0 };
+  const reviewReasons = result.reviewReasons.filter(
+    (reason) => !isBlankTransportDate(reason),
+  );
+
+  return {
+    ...result,
+    observations: [
+      ...result.observations,
+      ...blankTransportDates.map(() => REVIEW_REASONS.TRANSPORT_DATE_BLANK()),
+    ],
+    reviewReasons,
+    reviewRequired: reviewReasons.length > 0,
+  };
 };
 
 const isMtrEventData = (
@@ -157,5 +171,5 @@ export const crossValidateWithTextract = async ({
     documentExtractor,
   );
 
-  return dropAcceptedBlankFields(result);
+  return observeBlankTransportDates(result);
 };

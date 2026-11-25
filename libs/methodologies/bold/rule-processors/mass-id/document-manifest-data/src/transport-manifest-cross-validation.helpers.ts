@@ -232,7 +232,7 @@ export const validateMtrExtractedData = (
     extractedData.transportDate,
     eventData.pickUpEvent?.externalCreatedAt,
     {
-      acceptedWindow: { max: 7, min: 0 },
+      acceptedWindow: { max: 7, min: -7 },
       notExtractedReason: REVIEW_REASONS.FIELD_NOT_EXTRACTED({
         context: 'Pick-up event',
         field: 'transport date',
@@ -249,7 +249,7 @@ export const validateMtrExtractedData = (
           eventDate: event,
           extractedDate: extracted,
         }),
-      reviewWindow: { max: Number.POSITIVE_INFINITY, min: -3 },
+      reviewWindow: { max: Number.POSITIVE_INFINITY, min: -7 },
       timezone: pickUpTimezone,
     },
   );

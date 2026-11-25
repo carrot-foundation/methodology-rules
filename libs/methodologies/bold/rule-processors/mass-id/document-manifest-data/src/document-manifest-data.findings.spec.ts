@@ -133,6 +133,10 @@ describe('DOCUMENT_MANIFEST_DATA_FINDINGS catalog', () => {
     },
     {
       expected: [BoldReportType.MTR],
+      key: 'CROSS_VALIDATION.TRANSPORT_DATE_BLANK',
+    },
+    {
+      expected: [BoldReportType.MTR],
       key: 'CROSS_VALIDATION.TRANSPORT_DATE_MISMATCH',
     },
     {
@@ -196,7 +200,7 @@ describe('DOCUMENT_MANIFEST_DATA_FINDINGS catalog', () => {
       catalog.entries
         .filter(({ contexts }) => contexts.length === 1)
         .map(({ code }) => code),
-    ).toHaveLength(17);
+    ).toHaveLength(18);
   });
 
   it('should cover every declared finding code', () => {

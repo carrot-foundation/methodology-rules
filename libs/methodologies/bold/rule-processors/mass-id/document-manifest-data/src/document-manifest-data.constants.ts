@@ -142,6 +142,8 @@ export const CROSS_VALIDATION_COMMENTS = {
     extractedEntries: string;
   }) =>
     `None of the waste types extracted from the recycling manifest (${extractedEntries}) match the event's waste classification (${eventClassification}).`,
+  TRANSPORT_DATE_BLANK:
+    'The transport date is blank on the MTR, accepted because MTR systems let it be filled by hand at dispatch.',
   TRANSPORT_DATE_MISMATCH: ({
     daysDiff,
     eventDate,
@@ -251,6 +253,7 @@ export const REVIEW_REASONS = {
   RECYCLING_MANIFEST_WASTE_TYPE_MISMATCH: reviewReason(
     'RECYCLING_MANIFEST_WASTE_TYPE_MISMATCH',
   ),
+  TRANSPORT_DATE_BLANK: staticReviewReason('TRANSPORT_DATE_BLANK'),
   TRANSPORT_DATE_MISMATCH: reviewReason('TRANSPORT_DATE_MISMATCH'),
   TRANSPORT_DATE_WITHIN_TOLERANCE: reviewReason(
     'TRANSPORT_DATE_WITHIN_TOLERANCE',
