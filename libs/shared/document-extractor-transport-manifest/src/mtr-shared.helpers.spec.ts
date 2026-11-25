@@ -277,6 +277,37 @@ describe('MTR shared helpers', () => {
       });
     });
 
+    it('should mark the driver name blank when an inline plate follows an empty driver label', () => {
+      const section = ['Nome do Motorista', 'Placa do Veiculo: FKE2B34'].join(
+        '\n',
+      );
+
+      expect(extractDriverAndVehicle(section)).toEqual({
+        isDriverNameBlank: true,
+        vehiclePlate: 'FKE2B34',
+      });
+    });
+
+    it('should mark the driver name blank when the driver label has a trailing colon and nothing else', () => {
+      const section = ['Nome do Motorista:', 'Placa do Veiculo'].join('\n');
+
+      expect(extractDriverAndVehicle(section)).toEqual({
+        isDriverNameBlank: true,
+      });
+    });
+
+    it('should not mark the driver name blank when the driver label line carries an unparsable value', () => {
+      const section = [
+        'Nome do Motorista: 4N4 S1LV4',
+        'Placa do Veiculo',
+        'FKE2B34',
+      ].join('\n');
+
+      expect(extractDriverAndVehicle(section)).not.toHaveProperty(
+        'isDriverNameBlank',
+      );
+    });
+
     it('should handle Mercosul plate format', () => {
       const section = ['Placa do Veiculo', 'ABC1D23'].join('\n');
 

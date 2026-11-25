@@ -293,6 +293,13 @@ const extractFromSingleLabel = (
   return result;
 };
 
+const isBareDriverLabel = (line: string): boolean => {
+  const text = line.toLowerCase().trim();
+  const label = text.endsWith(':') ? text.slice(0, -1).trim() : text;
+
+  return (DRIVER_LABELS as readonly string[]).includes(label);
+};
+
 const isPlateLine = (line: string): boolean =>
   VEHICLE_PLATE_FORMAT.test(line) || TRUNCATED_PLATE_FORMAT.test(line);
 
@@ -304,6 +311,7 @@ const markBlankDriverName = (
 ): DriverAndVehicle =>
   driverLabelIndex !== -1 &&
   result.driverName === undefined &&
+  isBareDriverLabel(lines[driverLabelIndex]!) &&
   lines
     .slice(driverLabelIndex + 1)
     .filter((line) => isValueLine(line))
@@ -330,7 +338,7 @@ export const extractDriverAndVehicle = (section: string): DriverAndVehicle => {
   );
 
   if (inlineResult) {
-    return inlineResult;
+    return markBlankDriverName(inlineResult, lines, driverLabelIndex);
   }
 
   const lastLabelIndex = Math.max(driverLabelIndex, plateLabelIndex);
