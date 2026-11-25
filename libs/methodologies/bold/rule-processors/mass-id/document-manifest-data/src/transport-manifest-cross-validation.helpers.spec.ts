@@ -726,6 +726,59 @@ describe('transport-manifest-cross-validation.helpers', () => {
       },
     );
 
+    it.each([
+      {
+        dropOffEventDate: '2024-01-12',
+        expectedObservations: [
+          'TRANSPORT_DATE_WITHIN_TOLERANCE',
+          'RECEIVING_DATE_WITHIN_TOLERANCE',
+        ],
+        expectedReviewRequired: false,
+        scenario: 'both dates differ inside their windows',
+      },
+      {
+        dropOffEventDate: '2024-01-17',
+        expectedObservations: [],
+        expectedReviewRequired: true,
+        scenario: 'the receiving date needs review',
+      },
+    ])(
+      'should return observations $expectedObservations when $scenario',
+      ({ dropOffEventDate, expectedObservations, expectedReviewRequired }) => {
+        const extractionResult = createExtractionResult({
+          receivingDate: {
+            confidence: 'high',
+            parsed: '15/01/2024' as never,
+            rawMatch: 'Data de Recebimento: 15/01/2024',
+          },
+          transportDate: {
+            confidence: 'high',
+            parsed: '15/01/2024' as never,
+            rawMatch: 'Data de Transporte: 15/01/2024',
+          },
+        });
+
+        const eventData: MtrCrossValidationEventData = {
+          ...baseEventData,
+          dropOffEvent: {
+            address: STUB_BR_ADDRESS,
+            externalCreatedAt: dropOffEventDate,
+          } as unknown as BoldDocumentEvent,
+          pickUpEvent: {
+            address: STUB_BR_ADDRESS,
+            externalCreatedAt: '2024-01-13',
+          } as unknown as BoldDocumentEvent,
+        };
+
+        const result = validateMtrExtractedData(extractionResult, eventData);
+
+        expect(result.reviewRequired).toBe(expectedReviewRequired);
+        expect(result.observations?.map(({ code }) => code) ?? []).toEqual(
+          expectedObservations,
+        );
+      },
+    );
+
     it('should skip vehicle plate validation when pickUpEvent has no plate attribute', () => {
       const extractionResult = createExtractionResult({
         vehiclePlate: {

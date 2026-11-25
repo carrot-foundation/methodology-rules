@@ -114,7 +114,6 @@ export function expectRuleFindings(
     return ruleOutput;
   }
 
-  // A PASSED result may carry only observations
   const knownCodes = isPassed
     ? declarations
         .filter(({ meta }) => meta.category === 'OBSERVATION')
