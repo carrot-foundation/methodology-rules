@@ -386,6 +386,7 @@ export class CdfCustom1Parser implements DocumentParser<CdfExtractedData> {
       text,
       CDF_PATTERNS.documentNumber,
       LABEL_PATTERNS.documentNumber,
+      extractionResult.blocks,
     );
 
     if (documentNumber) {
@@ -399,6 +400,7 @@ export class CdfCustom1Parser implements DocumentParser<CdfExtractedData> {
       text,
       CDF_PATTERNS.environmentalLicense,
       LABEL_PATTERNS.environmentalLicense,
+      extractionResult.blocks,
     );
 
     if (environmentalLicense) {

@@ -27,6 +27,12 @@ describe('toCrossValidationFinding', () => {
       ),
     },
     {
+      code: 'BLANK_FIELD_RECEIVING_DATE',
+      expectedFinding: DOCUMENT_MANIFEST_DATA_FINDINGS.finding(
+        'DOCUMENT_EXTRACTION.BLANK_FIELD',
+      ),
+    },
+    {
       code: 'LOW_LAYOUT_MATCH_SCORE',
       expectedFinding: DOCUMENT_MANIFEST_DATA_FINDINGS.finding(
         'DOCUMENT_EXTRACTION.LOW_LAYOUT_MATCH_SCORE',

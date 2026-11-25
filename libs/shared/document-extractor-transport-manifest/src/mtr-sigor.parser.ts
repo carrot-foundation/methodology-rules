@@ -373,9 +373,9 @@ export class MtrSigorParser implements DocumentParser<MtrExtractedData> {
     };
 
     this.extractDocumentNumber(text, partialData);
-    this.extractIssueDate(text, partialData);
-    this.extractTransportDate(text, partialData);
-    this.extractReceivingDate(text, partialData);
+    this.extractIssueDate(text, partialData, extractionResult.blocks);
+    this.extractTransportDate(text, partialData, extractionResult.blocks);
+    this.extractReceivingDate(text, partialData, extractionResult.blocks);
     this.extractEntities(text, partialData, extractionResult.blocks);
     extractHaulerFields(text, partialData, {
       allSectionPatterns: ALL_SECTION_PATTERNS,
@@ -435,11 +435,13 @@ export class MtrSigorParser implements DocumentParser<MtrExtractedData> {
   private extractIssueDate(
     rawText: string,
     partialData: Partial<MtrExtractedData>,
+    blocks: TextExtractionResult['blocks'],
   ): void {
     const issueDate = extractFieldWithLabelFallback(
       rawText,
       MTR_PATTERNS.issueDate,
       LABEL_PATTERNS.issueDate,
+      blocks,
     );
 
     if (issueDate) {
@@ -450,11 +452,13 @@ export class MtrSigorParser implements DocumentParser<MtrExtractedData> {
   private extractReceivingDate(
     rawText: string,
     partialData: Partial<MtrExtractedData>,
+    blocks: TextExtractionResult['blocks'],
   ): void {
     const receivingDate = extractFieldWithLabelFallback(
       rawText,
       MTR_PATTERNS.receivingDate,
       LABEL_PATTERNS.receivingDate,
+      blocks,
     );
 
     if (receivingDate) {
@@ -465,11 +469,13 @@ export class MtrSigorParser implements DocumentParser<MtrExtractedData> {
   private extractTransportDate(
     rawText: string,
     partialData: Partial<MtrExtractedData>,
+    blocks: TextExtractionResult['blocks'],
   ): void {
     const transportDate = extractFieldWithLabelFallback(
       rawText,
       MTR_PATTERNS.transportDate,
       LABEL_PATTERNS.transportDate,
+      blocks,
     );
 
     if (transportDate) {

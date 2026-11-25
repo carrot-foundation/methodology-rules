@@ -177,6 +177,7 @@ export class MtrSinfatParser implements DocumentParser<MtrExtractedData> {
       text,
       MTR_PATTERNS.issueDate,
       LABEL_PATTERNS.issueDate,
+      extractionResult.blocks,
     );
 
     if (issueDate) {
@@ -187,6 +188,7 @@ export class MtrSinfatParser implements DocumentParser<MtrExtractedData> {
       text,
       MTR_PATTERNS.transportDate,
       LABEL_PATTERNS.transportDate,
+      extractionResult.blocks,
     );
 
     if (transportDate) {
@@ -197,6 +199,7 @@ export class MtrSinfatParser implements DocumentParser<MtrExtractedData> {
       text,
       MTR_PATTERNS.receivingDate,
       LABEL_PATTERNS.receivingDate,
+      extractionResult.blocks,
     );
 
     if (receivingDate) {

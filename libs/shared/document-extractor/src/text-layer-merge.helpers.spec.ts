@@ -3,6 +3,8 @@ import type { NonEmptyString } from '@carrot-fndn/shared/types';
 import type { BaseExtractedData } from './document-extractor.types';
 
 import {
+  blankFieldReviewReason,
+  createBlankField,
   createHighConfidenceField,
   createLowConfidenceField,
   lowConfidenceReviewReason,
@@ -166,6 +168,35 @@ describe('mergeTextLayerFields', () => {
   );
 });
 
+describe('mergeTextLayerFields with blank fields', () => {
+  it('should keep a blank field the text layer cannot fill and drop one it fills', () => {
+    const primary = {
+      ...stubData({
+        documentNumber: createHighConfidenceField('MTR-001'),
+        issueDate: createBlankField(''),
+        transportDate: createBlankField(''),
+      }),
+      blankFields: ['issueDate', 'transportDate'],
+    };
+    const textLayer = stubData({
+      documentNumber: createHighConfidenceField('MTR-001'),
+      issueDate: createHighConfidenceField('01/02/2024'),
+      transportDate: createBlankField(''),
+    });
+
+    const result = mergeTextLayerFields(primary, textLayer);
+
+    expect(result).toMatchObject({
+      data: {
+        blankFields: ['transportDate'],
+        issueDate: createHighConfidenceField('01/02/2024'),
+        lowConfidenceFields: [],
+      },
+      outcome: 'filled',
+    });
+  });
+});
+
 describe('applyTextLayerMerge', () => {
   const otherReason = { code: 'LOW_LAYOUT_MATCH_SCORE', description: 'other' };
   const output = {
@@ -202,6 +233,24 @@ describe('applyTextLayerMerge', () => {
     expect(
       applyTextLayerMerge(resolved, { data, outcome: 'filled' }),
     ).toMatchObject({ data, reviewReasons: [], reviewRequired: false });
+  });
+
+  it('should rebuild blank field reasons from the merged data', () => {
+    const blankOutput = {
+      ...output,
+      reviewReasons: [
+        blankFieldReviewReason('issueDate'),
+        blankFieldReviewReason('transportDate'),
+      ],
+    };
+    const data = { ...stubData({}), blankFields: ['transportDate'] };
+
+    expect(
+      applyTextLayerMerge(blankOutput, { data, outcome: 'filled' }),
+    ).toMatchObject({
+      reviewReasons: [blankFieldReviewReason('transportDate')],
+      reviewRequired: true,
+    });
   });
 
   it('should return the output unchanged when unverified', () => {

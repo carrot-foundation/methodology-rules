@@ -1,4 +1,5 @@
 export const DOCUMENT_EXTRACTION_COMMENTS = {
+  BLANK_FIELD: (field: string) => `Field left blank on the document: ${field}`,
   EXTRACTION_FAILED: (attachmentId: string, errorMessage: string) =>
     `Document extraction failed for attachment ${attachmentId}: ${errorMessage}`,
   LAYOUT_NOT_RECOGNIZED: (attachmentId: string, errorMessage: string) =>
@@ -14,5 +15,7 @@ export const DOCUMENT_EXTRACTION_COMMENTS = {
 
 export type DocumentExtractionCommentKey =
   keyof typeof DOCUMENT_EXTRACTION_COMMENTS;
+
+export const BLANK_FIELD_REASON_CODE_PREFIX = 'BLANK_FIELD_';
 
 export const LOW_CONFIDENCE_REASON_CODE_PREFIX = 'LOW_CONFIDENCE_';

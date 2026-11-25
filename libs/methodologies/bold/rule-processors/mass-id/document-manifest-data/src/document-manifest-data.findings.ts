@@ -1,6 +1,7 @@
 import type { RuleFinding } from '@carrot-fndn/shared/rule/types';
 
 import {
+  BLANK_FIELD_REASON_CODE_PREFIX,
   DOCUMENT_EXTRACTION_COMMENTS,
   LOW_CONFIDENCE_REASON_CODE_PREFIX,
   type ReviewReason,
@@ -287,6 +288,15 @@ export const DOCUMENT_MANIFEST_DATA_FINDINGS = defineRuleFindings(
         'Confira a classificação do resíduo enviada e o MTR anexado, confirme qual está correto e corrija na origem.',
       title: 'Resíduo do MTR diverge da classificação',
     },
+    'DOCUMENT_EXTRACTION.BLANK_FIELD': {
+      category: 'MISSING_DATA',
+      defaultOwner: 'RECYCLER',
+      description: 'Um campo do documento anexado está em branco.',
+      evidence: [crossValidationEvidence('blankFields')],
+      guidance:
+        'Oriente o reciclador a anexar o documento com o campo preenchido.',
+      title: 'Campo em branco no documento',
+    },
     'DOCUMENT_EXTRACTION.EXTRACTION_FAILED': {
       category: 'DOCUMENT_READING',
       defaultOwner: 'CARROT',
@@ -471,6 +481,12 @@ export const toCrossValidationFinding = ({
 }: ReviewReason): RuleFinding => {
   if (isKeyOf(CROSS_VALIDATION_COMMENTS, code)) {
     return DOCUMENT_MANIFEST_DATA_FINDINGS.finding(`CROSS_VALIDATION.${code}`);
+  }
+
+  if (code.startsWith(BLANK_FIELD_REASON_CODE_PREFIX)) {
+    return DOCUMENT_MANIFEST_DATA_FINDINGS.finding(
+      'DOCUMENT_EXTRACTION.BLANK_FIELD',
+    );
   }
 
   if (code.startsWith(LOW_CONFIDENCE_REASON_CODE_PREFIX)) {

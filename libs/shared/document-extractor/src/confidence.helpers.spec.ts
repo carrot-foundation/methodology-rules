@@ -8,6 +8,7 @@ import {
   calculateOverallConfidence,
   collectLowConfidenceFields,
   collectMissingRequiredFields,
+  createBlankField,
   createExtractedField,
   createFieldFromTextractConfidence,
   createHighConfidenceField,
@@ -73,6 +74,15 @@ describe('confidence.helpers', () => {
 
     it('should return low when no fields are defined', () => {
       expect(calculateOverallConfidence([])).toBe('low');
+    });
+
+    it('should ignore blank fields', () => {
+      expect(
+        calculateOverallConfidence([
+          createHighConfidenceField('a'),
+          createBlankField(''),
+        ]),
+      ).toBe('high');
     });
 
     it('should filter out undefined fields', () => {
@@ -496,6 +506,38 @@ describe('confidence.helpers', () => {
       expect(result.data.lowConfidenceFields).toEqual(['fieldA']);
       expect(result.data.extractionConfidence).toBe('low');
       expect(result.reviewRequired).toBe(true);
+    });
+
+    it('should report blank fields apart from low confidence reads', () => {
+      const partialData = {
+        documentType: 'transportManifest' as const,
+        fieldA: createBlankField(''),
+        fieldB: createLowConfidenceField(''),
+        group: { name: createBlankField('') },
+        rawText,
+      };
+
+      const result = finalizeExtraction({
+        allFields: ['fieldA', 'fieldB', 'group'],
+        confidenceFields: [partialData.fieldA, partialData.fieldB],
+        documentType: 'transportManifest',
+        matchScore: 0.8,
+        partialData,
+        rawText,
+      });
+
+      expect(result.data.blankFields).toEqual(['fieldA']);
+      expect(result.data.lowConfidenceFields).toEqual(['fieldB']);
+      expect(result.reviewReasons).toEqual([
+        {
+          code: 'LOW_CONFIDENCE_FIELD_B',
+          description: 'Low confidence field: fieldB',
+        },
+        {
+          code: 'BLANK_FIELD_FIELD_A',
+          description: 'Field left blank on the document: fieldA',
+        },
+      ]);
     });
 
     it('should flag review when match score is below threshold', () => {

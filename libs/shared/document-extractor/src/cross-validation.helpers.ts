@@ -44,8 +44,9 @@ const recordExtractionFailure = (
   result.failReasons.push({ code, description });
 };
 
-// The audit report shows which fields a LOW_CONFIDENCE review reason flagged, across every attachment
-const recordLowConfidenceFields = (
+// The audit report shows which fields a LOW_CONFIDENCE or BLANK_FIELD review reason flagged, across every attachment
+const recordFlaggedFields = (
+  key: 'blankFields' | 'lowConfidenceFields',
   fields: string[],
   result: CrossValidationResult,
 ): void => {
@@ -53,14 +54,14 @@ const recordLowConfidenceFields = (
     return;
   }
 
-  const recorded: unknown = result.crossValidation['lowConfidenceFields'];
+  // eslint-disable-next-line security/detect-object-injection
+  const recorded: unknown = result.crossValidation[key];
   const previous = Array.isArray(recorded)
     ? recorded.filter((field): field is string => typeof field === 'string')
     : [];
 
-  result.crossValidation['lowConfidenceFields'] = [
-    ...new Set([...previous, ...fields]),
-  ];
+  // eslint-disable-next-line security/detect-object-injection
+  result.crossValidation[key] = [...new Set([...previous, ...fields])];
 };
 
 const processInput = async <
@@ -137,8 +138,14 @@ const processInput = async <
     if (extractionResult.reviewRequired) {
       result.reviewRequired = true;
       result.reviewReasons.push(...extractionResult.reviewReasons);
-      recordLowConfidenceFields(
+      recordFlaggedFields(
+        'lowConfidenceFields',
         extractionResult.data.lowConfidenceFields,
+        result,
+      );
+      recordFlaggedFields(
+        'blankFields',
+        extractionResult.data.blankFields ?? [],
         result,
       );
     }

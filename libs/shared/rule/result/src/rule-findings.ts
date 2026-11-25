@@ -25,6 +25,7 @@ export interface FindingDeclaration {
 }
 
 export const EVIDENCE_FIELD_LABELS = {
+  blankFields: 'Campos em branco no documento',
   cdmCode: 'Código CDM',
   deductedWeight: 'Peso descontado enviado',
   documentNumber: 'Número do documento',

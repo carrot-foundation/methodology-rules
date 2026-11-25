@@ -1,6 +1,7 @@
 import type { BoldDocumentEvent } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import {
+  blankFieldReviewReason,
   createDocumentExtractor,
   crossValidateAttachments,
   type CrossValidationInput,
@@ -35,6 +36,25 @@ const documentExtractor = createDocumentExtractor(
   textExtractor,
   pdfTextLayerExtractor,
 );
+
+// MTR systems let the transport date be left blank and filled by hand at dispatch
+const ACCEPTED_BLANK_FIELD_CODES = new Set([
+  blankFieldReviewReason('transportDate').code,
+]);
+
+const dropAcceptedBlankFields = (
+  result: CrossValidationResult,
+): CrossValidationResult => {
+  const reviewReasons = result.reviewReasons.filter(
+    ({ code }) => !ACCEPTED_BLANK_FIELD_CODES.has(code),
+  );
+
+  if (reviewReasons.length === result.reviewReasons.length) {
+    return result;
+  }
+
+  return { ...result, reviewReasons, reviewRequired: reviewReasons.length > 0 };
+};
 
 const isMtrEventData = (
   eventData: DocumentManifestEventSubject,
@@ -116,7 +136,7 @@ export const crossValidateWithTextract = async ({
     }
   }
 
-  return crossValidateAttachments(
+  const result = await crossValidateAttachments(
     inputs,
     {
       getExtractorConfig: (event) => getExtractorConfig(event.documentType),
@@ -136,4 +156,6 @@ export const crossValidateWithTextract = async ({
     },
     documentExtractor,
   );
+
+  return dropAcceptedBlankFields(result);
 };
