@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   version-and-sync:
-    name: Bump Versions, Generate Manifests & Dispatch to Docs
+    name: Bump Versions, Generate Manifests & Dispatch to Docs and Smaug
     runs-on: ubuntu-latest
     if: >-
       !contains(github.event.head_commit.message, '[skip ci]')
@@ -123,4 +123,26 @@ jobs:
             {
               "run_id": "${{ github.run_id }}",
               "source_commit": "${{ steps.commit.outputs.new_sha || github.sha }}"
+            }
+
+      - name: Generate smaug dispatch token
+        id: smaug-app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          app-id: ${{ vars.CI_APP_ID }}
+          private-key: ${{ secrets.CI_APP_PRIVATE_KEY }}
+          owner: carrot-foundation
+          repositories: smaug
+          permission-contents: write
+
+      # Smaug pins the finding catalog from this run's artifact and skips a catalog whose only change is its commit.
+      - name: Dispatch to smaug
+        uses: peter-evans/repository-dispatch@ff45666b9427631e3450c54a1bcbee4d9ff4d7c0 # v3.0.0
+        with:
+          token: ${{ steps.smaug-app-token.outputs.token }}
+          repository: carrot-foundation/smaug
+          event-type: finding-catalog-updated
+          client-payload: >-
+            {
+              "run_id": "${{ github.run_id }}"
             }
