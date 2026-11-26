@@ -858,6 +858,12 @@ describe('transport-manifest-cross-validation.helpers', () => {
         scenario: 'extractor reads I as slash',
       },
       {
+        eventPlate: 'XYZ4J56',
+        extractedPlate: 'XYZ 4.156',
+        observation: OCR_SUBSTITUTION_OBSERVATION,
+        scenario: 'extractor reads a Mercosul J as .1',
+      },
+      {
         eventPlate: 'XYZ1845',
         extractedPlate: 'XYZ1I45',
         observation:

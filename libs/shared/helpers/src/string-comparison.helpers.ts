@@ -625,6 +625,26 @@ const OCR_CONFUSABLE_PAIRS: ReadonlySet<string> = new Set([
   'Z2',
 ]);
 
+const GRAMMAR_BREAKING_GLYPH_READINGS: ReadonlyArray<
+  readonly [read: string, glyph: string]
+> = [
+  ['.1', 'J'],
+  ['A', '4'],
+];
+
+// Only a reading the plate grammar rejects is repaired, so a valid plate that differs still mismatches
+const isGlyphMisreadOf = (misread: string, plate: string): boolean =>
+  !PLATE_SHAPE.test(misread) &&
+  PLATE_SHAPE.test(plate) &&
+  GRAMMAR_BREAKING_GLYPH_READINGS.some(([read, glyph]) =>
+    [...misread].some(
+      (_char, index) =>
+        misread.startsWith(read, index) &&
+        `${misread.slice(0, index)}${glyph}${misread.slice(index + read.length)}` ===
+          plate,
+    ),
+  );
+
 export const isOcrPlausiblePlateMatch = (
   plateA: string,
   plateB: string,
@@ -632,7 +652,12 @@ export const isOcrPlausiblePlateMatch = (
   const a = normalizeVehiclePlate(plateA);
   const b = normalizeVehiclePlate(plateB);
 
-  if (a === b || isMercosulEquivalentPlate(a, b)) {
+  if (
+    a === b ||
+    isMercosulEquivalentPlate(a, b) ||
+    isGlyphMisreadOf(a, b) ||
+    isGlyphMisreadOf(b, a)
+  ) {
     return true;
   }
 
