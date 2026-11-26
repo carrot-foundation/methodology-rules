@@ -266,11 +266,28 @@ describe('DocumentManifestDataProcessor', () => {
   });
 
   it.each([
-    { documentManifestType: TRANSPORT_MANIFEST, expectedAttachments: 1 },
-    { documentManifestType: RECYCLING_MANIFEST, expectedAttachments: 0 },
+    {
+      documentManifestType: TRANSPORT_MANIFEST,
+      expectedAttachments: 1,
+      recyclingManifestDocumentType: 'CDF',
+    },
+    {
+      documentManifestType: TRANSPORT_MANIFEST,
+      expectedAttachments: 0,
+      recyclingManifestDocumentType: 'MTR',
+    },
+    {
+      documentManifestType: RECYCLING_MANIFEST,
+      expectedAttachments: 0,
+      recyclingManifestDocumentType: 'CDF',
+    },
   ])(
-    'should give the $documentManifestType rule $expectedAttachments CDF attachment(s) to prove a receipt',
-    async ({ documentManifestType, expectedAttachments }) => {
+    'should give the $documentManifestType rule $expectedAttachments $recyclingManifestDocumentType attachment(s) to prove a receipt',
+    async ({
+      documentManifestType,
+      expectedAttachments,
+      recyclingManifestDocumentType,
+    }) => {
       const testCase = findTestCase(
         crossValidationTestCases,
         'Cross-validation passes with an observation',
@@ -283,7 +300,7 @@ describe('DocumentManifestDataProcessor', () => {
           ...testCase.events,
           [RECYCLING_MANIFEST]: stubBoldMassIDRecyclingManifestEvent({
             metadataAttributes: [
-              [DOCUMENT_TYPE, 'CDF'],
+              [DOCUMENT_TYPE, recyclingManifestDocumentType],
               [DOCUMENT_NUMBER, 'CDF-001'],
             ],
             partialDocumentEvent: {
@@ -303,8 +320,8 @@ describe('DocumentManifestDataProcessor', () => {
       expect(
         input?.recyclingManifests?.documentManifestEvents.map(
           ({ documentType }) => documentType,
-        ),
-      ).toEqual(expectedAttachments > 0 ? ['CDF'] : undefined);
+        ) ?? [],
+      ).toEqual(expectedAttachments > 0 ? ['CDF'] : []);
     },
   );
 

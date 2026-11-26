@@ -123,7 +123,7 @@ const runWithExtraction = async ({
   reviewReasons,
   weighingEvents = [],
 }: {
-  cdf?: ReturnType<typeof cdfExtraction> | undefined;
+  cdf?: Error | ReturnType<typeof cdfExtraction> | undefined;
   data: Record<string, unknown>;
   pickUpAttributes?: { name: string; value: string }[];
   recyclingManifestAttachments?: AttachmentInfo[];
@@ -144,9 +144,13 @@ const runWithExtraction = async ({
     reviewRequired: true,
   };
 
-  mockExtract.mockImplementation(({ s3Key }: { s3Key: string }) =>
-    Promise.resolve(s3Key === 'cdf-key' ? cdf : mtrExtraction),
-  );
+  mockExtract.mockImplementation(({ s3Key }: { s3Key: string }) => {
+    if (s3Key !== 'cdf-key') {
+      return Promise.resolve(mtrExtraction);
+    }
+
+    return cdf instanceof Error ? Promise.reject(cdf) : Promise.resolve(cdf);
+  });
 
   return crossValidateWithTextract({
     attachmentInfos: [
@@ -652,6 +656,14 @@ describe('crossValidateWithTextract', () => {
           expectedObservations: [],
           proof: 'a CDF that requires review',
         },
+        {
+          cdf: new NoMatchingLayoutError('recyclingManifest', []),
+          expectedFindings: [
+            'document-manifest-data.DOCUMENT_EXTRACTION.BLANK_FIELD',
+          ],
+          expectedObservations: [],
+          proof: 'a CDF whose extraction fails',
+        },
       ])(
         'should report the expected findings with $proof',
         async ({
@@ -711,6 +723,23 @@ describe('crossValidateWithTextract', () => {
         ]);
       });
 
+      it('should not read the CDF when the MTR already fails cross-validation', async () => {
+        const result = await runWithExtraction({
+          ...blankReceivingDate,
+          cdf: cdfExtraction(),
+          data: {
+            ...blankReceivingDate.data,
+            documentNumber: { confidence: 'high', parsed: '99999' },
+          },
+        });
+
+        expect(mockExtract).toHaveBeenCalledTimes(1);
+        expect(result.failMessages).not.toEqual([]);
+        expect(findingCodes(result.reviewReasons)).toContain(
+          'document-manifest-data.DOCUMENT_EXTRACTION.BLANK_FIELD',
+        );
+      });
+
       it('should not read the CDF when the receiving date is only low confidence', async () => {
         const result = await runWithExtraction({
           cdf: cdfExtraction(),
@@ -743,7 +772,7 @@ describe('crossValidateWithTextract', () => {
             'document-manifest-data.CROSS_VALIDATION.VEHICLE_PLATE_ILLEGIBLE',
           plate: 'illegible',
           reason: lowConfidenceReviewReason('vehiclePlate'),
-          vehiclePlate: { confidence: 'low', parsed: 'FK2B34' },
+          vehiclePlate: { confidence: 'low', parsed: '' },
         },
       ])(
         'should accept a $plate plate with an observation',
@@ -763,6 +792,73 @@ describe('crossValidateWithTextract', () => {
           ]);
         },
       );
+
+      it('should keep a plate read with low confidence, such as two distinct plates, as a review reason', async () => {
+        const result = await runWithExtraction({
+          data: {
+            lowConfidenceFields: ['vehiclePlate'],
+            vehiclePlate: { confidence: 'low', parsed: 'XYZ9W87' },
+          },
+          pickUpAttributes: [
+            { name: 'Vehicle License Plate', value: 'ABC1D23' },
+          ],
+          reviewReasons: [lowConfidenceReviewReason('vehiclePlate')],
+        });
+
+        expect(result.reviewRequired).toBe(true);
+        expect(result.reviewReasons).toEqual([
+          lowConfidenceReviewReason('vehiclePlate'),
+        ]);
+        expect(result.observations).toEqual([]);
+      });
+
+      it('should keep an unread plate as a review reason when another MTR read its plate with low confidence', async () => {
+        const unreadPlate = {
+          data: {
+            documentNumber: { confidence: 'high', parsed: '12345' },
+            extractionConfidence: 'high',
+            issueDate: { confidence: 'high', parsed: '01/01/2024' },
+            lowConfidenceFields: ['vehiclePlate'],
+            receivingDate: { confidence: 'high', parsed: '01/01/2024' },
+            transportDate: { confidence: 'high', parsed: '01/01/2024' },
+            vehiclePlate: { confidence: 'low', parsed: '' },
+          },
+          reviewReasons: [lowConfidenceReviewReason('vehiclePlate')],
+          reviewRequired: true,
+        };
+        const ambiguousPlate = {
+          ...unreadPlate,
+          data: {
+            ...unreadPlate.data,
+            vehiclePlate: { confidence: 'low', parsed: 'XYZ9W87' },
+          },
+        };
+
+        mockExtract.mockImplementation(({ s3Key }: { s3Key: string }) =>
+          Promise.resolve(s3Key === 'key-1' ? ambiguousPlate : unreadPlate),
+        );
+
+        const result = await crossValidateWithTextract({
+          attachmentInfos: [
+            { attachmentId: 'att-1', s3Bucket: 'bucket', s3Key: 'key-1' },
+            { attachmentId: 'att-2', s3Bucket: 'bucket', s3Key: 'key-2' },
+          ],
+          documentManifestEvents: [
+            mtrManifestEvent,
+            {
+              ...mtrManifestEvent,
+              attachment: { attachmentId: 'att-2' } as never,
+            },
+          ],
+          ...noRelatedEvents,
+        });
+
+        expect(result.reviewReasons).toEqual([
+          lowConfidenceReviewReason('vehiclePlate'),
+          lowConfidenceReviewReason('vehiclePlate'),
+        ]);
+        expect(result.observations).toEqual([]);
+      });
 
       it('should keep a confidently read plate that differs from Pick-up as a mismatch', async () => {
         const result = await runWithExtraction({

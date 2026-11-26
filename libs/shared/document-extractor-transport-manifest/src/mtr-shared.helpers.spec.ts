@@ -224,9 +224,7 @@ describe('MTR shared helpers', () => {
           '\n',
         );
 
-        expect(extractDriverAndVehicle(section)).toEqual({
-          isVehiclePlateBlank: true,
-        });
+        expect(extractDriverAndVehicle(section)).toEqual({});
       },
     );
 
@@ -249,6 +247,7 @@ describe('MTR shared helpers', () => {
     it.each([
       { scenario: 'a truncated plate', value: 'FK2B34' },
       { scenario: 'a plate with a misread glyph', value: 'FKE 2.B34' },
+      { scenario: 'a plate misread without digits', value: 'FKEZBEA' },
     ])(
       'should not mark the vehicle plate blank when $scenario follows the plate label',
       ({ value }) => {
@@ -567,9 +566,7 @@ describe('MTR shared helpers', () => {
         '\n',
       );
 
-      expect(extractDriverAndVehicle(section)).toEqual({
-        isVehiclePlateBlank: true,
-      });
+      expect(extractDriverAndVehicle(section)).toEqual({});
     });
 
     it('should extract long single name when both labels present', () => {

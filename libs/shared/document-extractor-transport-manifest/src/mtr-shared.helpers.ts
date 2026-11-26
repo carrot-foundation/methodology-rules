@@ -322,7 +322,7 @@ const markBlankDriverName = (
     ? { ...result, isDriverNameBlank: true }
     : result;
 
-// Only a plate label followed by no line with a digit is blank; a line with a digit may be a misread plate
+// Only a plate label followed by nothing but the driver name is blank; any other unparsed line may be a misread plate
 const markBlankVehiclePlate = (
   result: DriverAndVehicle,
   lines: string[],
@@ -331,9 +331,10 @@ const markBlankVehiclePlate = (
   plateLabelIndex !== -1 &&
   result.vehiclePlate === undefined &&
   toBareLabel(lines[plateLabelIndex]!) === PLATE_LABEL &&
-  !lines
+  lines
     .slice(plateLabelIndex + 1)
-    .some((line) => isValueLine(line) && /\d/.test(line))
+    .filter((line) => isValueLine(line))
+    .every((line) => line === result.driverName)
     ? { ...result, isVehiclePlateBlank: true }
     : result;
 

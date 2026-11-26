@@ -345,7 +345,10 @@ export class DocumentManifestDataProcessor extends RuleStandardDataProcessor<
       pickUpEvent,
       ...(this.documentManifestType === TRANSPORT_MANIFEST && {
         recyclingManifests: toManifestAttachments(
-          toManifestEventSubjects(RECYCLING_MANIFEST),
+          toManifestEventSubjects(RECYCLING_MANIFEST).filter(
+            ({ documentType }) =>
+              documentType?.toString() === BoldReportType.CDF.toString(),
+          ),
         ),
       }),
       recyclerEvent,

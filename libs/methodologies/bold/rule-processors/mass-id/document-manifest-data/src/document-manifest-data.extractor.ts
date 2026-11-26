@@ -1,3 +1,5 @@
+import type { MtrExtractedData } from '@carrot-fndn/shared/document-extractor-transport-manifest';
+
 import {
   blankFieldReviewReason,
   createDocumentExtractor,
@@ -47,6 +49,7 @@ const { DRIVER_IDENTIFIER_EXEMPTION_JUSTIFICATION } = BoldAttributeName;
 
 const acceptedBlankFieldObservations = (
   pickUpEvent: BoldDocumentEvent | undefined,
+  hasReadLowConfidencePlate: boolean,
 ): Map<string, () => ReviewReason> => {
   // MTR systems let the transport date be left blank and filled by hand at dispatch
   const accepted = new Map([
@@ -59,11 +62,15 @@ const acceptedBlankFieldObservations = (
       blankFieldReviewReason('vehiclePlate').code,
       REVIEW_REASONS.VEHICLE_PLATE_BLANK,
     ],
-    [
+  ]);
+
+  // A plate read with low confidence, such as two distinct plates, still needs review
+  if (!hasReadLowConfidencePlate) {
+    accepted.set(
       lowConfidenceReviewReason('vehiclePlate').code,
       REVIEW_REASONS.VEHICLE_PLATE_ILLEGIBLE,
-    ],
-  ]);
+    );
+  }
 
   if (
     isNonEmptyString(
@@ -136,7 +143,11 @@ const validateManifestAttachments = async ({
   recyclerEvent,
   wasteGeneratorEvent,
   weighingEvents,
-}: ManifestValidationInput): Promise<CrossValidationResult> => {
+}: ManifestValidationInput): Promise<{
+  hasReadLowConfidencePlate: boolean;
+  result: CrossValidationResult;
+}> => {
+  let hasReadLowConfidencePlate = false;
   const inputs: CrossValidationInput<DocumentManifestEventSubject>[] = [];
 
   const mtrDocumentNumbers = [
@@ -190,12 +201,18 @@ const validateManifestAttachments = async ({
     }
   }
 
-  return crossValidateAttachments(
+  const result = await crossValidateAttachments(
     inputs,
     {
       getExtractorConfig: (event) => getExtractorConfig(event.documentType),
       validate: (extractionResult, eventData) => {
         if (isMtrEventData(eventData)) {
+          const { vehiclePlate } = extractionResult.data as MtrExtractedData;
+
+          hasReadLowConfidencePlate ||=
+            vehiclePlate?.confidence === 'low' &&
+            isNonEmptyString(vehiclePlate.parsed);
+
           return validateMtrExtractedData(extractionResult, eventData);
         }
 
@@ -210,6 +227,8 @@ const validateManifestAttachments = async ({
     },
     documentExtractor,
   );
+
+  return { hasReadLowConfidencePlate, result };
 };
 
 // A CDF that passes cross-validation against this MassID and its MTR numbers proves the receipt a blank MTR receiving date omits
@@ -221,7 +240,7 @@ const recyclingManifestProvesReceipt = async (
     return false;
   }
 
-  const result = await validateManifestAttachments({
+  const { result } = await validateManifestAttachments({
     ...input,
     ...recyclingManifests,
     mtrEventDocumentNumbers: collectMtrDocumentNumbers(
@@ -238,11 +257,16 @@ export const crossValidateWithTextract = async ({
 }: ManifestValidationInput & {
   recyclingManifests?: ManifestAttachments | undefined;
 }): Promise<CrossValidationResult> => {
-  const result = await validateManifestAttachments(input);
-  const accepted = acceptedBlankFieldObservations(input.pickUpEvent);
+  const { hasReadLowConfidencePlate, result } =
+    await validateManifestAttachments(input);
+  const accepted = acceptedBlankFieldObservations(
+    input.pickUpEvent,
+    hasReadLowConfidencePlate,
+  );
 
   if (
     recyclingManifests &&
+    result.failMessages.length === 0 &&
     result.reviewReasons.some(
       ({ code }) => code === BLANK_RECEIVING_DATE_CODE,
     ) &&
