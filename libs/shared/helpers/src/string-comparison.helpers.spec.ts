@@ -745,6 +745,26 @@ describe('string-comparison.helpers', () => {
     it('should return false when two OCR-confusable chars differ', () => {
       expect(isOcrPlausiblePlateMatch('XYZ1I23', 'X1Z1123')).toBe(false);
     });
+
+    it.each([
+      ['XYZ 4.156', 'XYZ4J56', 'J read as .1'],
+      ['XYZAJ56', 'XYZ4J56', '4 read as A where a digit is required'],
+      ['XYZ4J56', 'XYZ 4.156', 'misread on either side'],
+    ])(
+      'should match %s and %s when a glyph misread breaks the plate grammar (%s)',
+      (plateA, plateB) => {
+        expect(isOcrPlausiblePlateMatch(plateA, plateB)).toBe(true);
+      },
+    );
+
+    it.each([
+      ['XYZ 4.156', 'XYZ4K56', 'repaired plate still differs'],
+      ['XYZAJ57', 'XYZ4J56', 'repair stacked on another difference'],
+      ['XYZ4456', 'XYZ4A56', 'old-format reading is already a valid plate'],
+      ['XYZ4156', 'XYZ4J56', 'old-format reading is already a valid plate'],
+    ])('should not match %s and %s (%s)', (plateA, plateB) => {
+      expect(isOcrPlausiblePlateMatch(plateA, plateB)).toBe(false);
+    });
   });
 
   describe('isMercosulEquivalentPlate', () => {
