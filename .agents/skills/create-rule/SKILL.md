@@ -61,7 +61,9 @@ skill](../methodology-registry/SKILL.md) when wiring or updating a registry entr
   cause the check to fail because it fabricates or omits the evaluated value. Examples include
   recycler GHG type, baseline, sorting factor, scale type, accredited address, the Container
   Quantity waiver or the accreditation document itself. Checks against a value copied from the
-  MassID keep the flag unset. The flag suppresses evaluation of the finding on every TEST run.
+  MassID keep the flag unset. The processor still evaluates the rule and emits the flag as finding
+  metadata. Smaug marks the reported finding `notEvaluated` when the failure belongs to the audit
+  run's methodology and every participant in the flagged role has a synthetic accreditation.
 - Exercise both the processor and Lambda entry point. Share synthetic cases via the test-cases
   module and reuse workspace stubs, including `stubRuleInput`, `createStubFromSchema` and
   `BoldStubsBuilder`. Use `aws-sdk-client-mock` for AWS SDK clients.

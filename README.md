@@ -64,7 +64,8 @@ To delegate dependency and hook setup to a host tool, set `WORKTREE_SETUP_HELPER
 name on `PATH` or an absolute path. The script calls `status --worktree <root> --json` first. A
 successful response with `{"state":"skipped"}` selects portable setup. Otherwise it runs
 `start --worktree <root> --wait` and returns the helper's result. An unset or unavailable helper
-selects portable setup.
+selects portable setup. The post-merge hook also runs this script. To delegate setup from that
+hook, export `WORKTREE_SETUP_HELPER` in the environment that runs Git.
 
 ### Common Commands
 
