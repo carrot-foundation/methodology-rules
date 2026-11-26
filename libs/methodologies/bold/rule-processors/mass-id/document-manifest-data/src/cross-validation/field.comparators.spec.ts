@@ -324,6 +324,43 @@ describe('cross-validation field comparators', () => {
       });
     });
 
+    it('should report the local date it compared and the timezone it used', () => {
+      const result = compareDateField(
+        highConfidenceDate('2024-01-15'),
+        '2024-01-15T00:00:00.000Z',
+        {
+          acceptedWindow: exactWindow,
+          onMismatch: onDateMismatch,
+          reviewWindow: exactWindow,
+          timezone: 'America/Sao_Paulo',
+        },
+      );
+
+      expect(result.debug).toMatchObject({
+        daysDiff: 1,
+        event: '2024-01-15T00:00:00.000Z',
+        eventLocalDate: '2024-01-14',
+        isMatch: false,
+        timezone: 'America/Sao_Paulo',
+      });
+      expect(result.validation.map((item) => toOutcome(item))).toEqual([
+        'fail',
+      ]);
+    });
+
+    it('should report UTC as the timezone when none is given', () => {
+      const result = compareDateField(
+        highConfidenceDate('2024-01-15'),
+        '2024-01-15T00:00:00Z',
+        { ...dateWindows, onMismatch: onDateMismatch },
+      );
+
+      expect(result.debug).toMatchObject({
+        eventLocalDate: '2024-01-15',
+        timezone: 'UTC',
+      });
+    });
+
     it('should skip validation when confidence is low', () => {
       const result = compareDateField(
         { confidence: 'low', parsed: '2024-01-01', rawMatch: '01/01/2024' },

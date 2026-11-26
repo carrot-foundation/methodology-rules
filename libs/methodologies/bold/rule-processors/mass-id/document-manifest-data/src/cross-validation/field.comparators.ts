@@ -169,8 +169,10 @@ export const compareDateField = (
     confidence: field?.confidence ?? null,
     daysDiff,
     event: eventDate ?? null,
+    eventLocalDate: localEventDate ?? null,
     extracted: field?.parsed ?? null,
     isMatch: daysDiff === null ? null : daysDiff === 0,
+    timezone,
   };
 
   if (!field) {
