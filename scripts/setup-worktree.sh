@@ -25,9 +25,13 @@ if [ -z "$setup_path" ]; then
 fi
 PATH="${setup_path#:}"
 export PATH
-project_root="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd -P)"
+project_root="$(CDPATH='' cd -- "$(dirname -- "$0")/.." && pwd -P)"
 cd "$project_root"
-if managed_helper="$(command -v crisos-project-setup)"; then
+# A host helper may own setup and hook installation for this checkout.
+if [ -n "${WORKTREE_SETUP_HELPER:-}" ] && ! command -v "$WORKTREE_SETUP_HELPER" >/dev/null 2>&1; then
+  echo "setup-worktree: WORKTREE_SETUP_HELPER is not executable; using portable setup" >&2
+fi
+if [ -n "${WORKTREE_SETUP_HELPER:-}" ] && managed_helper="$(command -v "$WORKTREE_SETUP_HELPER")"; then
   managed_status=0
   managed_scope="$("$managed_helper" status --worktree "$project_root" --json)" || managed_status=$?
   if [ "$managed_status" -eq 0 ] && printf '%s' "$managed_scope" | python3 -c 'import json,sys; sys.exit(0 if json.load(sys.stdin).get("state") == "skipped" else 1)'; then

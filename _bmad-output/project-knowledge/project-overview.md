@@ -14,21 +14,21 @@ A rule receives a reference to an S3-stored document, traverses the document rel
 
 ## Tech Stack Summary
 
-| Category | Technology | Version | Notes |
-|---|---|---|---|
-| Language | TypeScript | 5.9.3 | strict mode (`noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, `noImplicitReturns`) |
-| Runtime | Node.js (AWS Lambda) | 24.14.1 | see `.nvmrc` |
-| Monorepo | Nx | 22.6.1 | remote cache in S3 (`carrot-nx-cache`) |
-| Package manager | pnpm | 10.18.3 | enforced via `preinstall` |
-| Validation | Zod | 4.3.6 | runtime schema validation; types inferred via `z.infer` |
-| Testing | Vitest | 4.1.0 | + `@vitest/coverage-v8` |
-| Logging | pino | 10.x | structured logs |
-| Observability | @sentry/aws-serverless | 10.x | error monitoring |
-| Numerics | bignumber.js | 10 dp, ROUND_DOWN | all numeric comparisons |
-| Geo | geolib | — | distance / polygon containment |
-| OCR / docs | @aws-sdk/client-textract, pdf-lib | — | scale-ticket / manifest extraction |
-| AWS | client-s3, client-sts, @smithy/signature-v4 | — | document fetch + SigV4 signing |
-| Bundling | @nx/webpack | — | per-Lambda bundles |
+| Category        | Technology                                  | Version            | Notes                                                                                       |
+| --------------- | ------------------------------------------- | ------------------ | ------------------------------------------------------------------------------------------- |
+| Language        | TypeScript                                  | 5.9.3              | strict mode (`noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, `noImplicitReturns`) |
+| Runtime         | Node.js (AWS Lambda)                        | 24.14.1            | see `.nvmrc`                                                                                |
+| Monorepo        | Nx                                          | 22.6.1             | remote cache in S3 (`carrot-nx-cache`)                                                      |
+| Package manager | pnpm                                        | See `package.json` | `packageManager` pins the version                                                           |
+| Validation      | Zod                                         | 4.3.6              | runtime schema validation; types inferred via `z.infer`                                     |
+| Testing         | Vitest                                      | 4.1.0              | + `@vitest/coverage-v8`                                                                     |
+| Logging         | pino                                        | 10.x               | structured logs                                                                             |
+| Observability   | @sentry/aws-serverless                      | 10.x               | error monitoring                                                                            |
+| Numerics        | bignumber.js                                | 10 dp, ROUND_DOWN  | all numeric comparisons                                                                     |
+| Geo             | geolib                                      | —                  | distance / polygon containment                                                              |
+| OCR / docs      | @aws-sdk/client-textract, pdf-lib           | —                  | scale-ticket / manifest extraction                                                          |
+| AWS             | client-s3, client-sts, @smithy/signature-v4 | —                  | document fetch + SigV4 signing                                                              |
+| Bundling        | @nx/webpack                                 | —                  | per-Lambda bundles                                                                          |
 
 ## Architecture Type
 
@@ -64,4 +64,4 @@ Processors depend on `libs/shared/*` only — never on other processors. See [ar
 
 ## Source of Truth Note
 
-Domain knowledge (MassID, Credit, dMRV, methodology concepts) lives in the separate `docs/` repository, not here. The canonical AI/engineering rules live in `.ai/` (synced to `.cursor/rules/` + `.claude/skills/rule-*` via `pnpm ai:sync`).
+Domain knowledge (MassID, Credit, dMRV, methodology concepts) lives in the separate `docs/` repository, not here. Repository guidance lives in [AGENTS.md](../../AGENTS.md).

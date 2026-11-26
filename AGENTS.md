@@ -1,369 +1,107 @@
-# AGENTS.md
-
-Methodology Rules AI instructions for Codex, Claude, and Cursor with equal capability parity.
-
-## Equality rule
-
-- Cursor, Claude, and Codex are treated as equals.
-- No platform is primary for instruction definition.
-- Canonical source: `.ai/`.
-
-## Canonical workflow
-
-1. Edit canonical files in `.ai/`.
-2. Run `pnpm ai:sync` to regenerate platform adapters.
-3. Run `pnpm ai:check` to validate parity and links.
-
-## Current capability counts
-
-- Rules: 15
-- Skills: 13
-- Agents/Roles: 3
-
-## Available skills
-
-- `apply-methodology` - Apply an existing rule processor to a specific methodology using the apply script.
-- `check` - Run lint, typecheck, and test checks on affected projects to verify code quality.
-- `coderabbit` - Triage and address CodeRabbit automated review comments on a pull request.
-- `commit` - Stage files and create a conventional commit with a well-formed message.
-- `create-branch` - Create a new git branch from latest main using the naming convention.
-- `create-pr` - Analyze changes and create a pull request using the gh CLI with repo conventions.
-- `create-rule` - Scaffold a new rule processor, implement the evaluation logic, and write tests.
-- `debug` - Systematically diagnose and fix errors, test failures, and unexpected behavior.
-- `finish-work` - Run quality gates, commit changes, push branch, and create a pull request.
-- `review-pr` - Analyze a pull request diff and provide structured feedback on correctness, conventions, and quality.
-- `task-exec` - Autonomously implement a task following project conventions with iterative verification.
-- `unit-test` - Write Vitest unit tests following project conventions with proper stubs and assertions.
-- `zod` - Create and modify Zod schemas for runtime validation with proper type inference.
-
-## Rule mappings
-
-- `rule-canonical-config` - Keep generated rule manifests, READMEs, and codecov flags in sync with rules.config.ts edits
-- `rule-code-comments` - Keep comments meaningful by explaining intent rather than restating code
-- `rule-code-preservation` - Protect existing code, tests, and features from unintended removal or modification
-- `rule-code-style` - Maintain readable, consistent, and well-structured TypeScript code across the monorepo
-- `rule-commit` - Enforce Conventional Commits format for consistent and parseable commit history
-- `rule-document-extractor` - Enforce field-neutral parser design and layout conventions for the document extractor framework
-- `rule-error-handling` - Ensure errors are validated, propagated, and logged correctly across Lambda handlers and shared libraries
-- `rule-lambda` - Enforce thin Lambda handler patterns that delegate to processors
-- `rule-module-boundaries` - Enforce Nx module boundary rules and dependency constraints between libraries
-- `rule-naming-conventions` - Enforce consistent naming patterns for identifiers, files, and project structure
-- `rule-pull-request` - Standardize pull request creation and review workflow using gh CLI
-- `rule-rule-processors` - Enforce the standard structure and patterns for methodology rule processors
-- `rule-schemas` - Enforce Zod schema conventions for runtime validation and type derivation
-- `rule-testing` - Ensure consistent, safe, and maintainable test practices using Vitest and schema-driven data generation
-- `rule-typescript` - Enforce TypeScript strict-mode conventions and type safety across the codebase
-
-## Agent roles
-
-- `debugger` - Debugging specialist for errors, test failures, and unexpected behavior in rule processors and Lambda functions
-- `security-reviewer` - Security specialist for AWS Lambda, secrets handling, input validation, and sensitive data in rule processors
-- `verifier` - Quality gate agent that validates code changes pass all project checks before completion
-
-## Canonical references
-
-- `.ai/README.md`
-- `.ai/DEFINITIONS.md`
-- `.ai/STANDARDS.md`
-- `.ai/PARITY_MATRIX.md`
-- `.ai/PROJECT_CONTEXT.md`
-
-## Runtime adapter paths
-
-- Cursor: `.cursor/rules/`, `.cursor/skills/`, `.cursor/agents/`
-- Claude: `.claude/settings.json`, `.claude/skills/`, `.claude/agents/`
-- Codex: `.agents/skills/`, `AGENTS.md`
-
-# Methodology Rules Project Context
-
-Project-specific knowledge for AI assistants working on Methodology Rules. This content is appended to generated root adapters (`CLAUDE.md` and `AGENTS.md`).
-
-## Project Overview
-
-Methodology Rules is an Nx monorepo containing AWS Lambda rule processors for Carrot Foundation's BOLD methodology. Each processor validates a specific aspect of waste management documents (MassIDs, certificates, credit orders) by querying S3-stored documents and reporting results to Smaug via SigV4-signed HTTP requests.
-
-Unbound rule execution retrieves and stages document snapshots only through Smaug and never calls Palantir directly.
-
-## Technology Stack
-
-- **Monorepo**: Nx 22.6.1 workspace with pnpm 12.16.1
-- **Node**: 24.14.1 (see `.nvmrc`)
-- **TypeScript**: 5.9.3 with strict mode
-- **Runtime**: AWS Lambda (Node.js)
-- **Testing**: Vitest 4.1.0 with @vitest/coverage-v8
-- **Validation**: Zod 4.3.6 for runtime type validation
-- **Logging**: pino 10.3.1 with pino-pretty
-- **Observability**: @sentry/aws-serverless 10.45.0
-- **Math**: bignumber.js 10.0.2 (10 decimal places, ROUND_DOWN)
-- **Geo**: geolib 3.3.4 for geolocation validation
-- **Document extraction**: @aws-sdk/client-textract for OCR, pdf-lib for PDF manipulation
-- **AWS SDKs**: @aws-sdk/client-s3, @aws-sdk/client-sts, @smithy/signature-v4
-- **Build**: @nx/webpack with tsc compiler for Lambda bundling
-
-## Architecture
-
-### Directory Structure
-
-```text
-libs/
-  methodologies/
-    bold/                              # BOLD Mass ID methodology
-      rule-processors/
-        mass-id/                       # 20 rule processors for MassID documents
-          composting-cycle-timeframe/
-          document-manifest-data/
-          driver-identification/
-          drop-off-at-recycler/
-          geolocation-and-address-precision/
-          hauler-identification/
-          mass-id-qualifications/
-          mass-id-sorting/
-          no-conflicting-certificate-or-credit/
-          participant-accreditations-and-verifications-requirements/
-          prevented-emissions/
-          processor-identification/
-          project-boundary/
-          project-period-limit/
-          recycler-identification/
-          regional-waste-classification/
-          vehicle-identification/
-          waste-mass-is-unique/
-          waste-origin-identification/
-          weighing/
-    bold-carbon/                       # BOLD Carbon Certificate methodology
-      rules/                           # 1 rule set
-    bold-recycling/                    # BOLD Recycling Credit Order methodology
-      rules/                           # 1 rule set
-
-  shared/                              # Shared libraries (processors → shared only)
-    app/                               # Application types (RuleDataProcessor base)
-    aws-http/                          # AWS HTTP request helpers
-    cli/                               # CLI utilities (rule-runner, document-extractor)
-    cloudwatch-metrics/                # CloudWatch metrics publishing
-    document/                          # Document loader and query services
-    document-extractor/                # Generic document extraction
-    document-extractor-recycling-manifest/  # Recycling manifest extractor
-    document-extractor-scale-ticket/   # Scale ticket extractor (Textract OCR)
-    document-extractor-transport-manifest/  # Transport manifest extractor
-    env/                               # Environment variable access
-    helpers/                           # Common utilities (logger, isNil, etc.)
-    http-request/                      # HTTP request utilities
-    lambda/                            # Lambda wrapper and types
-    methodologies/                     # Methodology-specific shared code (matchers, types, utils)
-    rule/                              # Rule result, types, standard-data-processor
-    s3-bucket/                         # S3 bucket operations
-    testing/                           # Test utilities and stubs
-    text-extractor/                    # Text extraction abstractions
-    types/                             # Shared TypeScript types
-```
-
-### Processor Layout Pattern
-
-Each rule processor follows this file structure:
-
-```text
-libs/methodologies/{methodology}/rule-processors/{document-type}/{processor-name}/
-  src/
-    {name}.lambda.ts           # Lambda entry point (wrapRuleIntoLambdaHandler)
-    {name}.processor.ts        # Core validation logic (extends RuleDataProcessor)
-    {name}.rule-definition.ts  # Rule metadata (name, slug, version, events)
-    {name}.errors.ts           # Custom error classes
-    {name}.helpers.ts          # Pure helper functions
-    {name}.constants.ts        # Constants and result comment strings
-    {name}.findings.ts         # Finding codes, default owners, accreditation dependencies
-    {name}.types.ts            # TypeScript type definitions
-    {name}.validators.ts       # Zod validators (optional)
-    {name}.processor.spec.ts   # Processor unit tests
-    {name}.helpers.spec.ts     # Helper unit tests
-    {name}.lambda.e2e.spec.ts  # Lambda E2E tests
-    {name}.test-cases.ts       # Test case data
-    index.ts                   # Public exports
-```
-
-### Module Boundaries
-
-- Processors depend on `libs/shared/` only — no cross-processor imports
-- Shared methodology code lives in `libs/shared/methodologies/bold/`
-- Each processor is an independent Nx project with its own `project.json`
-
-### Processing Pipeline
-
-```text
-RuleInput (S3 event reference)
-  → Lambda handler (wrapRuleIntoLambdaHandler)
-    → Processor (extends RuleDataProcessor)
-      → DocumentQueryService (queries S3 for related documents)
-        → provideDocumentLoaderService / CachedDocumentLoaderService
-      → Validation logic (BigNumber.js, geolib, Zod, Textract)
-      → mapToRuleOutput (APPROVED / NOT_APPROVED / NOT_APPLICABLE)
-    → SigV4-signed POST to Smaug API (audit result)
-```
-
-## Key Patterns
-
-- **BigNumber.js**: All numeric comparisons use `BigNumber` with 10 decimal places and `ROUND_DOWN` to avoid floating-point errors
-- **geolib**: Geolocation distance calculations and polygon containment checks
-- **Textract**: OCR for scale ticket and transport manifest verification via `@aws-sdk/client-textract`
-- **STS AssumeRole**: Lambda assumes a cross-account role (`SMAUG_API_GATEWAY_ASSUME_ROLE_ARN`) to sign requests to Smaug API
-- **CachedDocumentLoaderService**: Caches S3 document fetches within a single Lambda invocation
-- **DocumentQueryService**: Traverses document relationship graphs in S3 to find related documents
-- **Rule definitions**: Each processor exports a `ruleDefinition` with `name`, `slug`, `version`, and `events` (satisfies `BaseRuleDefinition`)
-- **Test stubs**: Reuse stubs from `@carrot-fndn/shared/testing` and colocated `*.stubs.ts` files
-- **aws-sdk-client-mock**: Used for mocking AWS SDK clients in tests
-- **MassID event data**: `tools/mass-id-generator-cli/src/mass-id-catalog.ts` is the single authored source of the canonical MassID example and the per-event attribute dictionaries the docs site publishes. The project's `test-e2e` target runs twelve rule lambdas against that example; when an intended rule change makes one fail, update the catalog to match
-
-## Common Commands
-
-### Development
-
-```bash
-# Run tests for a specific processor
-pnpm test <project-name>               # nx test <project-name>
-
-# Run linting
-pnpm lint <project-name>               # nx lint <project-name>
-
-# TypeScript type check
-pnpm ts <project-name>                 # tsc --noEmit
-
-# Build a Lambda
-pnpm build-lambda <project-name>       # nx build-lambda <project-name>
-
-# Package a Lambda (zip)
-# nx package-lambda <project-name>     # depends on build-lambda
-```
-
-### Affected Commands
-
-```bash
-# Test all affected projects
-pnpm test:affected                     # nx affected --target test
-
-# Lint all affected projects (read-only)
-pnpm lint:affected                     # nx affected --target lint
-
-# Lint all affected projects and rewrite files with auto-fixes (mutates the tree)
-pnpm lint:affected:fix                 # nx affected --target lint --fix
-
-# TypeScript check all affected
-pnpm ts:affected                       # nx affected --target ts
-
-# Build all affected Lambdas
-pnpm build-lambda:affected             # nx affected --target build-lambda
-```
-
-### Run-Many Commands
-
-```bash
-# Test all projects
-pnpm test:all                          # nx run-many --target test
-
-# Lint all projects (read-only)
-pnpm lint:all                          # nx run-many --target lint
-
-# Lint all projects and rewrite files with auto-fixes (mutates the tree)
-pnpm lint:all:fix                      # nx run-many --target lint --fix
-
-# TypeScript check all
-pnpm ts:all                            # nx run-many --target ts
-
-# Build all Lambdas
-pnpm build-lambda:all                  # nx run-many --target build-lambda
-```
-
-### Scaffolding and Tooling
-
-```bash
-# Create a new rule processor
-pnpm create-rule
-
-# Run a rule processor locally
-pnpm run-rule <args>                   # nx run rule-runner-cli:run -- <args>
-
-# Extract document data
-pnpm extract-document -- <args>        # nx run document-extractor-cli:run -- <args>
-
-# Emit the MassID event data the docs site syncs
-pnpm generate:event-data               # tsx --tsconfig tsconfig.base.json tools/mass-id-generator-cli/src/main.ts --emit-to dist/methodology-event-data
-
-# Generate methodology rules manifest
-pnpm generate:manifest
-
-# Generate methodology framework rules
-pnpm generate:methodology-framework-rules
-
-# Generate rule READMEs
-pnpm generate:readmes
-
-# Generate methodology application READMEs
-pnpm generate:methodology-readmes
-
-# Upload Lambdas and metadata
-pnpm upload-lambdas-and-metadata
-```
-
-### Versioning
-
-```bash
-# Bump application versions
-pnpm bump:applications
-
-# Bump rule versions
-pnpm bump:rules
-```
-
-### AI Instructions
-
-```bash
-# Sync AI instructions to platform adapters
-pnpm ai:sync
-
-# Validate AI instruction parity
-pnpm ai:check
-```
-
-### Utilities
-
-```bash
-# Commitizen (guided commit message)
-pnpm commit                            # czg
-
-# Validate package.json files
-pnpm pkgJsonLint                       # npmPkgJsonLint .
-```
-
-## Environment Variables
-
-| Variable                                   | Purpose                                                       |
-| ------------------------------------------ | ------------------------------------------------------------- |
-| `DOCUMENT_BUCKET_NAME`                     | S3 bucket for methodology execution documents                 |
-| `DOCUMENT_ATTACHMENT_BUCKET_NAME`          | S3 bucket for document attachments (scale tickets, manifests) |
-| `SMAUG_API_GATEWAY_ASSUME_ROLE_ARN`        | IAM role ARN for STS AssumeRole to sign Smaug API requests    |
-| `AUDIT_URL`                                | Smaug API base URL for posting audit results                  |
-| `AI_ATTACHMENT_VALIDATOR_API_URI`          | Smaug API endpoint for AI-based attachment validation         |
-| `SENTRY_DSN`                               | Sentry DSN for error reporting                                |
-| `ENVIRONMENT`                              | Deployment environment (development, staging, production)     |
-| `SOURCE_CODE_VERSION`                      | Build artifact version identifier                             |
-| `SOURCE_CODE_URL`                          | GitHub repository URL                                         |
-| `ARTIFACT_CHECKSUM`                        | Build artifact checksum                                       |
-| `VALIDATE_ATTACHMENTS_CONSISTENCY_WITH_AI` | Feature flag for AI attachment validation                     |
-| `ENABLE_CLOUDWATCH_METRICS`                | Enable CloudWatch metrics publishing                          |
-| `CLOUDWATCH_METRICS_NAMESPACE`             | CloudWatch metrics namespace                                  |
-
-## Important Notes
-
-- **Package Manager**: use pnpm only. `packageManager` pins the version and `engine-strict` with `engines.pnpm` rejects a pnpm older than 10; npm and Yarn are not blocked by tooling
-- **Node Version**: 24.14.1 (check `.nvmrc`)
-- **Husky Hooks**: Git hooks for pre-commit linting via lint-staged
-- **Cacheable Operations**: `build-lambda`, `test`, `lint`, `ts`, `package-lambda`
-- **Remote Cache**: S3 bucket `carrot-nx-cache` (us-east-1)
-- **Webpack**: Lambda bundling uses `@nx/webpack` with custom config in `.webpack/webpack.nx.config.js`
-- **No cross-processor dependencies**: Each processor is isolated; shared code goes in `libs/shared/`
-
-## Worktree setup
-
-Run `/bin/sh scripts/setup-worktree.sh` after creating a worktree. On CrisOS this
-starts or joins the shared setup receipt, selects the pinned runtimes and arms
-Git hooks. Use `crisos-project-setup status --worktree "$PWD"` to inspect it; use
-`retry` after fixing a failed setup. The portable fallback installs the frozen
-lockfile with `--prefer-offline`.
+# Carrot Methodology Rules
+
+Carrot Engineering maintains this public Nx workspace. Its TypeScript rule processors evaluate
+methodology documents, including MassIDs, and report verification results to Smaug. Treat source
+code as public and production documents, attachments and credentials as confidential.
+
+## Workspace
+
+- `libs/methodologies/bold/rule-processors/` contains the evaluation logic. Each processor is an
+  Nx library. Keep reusable logic in `libs/shared/` and keep processors independent of each other.
+- `apps/methodologies/bold-carbon/` and `apps/methodologies/bold-recycling/` contain deployable Nx
+  applications. Their Lambda entry points expose handlers from the BOLD libraries using workspace
+  aliases. The methodology registries live in `libs/methodologies/bold-{carbon,recycling}/rules/`.
+- Cross-project imports use `@carrot-fndn/*` aliases declared in `tsconfig.paths.json`, which
+  `tsconfig.base.json` extends. Keep `project.json` tags consistent with sibling projects so the
+  dependency constraints in `eslint.config.js` apply. Shared libraries depend on shared code.
+- Use `massID`, `gasID` and `recycledID` for new domain identifiers. Preserve existing wire keys
+  when working with serialized documents and API contracts.
+
+## Execution paths
+
+A Lambda handler created with `wrapRuleIntoLambdaHandler` delegates evaluation to a rule processor.
+Processors load related documents through the shared document loader and `DocumentQueryService`,
+validate the rule subject, and evaluate the rule. Rule statuses include `PASSED`, `FAILED` and
+`REVIEW_REQUIRED`. The shared Lambda wrapper posts the result to Smaug using Signature Version 4
+(SigV4). Unbound execution resolves and stages snapshots through Smaug. Keep that path on Smaug so
+it uses the same snapshot and audit boundary as registered execution.
+
+- The shared document loader caches S3 reads within an invocation. Use `DOCUMENT_BUCKET_NAME` for
+  staged documents and `DOCUMENT_ATTACHMENT_BUCKET_NAME` for attachment reads. Keep bucket access
+  behind the shared services so callers retain the same caching and credentials behavior.
+- Smaug requests use `SMAUG_API_GATEWAY_ASSUME_ROLE_ARN` for the cross-account role. `AUDIT_URL`
+  selects the Smaug API. Local dry runs receive their environment through shell variables or
+  `--env-file`. The checked-in test environment is deliberately non-routable.
+- For mass, emissions and credit arithmetic, use the existing BigNumber helpers and preserve their
+  per-domain rounding rules. Existing geolocation comparisons use `geolib`.
+- Validate inbound documents with the appropriate Zod envelope, inbound, normalized, domain or
+  rule-subject schema. Keep external shapes in their existing validation layer and derive types from
+  the schemas. An expected verification failure becomes a rule result. Unexpected infrastructure
+  failures must propagate so retries and dead-letter queue handling still work. Use structured pino
+  logging with operation context and omit payloads and authentication material.
+
+## Commands
+
+Node is pinned in `.nvmrc`. Use the pnpm version in `package.json` and keep `pnpm-lock.yaml` frozen
+for setup. For a new worktree, run `/bin/sh scripts/setup-worktree.sh` with those versions selected.
+It installs dependencies and verifies the worktree's Husky hooks. A host can supply the optional
+`WORKTREE_SETUP_HELPER` executable as documented in [README.md](README.md#installation).
+
+| Task                                                            | Command                          |
+| --------------------------------------------------------------- | -------------------------------- |
+| Install dependencies                                            | `pnpm install --frozen-lockfile` |
+| Lint one Nx project                                             | `pnpm lint <project>`            |
+| Type-check one Nx project                                       | `pnpm ts <project>`              |
+| Test one Nx project                                             | `pnpm test <project>`            |
+| Run the Lambda integration tests for a project with that target | `pnpm nx run <project>:test-e2e` |
+| Build one Lambda application                                    | `pnpm build-lambda <project>`    |
+| Run a processor locally                                         | `pnpm run-rule <args>`           |
+| Extract fields from a document                                  | `pnpm extract-document <args>`   |
+
+The **canonical quality gate** is the [read-only check skill](.agents/skills/check/SKILL.md).
+For Nx changes it runs `pnpm lint:affected`, `pnpm ts:affected` and `pnpm test:affected` against the
+PR base. For repository-only tooling and documentation it checks the changed paths with the
+relevant existing tools. Use `pnpm lint:affected:fix` only as an explicit editing step. Git hooks
+run lint-staged on commit and validate the commit message.
+
+## Pull requests and release
+
+- Target `main`. Use [.github/pull_request_template.md](.github/pull_request_template.md) and the
+  matching repository label, such as `feature`, `bug`, `documentation`, `chore` or `refactoring`.
+  When a commit needs a workspace scope, the local convention uses `nx`, `rule`, `shared` and
+  `script`.
+- [Check and Deploy](.github/workflows/check-and-deploy.yaml) runs on branch pushes. It invokes
+  [Backend Check](.github/workflows/backend-check.yaml) for Nx lint, type checks, tests, Lambda
+  build and end-to-end checks, and runs the repository agent-config audit. Verify the checks
+  against the proposed commit before merge.
+- On `main`, Check and Deploy can invoke [Deploy](.github/workflows/deploy.yaml) when Lambda
+  applications are affected. Deploy uploads artifacts to S3 for production and development. Elrond
+  owns the infrastructure that consumes those artifacts. Coordinate changes to the handler or
+  environment contract with that infrastructure.
+- [Version and Sync Rules to Docs](.github/workflows/version-and-sync.yaml) bumps versions and
+  dispatches manifest updates to Docs and Smaug on pushes to `main`. Generated inputs and outputs
+  are listed in the [registry skill](.agents/skills/methodology-registry/SKILL.md).
+
+## Where to find implementation guidance
+
+| Change                                                                            | Reference                                                         |
+| --------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| Add or update a processor, finding, Lambda entry point or methodology application | [Processor development](.agents/skills/create-rule/SKILL.md)      |
+| Edit a methodology rule registry, version, manifest or generated README           | [Rule registry](.agents/skills/methodology-registry/SKILL.md)     |
+| Add a document layout or change confidence, blank fields or OCR merging           | [Document extraction](.agents/skills/document-extractor/SKILL.md) |
+| Review a Lambda trust boundary, signed request or document data handling          | [Lambda security review](.agents/skills/lambda-review/SKILL.md)   |
+| Update the MassID example published by Docs                                       | [MassID event data](README.md#massid-event-data)                  |
+
+`AGENTS.md` holds repository instructions. `CLAUDE.md` imports it, and Claude's skill symlinks
+point to the authored directories under `.agents/skills/`. Cursor reads those same sources.
+
+## Review guidelines
+
+- Review finding codes, result payloads and methodology registry entries as consumer contracts.
+  Changes to the result path should preserve the rule slug and existing finding identifiers
+  unless the task explicitly changes those contracts.
+- Prefer the stubs in `@carrot-fndn/shared/testing` and
+  `@carrot-fndn/shared/methodologies/bold/testing` for Vitest suites. Keep fixtures synthetic,
+  including tax identifiers, registration plates, addresses and text extracted from documents.
+- Propose comments where they explain an external constraint or a non-obvious invariant. Preserve
+  comments that capture a reason the code cannot express by itself.
