@@ -40,7 +40,7 @@ Domain-scoped types carry a **`Bold`** prefix (naming-convention rule), e.g.:
 The extraction framework is **field-neutral**:
 
 - `DocumentParser<T>` — all extracted fields are **optional**; a parser returns `undefined` (never `""`) for fields it cannot extract.
-- `reviewRequired` — set by **extraction confidence** (layout-match score < 0.5), not by business rules.
+- `reviewRequired` — derived from extraction quality and blank-field observations. See the [extraction skill](../../.agents/skills/document-extractor/SKILL.md).
 - `layoutId` / `layouts` — typed as `NonEmptyString`.
 - Default layouts live in `defaults.ts`, added only for stable, well-known document formats.
 - Required-field decisions are delegated to **rule processors**, never enforced in parsers.

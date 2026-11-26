@@ -47,27 +47,33 @@ RuleInput (S3 event reference: documentId, documentKeyPrefix, responseUrl, respo
 ## Key Components
 
 ### Rule contract (`libs/shared/rule/types`)
+
 - `RuleInput` — `documentId`, `documentKeyPrefix`, `requestId`, `responseToken`, `responseUrl`, optional `environment`, `parentDocumentId`, `ruleName`.
 - `RuleOutput` — `resultStatus` (`PASSED`/`FAILED`/`REVIEW_REQUIRED`), optional `resultComment`, `resultContent`, plus the response routing fields echoed back.
 - `IRuleDataProcessor` — `process(data: RuleInput): Promise<RuleOutput>`.
 
 ### Processor base classes
+
 - `RuleDataProcessor` (abstract, `libs/shared/app/types`) — the root contract; implements `process()`.
 - `ParentDocumentRuleProcessor<RuleSubject>` (`libs/shared/methodologies/bold/processors`) — the common BOLD base; subclasses implement `evaluateResult()` and the framework handles document loading, mapping, and result shaping.
 
 ### Lambda wrapper (`libs/shared/lambda/wrapper`)
+
 `wrapRuleIntoLambdaHandler(rule)` is the single entry-point boilerplate: initializes Sentry, parses the event into `RuleInput` (Zod), invokes `rule.process()`, reports the result, sets Sentry tags on failure, and lets errors propagate. Rule Lambdas are therefore one line: `export const handler = wrapRuleIntoLambdaHandler(new XProcessor())`.
 
 ### Document access (`libs/shared/document`, `libs/shared/methodologies/bold`)
+
 - `DocumentQueryService` traverses the document relationship graph in S3 to find related documents (e.g. a MassID's events, manifests, certificates).
 - `CachedDocumentLoaderService` caches S3 fetches within a single invocation.
 - BOLD matchers/types model document events (`BoldDocumentEventName`) and entities.
 
 ### Result reporting (`libs/shared/rule/result`)
+
 `reportRuleResults` signs the request with SigV4 (assuming `SMAUG_API_GATEWAY_ASSUME_ROLE_ARN` via STS) and POSTs the verdict to the Smaug `AUDIT_URL`.
 
 ### Document extraction (`libs/shared/document-extractor*`, `text-extractor`)
-Field-neutral `DocumentParser<T>` framework. Specialized extractors (scale-ticket, transport-manifest, recycling-manifest) use Textract OCR. Parsers return optional fields (`undefined` when absent) and set `reviewRequired` by extraction confidence; required-field decisions belong to rule processors.
+
+Field-neutral `DocumentParser<T>` framework. Specialized extractors (scale-ticket, transport-manifest, recycling-manifest) use Textract OCR. Parsers return optional fields. The extraction framework derives review reasons from extraction signals, and processors decide which fields a rule requires. See the [extraction skill](../../.agents/skills/document-extractor/SKILL.md).
 
 ## Data Architecture
 
@@ -75,15 +81,15 @@ No database. State lives in **S3** (methodology execution documents + attachment
 
 ## Cross-Cutting Concerns
 
-| Concern | Approach |
-|---|---|
-| Validation | Zod at every boundary (`.parse` / `.safeParse`); types via `z.infer`. |
-| Numerics | `bignumber.js`, 10 dp, ROUND_DOWN — never raw JS float math. |
-| Geo | `geolib` for distance / polygon containment. |
-| Logging | `pino` structured logs (document/request IDs); never `console.log`; never log PII. |
-| Errors | Enrich + propagate; let the Lambda runtime retry/DLQ; no silent catches. |
-| Observability | Sentry (`@sentry/aws-serverless`) + optional CloudWatch metrics. |
-| Auth (egress) | STS AssumeRole + SigV4 to call Smaug. |
+| Concern       | Approach                                                                           |
+| ------------- | ---------------------------------------------------------------------------------- |
+| Validation    | Zod at every boundary (`.parse` / `.safeParse`); types via `z.infer`.              |
+| Numerics      | `bignumber.js`, 10 dp, ROUND_DOWN — never raw JS float math.                       |
+| Geo           | `geolib` for distance / polygon containment.                                       |
+| Logging       | `pino` structured logs (document/request IDs); never `console.log`; never log PII. |
+| Errors        | Enrich + propagate; let the Lambda runtime retry/DLQ; no silent catches.           |
+| Observability | Sentry (`@sentry/aws-serverless`) + optional CloudWatch metrics.                   |
+| Auth (egress) | STS AssumeRole + SigV4 to call Smaug.                                              |
 
 ## Testing Strategy
 

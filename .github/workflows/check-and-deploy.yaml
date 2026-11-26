@@ -15,6 +15,17 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  agent-config:
+    uses: carrot-foundation/.github/.github/workflows/repo-agent-config.yml@6f8c2d0e71dd8923e4c745161a8c4a04c4791c95
+    with:
+      lorien-ref: main
+      deny-patterns: |
+        cri[s]os
+      skip: ''
+      max-agents-bytes: '32768'
+    secrets:
+      lorien-read-token: ${{ secrets.LORIEN_READ_TOKEN }}
+
   affected:
     name: Get affected
     runs-on: ubuntu-latest

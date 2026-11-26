@@ -34,7 +34,6 @@ library and application layout, findings and registration.
 
 ## Implementation Conventions (must-follow)
 
-- Processor extends `ParentDocumentRuleProcessor<RuleSubject>` and implements `evaluateResult()`. Business logic lives in the processor, **never** in the Lambda file.
 - Import shared code only via `@carrot-fndn/*` path aliases (`tsconfig.paths.json`). No relative paths crossing Nx boundaries; no cross-processor imports.
 - Strict TypeScript: explicit return types on exports, named exports only, no `any`/`!`/`@ts-ignore`. Narrow indexed access (`noUncheckedIndexedAccess`). Infer types from Zod.
 - Numeric comparisons via `bignumber.js` (10 dp, ROUND_DOWN). Geo via `geolib`.
