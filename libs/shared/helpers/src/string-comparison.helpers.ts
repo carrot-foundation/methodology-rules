@@ -169,7 +169,10 @@ const isWithinRange = (range: KilometerMarkers, marker: KilometerMarkers) => {
 };
 
 const sortedDistances = (markers: KilometerMarkers): string =>
-  markers.distances.toSorted().join(' ');
+  markers.distances
+    .map(Number)
+    .toSorted((x, y) => x - y)
+    .join(' ');
 
 // A whole marker ("km 42") is a less precise reading of the same km with decimals ("km 42,3"); a stretch has exact ends.
 const kilometerMarkersMatch = (
