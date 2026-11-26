@@ -8,7 +8,9 @@ import {
   BoldStubsBuilder,
   expectRuleFindings,
   findTestCase,
+  stubBoldMassIDRecyclingManifestEvent,
   stubDocument,
+  stubDocumentEventAttachment,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   BoldAttributeName,
@@ -29,7 +31,7 @@ import {
 } from './document-manifest-data.test-cases';
 
 const { DOCUMENT_NUMBER, DOCUMENT_TYPE } = BoldAttributeName;
-const { RECYCLING_MANIFEST } = BoldDocumentEventName;
+const { RECYCLING_MANIFEST, TRANSPORT_MANIFEST } = BoldDocumentEventName;
 
 type DocumentManifestDataTestCase =
   (typeof documentManifestDataTestCases)[number];
@@ -262,6 +264,66 @@ describe('DocumentManifestDataProcessor', () => {
       ),
     ]);
   });
+
+  it.each([
+    {
+      documentManifestType: TRANSPORT_MANIFEST,
+      expectedAttachments: 1,
+      recyclingManifestDocumentType: 'CDF',
+    },
+    {
+      documentManifestType: TRANSPORT_MANIFEST,
+      expectedAttachments: 0,
+      recyclingManifestDocumentType: 'MTR',
+    },
+    {
+      documentManifestType: RECYCLING_MANIFEST,
+      expectedAttachments: 0,
+      recyclingManifestDocumentType: 'CDF',
+    },
+  ])(
+    'should give the $documentManifestType rule $expectedAttachments $recyclingManifestDocumentType attachment(s) to prove a receipt',
+    async ({
+      documentManifestType,
+      expectedAttachments,
+      recyclingManifestDocumentType,
+    }) => {
+      const testCase = findTestCase(
+        crossValidationTestCases,
+        'Cross-validation passes with an observation',
+      );
+
+      await processTestCase({
+        ...testCase,
+        documentManifestType,
+        events: {
+          ...testCase.events,
+          [RECYCLING_MANIFEST]: stubBoldMassIDRecyclingManifestEvent({
+            metadataAttributes: [
+              [DOCUMENT_TYPE, recyclingManifestDocumentType],
+              [DOCUMENT_NUMBER, 'CDF-001'],
+            ],
+            partialDocumentEvent: {
+              attachments: [
+                stubDocumentEventAttachment({ label: RECYCLING_MANIFEST }),
+              ],
+            },
+          }),
+        },
+      });
+
+      const [input] = crossValidateWithTextractMock.mock.lastCall ?? [];
+
+      expect(input?.recyclingManifests?.attachmentInfos ?? []).toHaveLength(
+        expectedAttachments,
+      );
+      expect(
+        input?.recyclingManifests?.documentManifestEvents.map(
+          ({ documentType }) => documentType,
+        ) ?? [],
+      ).toEqual(expectedAttachments > 0 ? ['CDF'] : []);
+    },
+  );
 
   it('should return the extraction failure finding when the document extraction fails', async () => {
     const { ruleOutput } = await processTestCase(

@@ -43,6 +43,11 @@ export interface DocumentManifestEventSubject {
 
 export type EventAttributeValueType = BoldAttributeValue | string | undefined;
 
+export interface ManifestAttachments {
+  attachmentInfos: AttachmentInfo[];
+  documentManifestEvents: DocumentManifestEventSubject[];
+}
+
 export interface ValidationResult {
   failMessages: string[];
   passMessage?: string;
