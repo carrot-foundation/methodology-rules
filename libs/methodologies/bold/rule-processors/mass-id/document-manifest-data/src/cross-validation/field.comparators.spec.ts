@@ -676,6 +676,65 @@ describe('cross-validation field comparators', () => {
       expect(result.validation).toHaveLength(1);
     });
 
+    it.each([
+      { city: 'Vila Inventada', expectedReview: false },
+      { city: 'VILA INVENTADA', expectedReview: false },
+      { city: 'Outrolugar', expectedReview: true },
+    ])(
+      'should review the same highway stretch in a different city ($city)',
+      ({ city, expectedReview }) => {
+        const entity = stubMtrEntityWithHighAddress(
+          'Fictional Generator',
+          '11.111.111/0001-11',
+          'BR-999 do km 10,000 ao km 13,000, 1801 Bairro Norte',
+          city,
+          'PR',
+        );
+        const result = compareEntity(
+          entity,
+          ['Fictional Generator'],
+          '11.111.111/0001-11',
+          entityReasonsWithAddress,
+          stubEventAddress({
+            city: 'Vila Inventada',
+            countryState: 'PR',
+            number: '',
+            street: 'BR-999 - do km 10',
+          }),
+        );
+
+        expect(
+          result.validation.some(
+            (validation) =>
+              validation.reviewReason?.code === 'ADDRESS_MISMATCH',
+          ),
+        ).toBe(expectedReview);
+      },
+    );
+
+    it('should review a matching street in a different single-word city', () => {
+      const entity = stubMtrEntityWithHighAddress(
+        'Fictional Generator',
+        '11.111.111/0001-11',
+        'Rodovia Ficticia BR-999, Km 42',
+        'Outrolugar',
+        'SP',
+      );
+      const result = compareEntity(
+        entity,
+        ['Fictional Generator'],
+        '11.111.111/0001-11',
+        entityReasonsWithAddress,
+        stubEventAddress({
+          city: 'Inventada',
+          number: '',
+          street: 'Rodovia Ficticia BR-999, Km 42',
+        }),
+      );
+
+      expect(result.validation).toHaveLength(1);
+    });
+
     it('should include address in debug for entity with address fields', () => {
       const entity = stubEntityWithAddress(
         'Generator Co',

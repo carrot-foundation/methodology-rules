@@ -342,8 +342,12 @@ const validateEntityAddress = (
     extractedAddress,
     eventAddressString,
   );
+  // The whole-address score tolerates one missing word, which can be the city.
+  const isSameCity =
+    entityWithAddress.city.blank === true ||
+    isNameMatch(entityWithAddress.city.parsed, eventAddress.city).isMatch;
 
-  if (isMatch) {
+  if (isMatch && isSameCity) {
     return undefined;
   }
 

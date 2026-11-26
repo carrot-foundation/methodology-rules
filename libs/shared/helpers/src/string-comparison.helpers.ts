@@ -83,9 +83,14 @@ const SPACED_METER_OFFSET_PATTERN =
 const joinMeterOffsets = (value: string): string =>
   value.replaceAll(SPACED_METER_OFFSET_PATTERN, '$1+$2');
 
+// "do km 10 ao km 13" names a stretch of road, not two conflicting markers.
+const KILOMETER_RANGE_PATTERN =
+  /(?<![\p{L}_])km\.?\s*\d[\d.,+]*\s+(?:a|ao|ate|até)\s+km\.?\s*\d/iu;
+
 interface KilometerMarkers {
   distances: string[];
   invalid: boolean;
+  isRange: boolean;
   isWholeKilometer: boolean;
   kilometers: string[];
   value: string;
@@ -135,13 +140,32 @@ const normalizeKilometerMarkers = (address: string): KilometerMarkers => {
     },
   );
 
+  const distinctDistances = new Set(distances).size;
+  const isRange =
+    distinctDistances === 2 &&
+    distances.length === 2 &&
+    KILOMETER_RANGE_PATTERN.test(value);
+
   return {
     distances: deduplicateConsecutiveTokens(distances),
-    invalid: invalidMarkers.length > 0 || new Set(distances).size > 1,
+    invalid: invalidMarkers.length > 0 || (distinctDistances > 1 && !isRange),
+    isRange,
     isWholeKilometer: !hasFraction,
     kilometers: deduplicateConsecutiveTokens(kilometerParts),
     value: normalized,
   };
+};
+
+const isWithinRange = (range: KilometerMarkers, marker: KilometerMarkers) => {
+  const [start, end] = range.distances.map(Number).toSorted((x, y) => x - y);
+  const distance = Number(marker.distances[0]);
+
+  return (
+    !marker.isRange &&
+    marker.distances.length === 1 &&
+    distance >= start! &&
+    distance <= end!
+  );
 };
 
 // A whole marker ("km 42") is a less precise reading of the same km with decimals ("km 42,3").
@@ -149,11 +173,17 @@ const kilometerMarkersMatch = (
   a: KilometerMarkers,
   b: KilometerMarkers,
 ): boolean =>
+  (a.isRange && isWithinRange(a, b)) ||
+  (b.isRange && isWithinRange(b, a)) ||
   a.distances.length === 0 ||
   b.distances.length === 0 ||
   a.distances.join(' ') === b.distances.join(' ') ||
   ((a.isWholeKilometer || b.isWholeKilometer) &&
     a.kilometers.join(' ') === b.kilometers.join(' '));
+
+// "S/N", "S/SN" and "SN" all say the address has no number, so they carry no address information.
+const NO_NUMBER_MARKER_PATTERN =
+  /(?<![\p{L}\p{N}])(?:s\s*\/\s*s?n|sn)(?![\p{L}\p{N}])/giu;
 
 /**
  * Normalizes an address string for comparison.
@@ -161,10 +191,9 @@ const kilometerMarkersMatch = (
  * and deduplicates consecutive identical tokens (OCR noise).
  */
 export const normalizeAddress = (value: string): string => {
-  const withDigitSpaces = normalizeKilometerMarkers(value).value.replaceAll(
-    /(?<=\d)[^\d\sa-zA-Z]+(?=\d)/g,
-    ' ',
-  );
+  const withDigitSpaces = normalizeKilometerMarkers(value)
+    .value.replaceAll(NO_NUMBER_MARKER_PATTERN, ' ')
+    .replaceAll(/(?<=\d)[^\d\sa-zA-Z]+(?=\d)/g, ' ');
   const normalized = aggressiveNormalize(withDigitSpaces);
 
   if (normalized === '') {
