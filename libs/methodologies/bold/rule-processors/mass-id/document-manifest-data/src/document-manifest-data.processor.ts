@@ -58,11 +58,11 @@ import {
   toCrossValidationFinding,
 } from './document-manifest-data.findings';
 import {
-  type AttachmentInfo,
   type DocumentManifestEventSubject,
   type EventAttributeValueType,
   getAttachmentInfos,
   hasRecyclingManifestException,
+  type ManifestAttachments,
 } from './document-manifest-data.helpers';
 
 const {
@@ -92,15 +92,14 @@ interface ManifestDocuments {
   document: BoldDocument;
 }
 
-type RuleSubject = {
-  attachmentInfos: AttachmentInfo[];
+type RuleSubject = ManifestAttachments & {
   document: BoldDocument;
-  documentManifestEvents: DocumentManifestEventSubject[];
   dropOffEvent: BoldDocumentEvent | undefined;
   haulerEvent: BoldDocumentEvent | undefined;
   mtrEventDocumentNumbers: string[];
   pickUpEvent: BoldDocumentEvent | undefined;
   recyclerEvent: BoldDocumentEvent | undefined;
+  recyclingManifests?: ManifestAttachments | undefined;
   wasteGeneratorEvent: BoldDocumentEvent | undefined;
   weighingEvents: BoldDocumentEvent[];
 };
@@ -191,6 +190,7 @@ export class DocumentManifestDataProcessor extends RuleStandardDataProcessor<
       mtrEventDocumentNumbers: ruleSubject.mtrEventDocumentNumbers,
       pickUpEvent: ruleSubject.pickUpEvent,
       recyclerEvent: ruleSubject.recyclerEvent,
+      recyclingManifests: ruleSubject.recyclingManifests,
       wasteGeneratorEvent: ruleSubject.wasteGeneratorEvent,
       weighingEvents: ruleSubject.weighingEvents,
     });
@@ -255,9 +255,6 @@ export class DocumentManifestDataProcessor extends RuleStandardDataProcessor<
     approvedExceptions,
     document,
   }: ManifestDocuments): RuleSubject {
-    const transportManifestEvents = document.externalEvents?.filter(
-      eventNameIsAnyOf([this.documentManifestType]),
-    );
     const recyclerEvent = document.externalEvents?.find(
       and(eventNameIsAnyOf([ACTOR]), eventLabelIsAnyOf([RECYCLER])),
     );
@@ -278,33 +275,42 @@ export class DocumentManifestDataProcessor extends RuleStandardDataProcessor<
       [],
     );
 
-    const documentManifestEvents = getOrDefault(
-      transportManifestEvents?.map((event) => {
-        const correctLabelAttachment = getDocumentEventAttachmentByLabel(
-          event,
-          this.documentManifestType,
-        );
+    const toManifestEventSubjects = (
+      manifestType: DocumentManifestType,
+    ): DocumentManifestEventSubject[] =>
+      getOrDefault(
+        document.externalEvents
+          ?.filter(eventNameIsAnyOf([manifestType]))
+          .map((event) => {
+            const correctLabelAttachment = getDocumentEventAttachmentByLabel(
+              event,
+              manifestType,
+            );
 
-        const hasWrongLabelAttachment =
-          !correctLabelAttachment && isNonEmptyArray(event.attachments);
+            const hasWrongLabelAttachment =
+              !correctLabelAttachment && isNonEmptyArray(event.attachments);
 
-        return {
-          approvedExceptions,
-          attachment: correctLabelAttachment,
-          documentNumber: getEventAttributeValue(event, DOCUMENT_NUMBER),
-          documentType: getEventAttributeValue(event, DOCUMENT_TYPE),
-          eventAddressId: event.address.id,
-          eventValue: event.value,
-          exemptionJustification: getEventAttributeValue(
-            event,
-            EXEMPTION_JUSTIFICATION,
-          ),
-          hasWrongLabelAttachment,
-          issueDateAttribute: getEventAttributeByName(event, ISSUE_DATE),
-          recyclerCountryCode: recyclerEvent?.address.countryCode,
-        };
-      }),
-      [],
+            return {
+              approvedExceptions,
+              attachment: correctLabelAttachment,
+              documentNumber: getEventAttributeValue(event, DOCUMENT_NUMBER),
+              documentType: getEventAttributeValue(event, DOCUMENT_TYPE),
+              eventAddressId: event.address.id,
+              eventValue: event.value,
+              exemptionJustification: getEventAttributeValue(
+                event,
+                EXEMPTION_JUSTIFICATION,
+              ),
+              hasWrongLabelAttachment,
+              issueDateAttribute: getEventAttributeByName(event, ISSUE_DATE),
+              recyclerCountryCode: recyclerEvent?.address.countryCode,
+            };
+          }),
+        [],
+      );
+
+    const documentManifestEvents = toManifestEventSubjects(
+      this.documentManifestType,
     );
 
     const mtrEventDocumentNumbers =
@@ -320,17 +326,31 @@ export class DocumentManifestDataProcessor extends RuleStandardDataProcessor<
           )
         : [];
 
-    return {
+    const toManifestAttachments = (
+      events: DocumentManifestEventSubject[],
+    ): ManifestAttachments => ({
       attachmentInfos: getAttachmentInfos({
         documentId: document.id,
-        events: documentManifestEvents,
+        events,
       }),
+      documentManifestEvents: events,
+    });
+
+    return {
+      ...toManifestAttachments(documentManifestEvents),
       document,
-      documentManifestEvents,
       dropOffEvent,
       haulerEvent,
       mtrEventDocumentNumbers,
       pickUpEvent,
+      ...(this.documentManifestType === TRANSPORT_MANIFEST && {
+        recyclingManifests: toManifestAttachments(
+          toManifestEventSubjects(RECYCLING_MANIFEST).filter(
+            ({ documentType }) =>
+              documentType?.toString() === BoldReportType.CDF.toString(),
+          ),
+        ),
+      }),
       recyclerEvent,
       wasteGeneratorEvent,
       weighingEvents,

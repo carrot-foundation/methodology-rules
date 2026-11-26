@@ -380,8 +380,8 @@ describe('MtrSigorParser', () => {
 
       expect(result.data.driverName).toEqual(createBlankField(''));
       expect(result.data.blankFields).toContain('driverName');
-      expect(result.data.vehiclePlate?.parsed).toBe('');
-      expect(result.data.vehiclePlate?.confidence).toBe('low');
+      expect(result.data.vehiclePlate).toEqual(createBlankField(''));
+      expect(result.data.blankFields).toContain('vehiclePlate');
     });
 
     it('should extract OCR-mangled plate when driver name is identified', () => {

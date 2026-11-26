@@ -146,6 +146,7 @@ export interface DriverAndVehicle {
   driverName?: string;
   isDriverNameBlank?: boolean;
   isVehiclePlateAmbiguous?: boolean;
+  isVehiclePlateBlank?: boolean;
   vehiclePlate?: string;
 }
 
@@ -293,12 +294,14 @@ const extractFromSingleLabel = (
   return result;
 };
 
-const isBareDriverLabel = (line: string): boolean => {
+const toBareLabel = (line: string): string => {
   const text = line.toLowerCase().trim();
-  const label = text.endsWith(':') ? text.slice(0, -1).trim() : text;
 
-  return (DRIVER_LABELS as readonly string[]).includes(label);
+  return text.endsWith(':') ? text.slice(0, -1).trim() : text;
 };
+
+const isBareDriverLabel = (line: string): boolean =>
+  (DRIVER_LABELS as readonly string[]).includes(toBareLabel(line));
 
 const isPlateLine = (line: string): boolean =>
   VEHICLE_PLATE_FORMAT.test(line) || TRUNCATED_PLATE_FORMAT.test(line);
@@ -319,6 +322,34 @@ const markBlankDriverName = (
     ? { ...result, isDriverNameBlank: true }
     : result;
 
+// Only a plate label followed by nothing but the driver name is blank; any other unparsed line may be a misread plate
+const markBlankVehiclePlate = (
+  result: DriverAndVehicle,
+  lines: string[],
+  plateLabelIndex: number,
+): DriverAndVehicle =>
+  plateLabelIndex !== -1 &&
+  result.vehiclePlate === undefined &&
+  toBareLabel(lines[plateLabelIndex]!) === PLATE_LABEL &&
+  lines
+    .slice(plateLabelIndex + 1)
+    .filter((line) => isValueLine(line))
+    .every((line) => line === result.driverName)
+    ? { ...result, isVehiclePlateBlank: true }
+    : result;
+
+const markBlankFields = (
+  result: DriverAndVehicle,
+  lines: string[],
+  driverLabelIndex: number,
+  plateLabelIndex: number,
+): DriverAndVehicle =>
+  markBlankVehiclePlate(
+    markBlankDriverName(result, lines, driverLabelIndex),
+    lines,
+    plateLabelIndex,
+  );
+
 export const extractDriverAndVehicle = (section: string): DriverAndVehicle => {
   const lines = section.split('\n').map((line) => line.trim());
 
@@ -338,7 +369,12 @@ export const extractDriverAndVehicle = (section: string): DriverAndVehicle => {
   );
 
   if (inlineResult) {
-    return markBlankDriverName(inlineResult, lines, driverLabelIndex);
+    return markBlankFields(
+      inlineResult,
+      lines,
+      driverLabelIndex,
+      plateLabelIndex,
+    );
   }
 
   const lastLabelIndex = Math.max(driverLabelIndex, plateLabelIndex);
@@ -355,13 +391,14 @@ export const extractDriverAndVehicle = (section: string): DriverAndVehicle => {
       result.isVehiclePlateAmbiguous = true;
     }
 
-    return markBlankDriverName(result, lines, driverLabelIndex);
+    return markBlankFields(result, lines, driverLabelIndex, plateLabelIndex);
   }
 
-  return markBlankDriverName(
+  return markBlankFields(
     extractFromSingleLabel(valueLines, driverLabelIndex !== -1),
     lines,
     driverLabelIndex,
+    plateLabelIndex,
   );
 };
 
@@ -470,6 +507,7 @@ export const extractHaulerFields = (
       driverName,
       isDriverNameBlank,
       isVehiclePlateAmbiguous,
+      isVehiclePlateBlank,
       vehiclePlate,
     } = extractDriverAndVehicle(haulerSection);
 
@@ -494,6 +532,8 @@ export const extractHaulerFields = (
         vehiclePlate,
         `Placa do Veiculo\n${vehiclePlate}`,
       );
+    } else if (isVehiclePlateBlank === true) {
+      partialData.vehiclePlate = createBlankField('');
     } else if (labelPatterns.vehiclePlate.test(haulerSection)) {
       partialData.vehiclePlate = createLowConfidenceField('');
     }

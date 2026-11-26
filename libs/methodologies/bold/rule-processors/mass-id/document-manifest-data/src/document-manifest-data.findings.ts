@@ -52,12 +52,16 @@ const mtrDateWithinToleranceObservation = ({
 const mtrBlankFieldObservation = ({
   description,
   evidenceField,
-  filledField,
+  fix,
   title,
 }: {
   description: string;
-  evidenceField: 'blankFields' | 'transportDate';
-  filledField: string;
+  evidenceField:
+    | 'blankFields'
+    | 'lowConfidenceFields'
+    | 'receivingDate'
+    | 'transportDate';
+  fix: string;
   title: string;
 }): FindingMeta => ({
   category: 'OBSERVATION',
@@ -65,11 +69,18 @@ const mtrBlankFieldObservation = ({
   description,
   documentKinds: [BoldReportType.MTR],
   evidence: [crossValidationEvidence(evidenceField)],
-  guidance: `Nenhuma correção é necessária para a aprovação. Para evitar a observação, emita o MTR com ${filledField}.`,
+  guidance: `Nenhuma correção é necessária para a aprovação. Para evitar a observação, ${fix}.`,
   title,
 });
 
 const MTR_DATE_OBSERVATIONS = {
+  'CROSS_VALIDATION.RECEIVING_DATE_BLANK': mtrBlankFieldObservation({
+    description:
+      'A data de recebimento está em branco no MTR anexado (MTR sem baixa). O campo em branco é aceito porque o CDF anexado a esta MassID passou na validação cruzada e comprova o recebimento.',
+    evidenceField: 'receivingDate',
+    fix: 'anexe o MTR depois que o destinador registrar a baixa no sistema',
+    title: 'Data de recebimento em branco no MTR',
+  }),
   'CROSS_VALIDATION.RECEIVING_DATE_WITHIN_TOLERANCE':
     mtrDateWithinToleranceObservation({
       acceptedWindow: 'de 1 dia antes a 10 dias depois',
@@ -81,7 +92,7 @@ const MTR_DATE_OBSERVATIONS = {
     description:
       'A data de transporte está em branco no MTR anexado. O campo em branco é aceito porque os sistemas de MTR permitem preenchê-lo à mão no despacho.',
     evidenceField: 'transportDate',
-    filledField: 'a data de transporte preenchida',
+    fix: 'emita o MTR com a data de transporte preenchida',
     title: 'Data de transporte em branco no MTR',
   }),
   'CROSS_VALIDATION.TRANSPORT_DATE_WITHIN_TOLERANCE':
@@ -126,7 +137,7 @@ export const DOCUMENT_MANIFEST_DATA_FINDINGS = defineRuleFindings(
       description:
         'O MTR não identifica o motorista; aceito porque o evento "Pick-up" traz a justificativa de ausência de motorista.',
       evidenceField: 'blankFields',
-      filledField: 'o nome do motorista preenchido',
+      fix: 'emita o MTR com o nome do motorista preenchido',
       title: 'Nome do motorista em branco no MTR',
     }),
     'CROSS_VALIDATION.DROP_OFF_DATE_OUTSIDE_PERIOD': {
@@ -278,6 +289,20 @@ export const DOCUMENT_MANIFEST_DATA_FINDINGS = defineRuleFindings(
         'Confira a data do evento "Pick-up" e o MTR anexado, confirme qual está correto e corrija na origem.',
       title: 'Data de transporte diverge do MTR',
     },
+    'CROSS_VALIDATION.VEHICLE_PLATE_BLANK': mtrBlankFieldObservation({
+      description:
+        'A placa do veículo está em branco no MTR anexado. O campo em branco é aceito porque a Portaria MMA 280/2020 (art. 7º, § 1º) permite deixá-lo em branco no sistema.',
+      evidenceField: 'blankFields',
+      fix: 'emita o MTR com a placa do veículo preenchida',
+      title: 'Placa do veículo em branco no MTR',
+    }),
+    'CROSS_VALIDATION.VEHICLE_PLATE_ILLEGIBLE': mtrBlankFieldObservation({
+      description:
+        'A placa do veículo no MTR anexado não pôde ser lida com confiança. A placa ilegível é aceita porque a Portaria MMA 280/2020 (art. 7º, § 1º) permite deixá-la em branco no sistema.',
+      evidenceField: 'lowConfidenceFields',
+      fix: 'emita o MTR com a placa do veículo legível',
+      title: 'Placa do veículo ilegível no MTR',
+    }),
     'CROSS_VALIDATION.VEHICLE_PLATE_MISMATCH': {
       category: 'DOCUMENT_DIVERGENCE',
       defaultOwner: 'INTEGRATOR',

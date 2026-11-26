@@ -280,15 +280,15 @@ Tecnologia: Compostagem`;
       expect(result.data.blankFields ?? []).not.toContain('driverName');
     });
 
-    it('should mark the driver name blank and the plate low confidence when driver/plate labels exist but no values', () => {
+    it('should mark the driver name and the plate blank when driver/plate labels exist but no values', () => {
       const result = parser.parse(
         stubTextExtractionResult(sinfatWithHaulerValues([])),
       );
 
       expect(result.data.driverName).toEqual(createBlankField(''));
       expect(result.data.blankFields).toContain('driverName');
-      expect(result.data.vehiclePlate?.parsed).toBe('');
-      expect(result.data.vehiclePlate?.confidence).toBe('low');
+      expect(result.data.vehiclePlate).toEqual(createBlankField(''));
+      expect(result.data.blankFields).toContain('vehiclePlate');
     });
 
     it('should extract waste types from Textract blocks using table extraction', () => {

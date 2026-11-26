@@ -242,10 +242,46 @@ describe('MTR shared helpers', () => {
       });
     });
 
-    it('should return empty when only plate label present but no matching plate', () => {
+    it('should mark the vehicle plate blank when only the plate label is present with no value', () => {
       const section = ['Placa do Veiculo', ''].join('\n');
 
-      expect(extractDriverAndVehicle(section)).toEqual({});
+      expect(extractDriverAndVehicle(section)).toEqual({
+        isVehiclePlateBlank: true,
+      });
+    });
+
+    it.each([
+      { scenario: 'a truncated plate', value: 'FK2B34' },
+      { scenario: 'a plate with a misread glyph', value: 'FKE 2.B34' },
+      { scenario: 'a plate misread without digits', value: 'FKEZBEA' },
+    ])(
+      'should not mark the vehicle plate blank when $scenario follows the plate label',
+      ({ value }) => {
+        const section = ['Placa do Veiculo', value].join('\n');
+
+        expect(extractDriverAndVehicle(section)).toEqual({});
+      },
+    );
+
+    it('should not mark the vehicle plate blank when the plate label line carries an unparsable value', () => {
+      const section = ['Placa do Veiculo: FKE 2.B34'].join('\n');
+
+      expect(extractDriverAndVehicle(section)).not.toHaveProperty(
+        'isVehiclePlateBlank',
+      );
+    });
+
+    it('should mark the vehicle plate blank when only a driver name follows the plate label', () => {
+      const section = [
+        'Placa do Veiculo:',
+        'Nome do Motorista',
+        'PEDRO ALMEIDA',
+      ].join('\n');
+
+      expect(extractDriverAndVehicle(section)).toEqual({
+        driverName: 'PEDRO ALMEIDA',
+        isVehiclePlateBlank: true,
+      });
     });
 
     it('should return empty when no labels are found', () => {
@@ -280,6 +316,7 @@ describe('MTR shared helpers', () => {
 
       expect(extractDriverAndVehicle(section)).toEqual({
         isDriverNameBlank: true,
+        isVehiclePlateBlank: true,
       });
     });
 
@@ -299,6 +336,7 @@ describe('MTR shared helpers', () => {
 
       expect(extractDriverAndVehicle(section)).toEqual({
         isDriverNameBlank: true,
+        isVehiclePlateBlank: true,
       });
     });
 
@@ -546,6 +584,7 @@ describe('MTR shared helpers', () => {
 
       expect(extractDriverAndVehicle(section)).toEqual({
         driverName: 'PEDRO ALMEIDA',
+        isVehiclePlateBlank: true,
       });
     });
 

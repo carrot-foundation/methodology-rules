@@ -1,6 +1,7 @@
 import {
   clearRegistry,
   createBlankField,
+  createLowConfidenceField,
 } from '@carrot-fndn/shared/document-extractor';
 import { stubTextExtractionResult } from '@carrot-fndn/shared/text-extractor';
 
@@ -432,7 +433,7 @@ IBAMA`;
       expect(result.data.vehiclePlate?.confidence).toBe('low');
     });
 
-    it('should mark the driver name blank and the plate low confidence when labels exist but no valid values follow', () => {
+    it('should mark the driver name and the plate blank when labels exist but no valid values follow', () => {
       const text = `MANIFESTO DE TRANSPORTE DE RESÍDUOS - MTR
 MTR Nº: 123456789
 Data de Emissão: 15/03/2024
@@ -452,8 +453,31 @@ IBAMA`;
 
       expect(result.data.driverName).toEqual(createBlankField(''));
       expect(result.data.blankFields).toContain('driverName');
-      expect(result.data.vehiclePlate?.parsed).toBe('');
-      expect(result.data.vehiclePlate?.confidence).toBe('low');
+      expect(result.data.vehiclePlate).toEqual(createBlankField(''));
+      expect(result.data.blankFields).toContain('vehiclePlate');
+    });
+
+    it('should keep the plate low confidence when an unreadable plate follows the plate label', () => {
+      const text = `MANIFESTO DE TRANSPORTE DE RESÍDUOS - MTR
+MTR Nº: 123456789
+Data de Emissão: 15/03/2024
+
+Transportador
+TRANSPORTES LTDA
+CNPJ: 98.765.432/0001-10
+Nome do Motorista
+Placa do Veículo
+FK2B34
+
+Destinatário
+RECICLAGEM LTDA
+CNPJ: 11.222.333/0001-44
+IBAMA`;
+
+      const result = parser.parse(stubTextExtractionResult(text));
+
+      expect(result.data.vehiclePlate).toEqual(createLowConfidenceField(''));
+      expect(result.data.blankFields ?? []).not.toContain('vehiclePlate');
     });
 
     it('should extract driver and plate from multi-line section layout', () => {
