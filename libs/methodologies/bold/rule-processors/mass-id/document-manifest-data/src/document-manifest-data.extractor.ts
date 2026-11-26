@@ -4,6 +4,7 @@ import {
   crossValidateAttachments,
   type CrossValidationInput,
   type CrossValidationResult,
+  lowConfidenceReviewReason,
   type ReviewReason,
 } from '@carrot-fndn/shared/document-extractor';
 import { isNonEmptyString, logger } from '@carrot-fndn/shared/helpers';
@@ -22,9 +23,9 @@ import {
 
 import { REVIEW_REASONS } from './document-manifest-data.constants';
 import {
-  type AttachmentInfo,
   type DocumentManifestEventSubject,
   getExtractorConfig,
+  type ManifestAttachments,
 } from './document-manifest-data.helpers';
 import {
   type CdfCrossValidationEventData,
@@ -53,6 +54,15 @@ const acceptedBlankFieldObservations = (
       blankFieldReviewReason('transportDate').code,
       REVIEW_REASONS.TRANSPORT_DATE_BLANK,
     ],
+    // Portaria MMA 280/2020 art. 7 §1 lets the plate be left blank in the MTR system
+    [
+      blankFieldReviewReason('vehiclePlate').code,
+      REVIEW_REASONS.VEHICLE_PLATE_BLANK,
+    ],
+    [
+      lowConfidenceReviewReason('vehiclePlate').code,
+      REVIEW_REASONS.VEHICLE_PLATE_ILLEGIBLE,
+    ],
   ]);
 
   if (
@@ -70,6 +80,18 @@ const acceptedBlankFieldObservations = (
   }
 
   return accepted;
+};
+
+const BLANK_RECEIVING_DATE_CODE = blankFieldReviewReason('receivingDate').code;
+
+type ManifestValidationInput = ManifestAttachments & {
+  dropOffEvent: BoldDocumentEvent | undefined;
+  haulerEvent: BoldDocumentEvent | undefined;
+  mtrEventDocumentNumbers?: string[];
+  pickUpEvent: BoldDocumentEvent | undefined;
+  recyclerEvent: BoldDocumentEvent | undefined;
+  wasteGeneratorEvent: BoldDocumentEvent | undefined;
+  weighingEvents: BoldDocumentEvent[];
 };
 
 const observeAcceptedBlankFields = (
@@ -104,7 +126,7 @@ const isMtrEventData = (
   'manifestType' in eventData &&
   (eventData as { manifestType: unknown }).manifestType === 'mtr';
 
-export const crossValidateWithTextract = async ({
+const validateManifestAttachments = async ({
   attachmentInfos,
   documentManifestEvents,
   dropOffEvent,
@@ -114,17 +136,7 @@ export const crossValidateWithTextract = async ({
   recyclerEvent,
   wasteGeneratorEvent,
   weighingEvents,
-}: {
-  attachmentInfos: AttachmentInfo[];
-  documentManifestEvents: DocumentManifestEventSubject[];
-  dropOffEvent: BoldDocumentEvent | undefined;
-  haulerEvent: BoldDocumentEvent | undefined;
-  mtrEventDocumentNumbers?: string[];
-  pickUpEvent: BoldDocumentEvent | undefined;
-  recyclerEvent: BoldDocumentEvent | undefined;
-  wasteGeneratorEvent: BoldDocumentEvent | undefined;
-  weighingEvents: BoldDocumentEvent[];
-}): Promise<CrossValidationResult> => {
+}: ManifestValidationInput): Promise<CrossValidationResult> => {
   const inputs: CrossValidationInput<DocumentManifestEventSubject>[] = [];
 
   const mtrDocumentNumbers = [
@@ -178,7 +190,7 @@ export const crossValidateWithTextract = async ({
     }
   }
 
-  const result = await crossValidateAttachments(
+  return crossValidateAttachments(
     inputs,
     {
       getExtractorConfig: (event) => getExtractorConfig(event.documentType),
@@ -198,9 +210,49 @@ export const crossValidateWithTextract = async ({
     },
     documentExtractor,
   );
+};
 
-  return observeAcceptedBlankFields(
-    result,
-    acceptedBlankFieldObservations(pickUpEvent),
-  );
+// A CDF that passes cross-validation against this MassID and its MTR numbers proves the receipt a blank MTR receiving date omits
+const recyclingManifestProvesReceipt = async (
+  input: ManifestValidationInput,
+  recyclingManifests: ManifestAttachments,
+): Promise<boolean> => {
+  if (recyclingManifests.attachmentInfos.length === 0) {
+    return false;
+  }
+
+  const result = await validateManifestAttachments({
+    ...input,
+    ...recyclingManifests,
+    mtrEventDocumentNumbers: collectMtrDocumentNumbers(
+      input.documentManifestEvents,
+    ),
+  });
+
+  return result.failMessages.length === 0 && !result.reviewRequired;
+};
+
+export const crossValidateWithTextract = async ({
+  recyclingManifests,
+  ...input
+}: ManifestValidationInput & {
+  recyclingManifests?: ManifestAttachments | undefined;
+}): Promise<CrossValidationResult> => {
+  const result = await validateManifestAttachments(input);
+  const accepted = acceptedBlankFieldObservations(input.pickUpEvent);
+
+  if (
+    recyclingManifests &&
+    result.reviewReasons.some(
+      ({ code }) => code === BLANK_RECEIVING_DATE_CODE,
+    ) &&
+    (await recyclingManifestProvesReceipt(input, recyclingManifests))
+  ) {
+    accepted.set(
+      BLANK_RECEIVING_DATE_CODE,
+      REVIEW_REASONS.RECEIVING_DATE_BLANK,
+    );
+  }
+
+  return observeAcceptedBlankFields(result, accepted);
 };

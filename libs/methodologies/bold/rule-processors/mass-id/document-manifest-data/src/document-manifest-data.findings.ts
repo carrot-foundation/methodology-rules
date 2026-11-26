@@ -56,7 +56,11 @@ const mtrBlankFieldObservation = ({
   title,
 }: {
   description: string;
-  evidenceField: 'blankFields' | 'transportDate';
+  evidenceField:
+    | 'blankFields'
+    | 'lowConfidenceFields'
+    | 'receivingDate'
+    | 'transportDate';
   filledField: string;
   title: string;
 }): FindingMeta => ({
@@ -70,6 +74,13 @@ const mtrBlankFieldObservation = ({
 });
 
 const MTR_DATE_OBSERVATIONS = {
+  'CROSS_VALIDATION.RECEIVING_DATE_BLANK': mtrBlankFieldObservation({
+    description:
+      'A data de recebimento está em branco no MTR anexado (MTR sem baixa). O campo em branco é aceito porque o CDF anexado a esta MassID passou na validação cruzada e comprova o recebimento.',
+    evidenceField: 'receivingDate',
+    filledField: 'a baixa registrada e a data de recebimento preenchida',
+    title: 'Data de recebimento em branco no MTR',
+  }),
   'CROSS_VALIDATION.RECEIVING_DATE_WITHIN_TOLERANCE':
     mtrDateWithinToleranceObservation({
       acceptedWindow: 'de 1 dia antes a 10 dias depois',
@@ -278,6 +289,20 @@ export const DOCUMENT_MANIFEST_DATA_FINDINGS = defineRuleFindings(
         'Confira a data do evento "Pick-up" e o MTR anexado, confirme qual está correto e corrija na origem.',
       title: 'Data de transporte diverge do MTR',
     },
+    'CROSS_VALIDATION.VEHICLE_PLATE_BLANK': mtrBlankFieldObservation({
+      description:
+        'A placa do veículo está em branco no MTR anexado. O campo em branco é aceito porque a Portaria MMA 280/2020 (art. 7º, § 1º) permite deixá-lo em branco no sistema.',
+      evidenceField: 'blankFields',
+      filledField: 'a placa do veículo preenchida',
+      title: 'Placa do veículo em branco no MTR',
+    }),
+    'CROSS_VALIDATION.VEHICLE_PLATE_ILLEGIBLE': mtrBlankFieldObservation({
+      description:
+        'A placa do veículo no MTR anexado não pôde ser lida com confiança. A placa ilegível é aceita porque a Portaria MMA 280/2020 (art. 7º, § 1º) permite deixá-la em branco no sistema.',
+      evidenceField: 'lowConfidenceFields',
+      filledField: 'a placa do veículo legível',
+      title: 'Placa do veículo ilegível no MTR',
+    }),
     'CROSS_VALIDATION.VEHICLE_PLATE_MISMATCH': {
       category: 'DOCUMENT_DIVERGENCE',
       defaultOwner: 'INTEGRATOR',

@@ -107,6 +107,8 @@ export const CROSS_VALIDATION_COMMENTS = {
   RECEIVER_ADDRESS_MISMATCH: ({ score }: { score: number }) =>
     `The receiver address extracted from the document does not match the "${RECYCLER}" ACTOR event address. Similarity: ${(score * 100).toFixed(0)}%.`,
   RECEIVER_TAX_ID_MISMATCH: `The receiver tax ID extracted from the document does not match the "${RECYCLER}" participant tax ID.`,
+  RECEIVING_DATE_BLANK:
+    'The receiving date is blank on the MTR, accepted because the recycling manifest attached to this MassID passed cross-validation and proves the receipt.',
   RECEIVING_DATE_MISMATCH: ({
     daysDiff,
     eventDate,
@@ -166,6 +168,10 @@ export const CROSS_VALIDATION_COMMENTS = {
     extractedDate: string;
   }) =>
     `The transport date extracted from the document ("${extractedDate}") differs from the Pick-up event date ("${eventDate}") by ${daysDiff} day(s), within the accepted window.`,
+  VEHICLE_PLATE_BLANK:
+    'The vehicle plate is blank on the MTR, accepted because MTR systems let it be left blank.',
+  VEHICLE_PLATE_ILLEGIBLE:
+    'The vehicle plate on the MTR could not be read reliably, accepted because MTR systems let it be left blank.',
   VEHICLE_PLATE_MISMATCH: `The vehicle plate extracted from the document does not match the Pick-up event value.`,
   WASTE_QUANTITY_FAR_BELOW_WEIGHING: ({
     extractedQuantityKg,
@@ -245,6 +251,7 @@ export const REVIEW_REASONS = {
   MTR_NUMBER_NOT_IN_CDF: reviewReason('MTR_NUMBER_NOT_IN_CDF'),
   RECEIVER_ADDRESS_MISMATCH: reviewReason('RECEIVER_ADDRESS_MISMATCH'),
   RECEIVER_TAX_ID_MISMATCH: staticReviewReason('RECEIVER_TAX_ID_MISMATCH'),
+  RECEIVING_DATE_BLANK: staticReviewReason('RECEIVING_DATE_BLANK'),
   RECEIVING_DATE_MISMATCH: reviewReason('RECEIVING_DATE_MISMATCH'),
   RECEIVING_DATE_WITHIN_TOLERANCE: reviewReason(
     'RECEIVING_DATE_WITHIN_TOLERANCE',
@@ -261,6 +268,8 @@ export const REVIEW_REASONS = {
   TRANSPORT_DATE_WITHIN_TOLERANCE: reviewReason(
     'TRANSPORT_DATE_WITHIN_TOLERANCE',
   ),
+  VEHICLE_PLATE_BLANK: staticReviewReason('VEHICLE_PLATE_BLANK'),
+  VEHICLE_PLATE_ILLEGIBLE: staticReviewReason('VEHICLE_PLATE_ILLEGIBLE'),
   VEHICLE_PLATE_MISMATCH: staticReviewReason('VEHICLE_PLATE_MISMATCH'),
   WASTE_QUANTITY_FAR_BELOW_WEIGHING: reviewReason(
     'WASTE_QUANTITY_FAR_BELOW_WEIGHING',

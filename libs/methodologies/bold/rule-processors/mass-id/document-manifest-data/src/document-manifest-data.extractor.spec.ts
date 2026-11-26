@@ -28,6 +28,8 @@ import {
   NoMatchingLayoutError,
 } from '@carrot-fndn/shared/document-extractor';
 // eslint-disable-next-line import/first -- Must import after mock is set up
+import { createExtractedWasteTypeEntry } from '@carrot-fndn/shared/document-extractor-transport-manifest';
+// eslint-disable-next-line import/first -- Must import after mock is set up
 import {
   pdfTextLayerExtractor,
   textExtractor,
@@ -71,16 +73,64 @@ const mtrManifestEvent: DocumentManifestEventSubject = {
   recyclerCountryCode: 'BR',
 };
 
+const cdfManifestEvent: DocumentManifestEventSubject = {
+  ...mtrManifestEvent,
+  attachment: { attachmentId: 'att-cdf' } as never,
+  documentNumber: 'CDF-001',
+  documentType: 'CDF',
+};
+
+const recyclingManifests = {
+  attachmentInfos: [
+    { attachmentId: 'att-cdf', s3Bucket: 'bucket', s3Key: 'cdf-key' },
+  ],
+  documentManifestEvents: [cdfManifestEvent],
+};
+
+const cdfExtraction = (data: Record<string, unknown> = {}) => ({
+  data: {
+    documentNumber: { confidence: 'high', parsed: 'CDF-001' },
+    extractionConfidence: 'high',
+    issueDate: { confidence: 'high', parsed: '2024-01-01' },
+    lowConfidenceFields: [],
+    processingPeriod: {
+      confidence: 'high',
+      parsed: '01/01/2024 ate 31/01/2024',
+    },
+    transportManifests: { confidence: 'high', parsed: ['12345'] },
+    wasteEntries: {
+      confidence: 'high',
+      parsed: [
+        {
+          code: '190812',
+          description: 'Lodos de tratamento',
+          quantity: 9000,
+          unit: 'kg',
+        },
+      ],
+    },
+    ...data,
+  },
+  reviewReasons: [] as ReturnType<typeof lowConfidenceReviewReason>[],
+  reviewRequired: false,
+});
+
 const runWithExtraction = async ({
+  cdf,
   data,
   pickUpAttributes = [],
+  recyclingManifestAttachments = recyclingManifests.attachmentInfos,
   reviewReasons,
+  weighingEvents = [],
 }: {
+  cdf?: ReturnType<typeof cdfExtraction> | undefined;
   data: Record<string, unknown>;
   pickUpAttributes?: { name: string; value: string }[];
+  recyclingManifestAttachments?: AttachmentInfo[];
   reviewReasons: ReturnType<typeof blankFieldReviewReason>[];
+  weighingEvents?: BoldDocumentEvent[];
 }) => {
-  mockExtract.mockResolvedValue({
+  const mtrExtraction = {
     data: {
       documentNumber: { confidence: 'high', parsed: '12345' },
       extractionConfidence: 'high',
@@ -92,7 +142,11 @@ const runWithExtraction = async ({
     },
     reviewReasons,
     reviewRequired: true,
-  });
+  };
+
+  mockExtract.mockImplementation(({ s3Key }: { s3Key: string }) =>
+    Promise.resolve(s3Key === 'cdf-key' ? cdf : mtrExtraction),
+  );
 
   return crossValidateWithTextract({
     attachmentInfos: [
@@ -114,8 +168,19 @@ const runWithExtraction = async ({
         })),
       },
     } as unknown as BoldDocumentEvent,
+    ...(cdf && {
+      recyclingManifests: {
+        ...recyclingManifests,
+        attachmentInfos: recyclingManifestAttachments,
+      },
+    }),
+    weighingEvents,
   });
 };
+
+const findingCodes = (
+  reasons: Parameters<typeof toCrossValidationFinding>[0][],
+) => reasons.map((reason) => toCrossValidationFinding(reason).code);
 
 describe('crossValidateWithTextract', () => {
   it('should opt in to the PDF text-layer fallback', () => {
@@ -525,6 +590,194 @@ describe('crossValidateWithTextract', () => {
         expect(result.reviewRequired).toBe(true);
         expect(result.reviewReasons).toEqual([
           lowConfidenceReviewReason('driverName'),
+        ]);
+        expect(result.observations).toEqual([]);
+      });
+    });
+
+    describe('when the MTR receiving date is blank', () => {
+      const blankReceivingDate = {
+        data: {
+          blankFields: ['receivingDate'],
+          receivingDate: blankDate,
+        },
+        reviewReasons: [blankFieldReviewReason('receivingDate')],
+      };
+
+      it.each([
+        {
+          cdf: cdfExtraction(),
+          expectedFindings: [],
+          expectedObservations: [
+            'document-manifest-data.CROSS_VALIDATION.RECEIVING_DATE_BLANK',
+          ],
+          proof: 'a CDF that passes cross-validation',
+        },
+        {
+          cdf: undefined,
+          expectedFindings: [
+            'document-manifest-data.DOCUMENT_EXTRACTION.BLANK_FIELD',
+          ],
+          expectedObservations: [],
+          proof: 'no CDF',
+        },
+        {
+          cdf: cdfExtraction(),
+          expectedFindings: [
+            'document-manifest-data.DOCUMENT_EXTRACTION.BLANK_FIELD',
+          ],
+          expectedObservations: [],
+          proof: 'a CDF event without an attachment',
+          recyclingManifestAttachments: [],
+        },
+        {
+          cdf: cdfExtraction({
+            transportManifests: { confidence: 'high', parsed: ['99999'] },
+          }),
+          expectedFindings: [
+            'document-manifest-data.DOCUMENT_EXTRACTION.BLANK_FIELD',
+          ],
+          expectedObservations: [],
+          proof: 'a CDF that does not list the MTR',
+        },
+        {
+          cdf: {
+            ...cdfExtraction(),
+            reviewReasons: [lowConfidenceReviewReason('recycler')],
+            reviewRequired: true,
+          },
+          expectedFindings: [
+            'document-manifest-data.DOCUMENT_EXTRACTION.BLANK_FIELD',
+          ],
+          expectedObservations: [],
+          proof: 'a CDF that requires review',
+        },
+      ])(
+        'should report the expected findings with $proof',
+        async ({
+          cdf,
+          expectedFindings,
+          expectedObservations,
+          recyclingManifestAttachments,
+        }) => {
+          const result = await runWithExtraction({
+            ...blankReceivingDate,
+            ...(cdf && { cdf }),
+            ...(recyclingManifestAttachments && {
+              recyclingManifestAttachments,
+            }),
+          });
+
+          expect(result.reviewRequired).toBe(expectedFindings.length > 0);
+          expect(result.failMessages).toEqual([]);
+          expect(findingCodes(result.reviewReasons)).toEqual(expectedFindings);
+          expect(findingCodes(result.observations)).toEqual(
+            expectedObservations,
+          );
+        },
+      );
+
+      it('should keep a weight divergence as a finding when a CDF proves receipt', async () => {
+        const result = await runWithExtraction({
+          ...blankReceivingDate,
+          cdf: cdfExtraction(),
+          data: {
+            ...blankReceivingDate.data,
+            wasteTypes: [
+              createExtractedWasteTypeEntry({
+                code: '190812',
+                description: 'Lodos de tratamento',
+                quantity: 5,
+                unit: 't',
+              }),
+            ],
+          },
+          pickUpAttributes: [
+            { name: 'Local Waste Classification ID', value: '190812' },
+            {
+              name: 'Local Waste Classification Description',
+              value: 'Lodos de tratamento',
+            },
+          ],
+          weighingEvents: [{ value: 9000 } as unknown as BoldDocumentEvent],
+        });
+
+        expect(result.reviewRequired).toBe(true);
+        expect(findingCodes(result.reviewReasons)).toEqual([
+          'document-manifest-data.CROSS_VALIDATION.WASTE_QUANTITY_WEIGHT_MISMATCH',
+        ]);
+        expect(findingCodes(result.observations)).toEqual([
+          'document-manifest-data.CROSS_VALIDATION.RECEIVING_DATE_BLANK',
+        ]);
+      });
+
+      it('should not read the CDF when the receiving date is only low confidence', async () => {
+        const result = await runWithExtraction({
+          cdf: cdfExtraction(),
+          data: {
+            lowConfidenceFields: ['receivingDate'],
+            receivingDate: { confidence: 'low', parsed: '01/01/2024' },
+          },
+          reviewReasons: [lowConfidenceReviewReason('receivingDate')],
+        });
+
+        expect(mockExtract).toHaveBeenCalledTimes(1);
+        expect(result.reviewReasons).toEqual([
+          lowConfidenceReviewReason('receivingDate'),
+        ]);
+        expect(result.observations).toEqual([]);
+      });
+    });
+
+    describe('when the MTR vehicle plate cannot be compared', () => {
+      it.each([
+        {
+          expectedObservation:
+            'document-manifest-data.CROSS_VALIDATION.VEHICLE_PLATE_BLANK',
+          plate: 'blank',
+          reason: blankFieldReviewReason('vehiclePlate'),
+          vehiclePlate: blankDate,
+        },
+        {
+          expectedObservation:
+            'document-manifest-data.CROSS_VALIDATION.VEHICLE_PLATE_ILLEGIBLE',
+          plate: 'illegible',
+          reason: lowConfidenceReviewReason('vehiclePlate'),
+          vehiclePlate: { confidence: 'low', parsed: 'FK2B34' },
+        },
+      ])(
+        'should accept a $plate plate with an observation',
+        async ({ expectedObservation, reason, vehiclePlate }) => {
+          const result = await runWithExtraction({
+            data: { vehiclePlate },
+            pickUpAttributes: [
+              { name: 'Vehicle License Plate', value: 'ABC1D23' },
+            ],
+            reviewReasons: [reason],
+          });
+
+          expect(result.reviewRequired).toBe(false);
+          expect(result.reviewReasons).toEqual([]);
+          expect(findingCodes(result.observations)).toEqual([
+            expectedObservation,
+          ]);
+        },
+      );
+
+      it('should keep a confidently read plate that differs from Pick-up as a mismatch', async () => {
+        const result = await runWithExtraction({
+          data: {
+            vehiclePlate: { confidence: 'high', parsed: 'XYZ9W87' },
+          },
+          pickUpAttributes: [
+            { name: 'Vehicle License Plate', value: 'ABC1D23' },
+          ],
+          reviewReasons: [],
+        });
+
+        expect(result.reviewRequired).toBe(true);
+        expect(findingCodes(result.reviewReasons)).toEqual([
+          'document-manifest-data.CROSS_VALIDATION.VEHICLE_PLATE_MISMATCH',
         ]);
         expect(result.observations).toEqual([]);
       });

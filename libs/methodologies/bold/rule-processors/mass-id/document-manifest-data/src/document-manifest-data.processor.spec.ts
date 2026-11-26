@@ -8,7 +8,9 @@ import {
   BoldStubsBuilder,
   expectRuleFindings,
   findTestCase,
+  stubBoldMassIDRecyclingManifestEvent,
   stubDocument,
+  stubDocumentEventAttachment,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   BoldAttributeName,
@@ -29,7 +31,7 @@ import {
 } from './document-manifest-data.test-cases';
 
 const { DOCUMENT_NUMBER, DOCUMENT_TYPE } = BoldAttributeName;
-const { RECYCLING_MANIFEST } = BoldDocumentEventName;
+const { RECYCLING_MANIFEST, TRANSPORT_MANIFEST } = BoldDocumentEventName;
 
 type DocumentManifestDataTestCase =
   (typeof documentManifestDataTestCases)[number];
@@ -262,6 +264,49 @@ describe('DocumentManifestDataProcessor', () => {
       ),
     ]);
   });
+
+  it.each([
+    { documentManifestType: TRANSPORT_MANIFEST, expectedAttachments: 1 },
+    { documentManifestType: RECYCLING_MANIFEST, expectedAttachments: 0 },
+  ])(
+    'should give the $documentManifestType rule $expectedAttachments CDF attachment(s) to prove a receipt',
+    async ({ documentManifestType, expectedAttachments }) => {
+      const testCase = findTestCase(
+        crossValidationTestCases,
+        'Cross-validation passes with an observation',
+      );
+
+      await processTestCase({
+        ...testCase,
+        documentManifestType,
+        events: {
+          ...testCase.events,
+          [RECYCLING_MANIFEST]: stubBoldMassIDRecyclingManifestEvent({
+            metadataAttributes: [
+              [DOCUMENT_TYPE, 'CDF'],
+              [DOCUMENT_NUMBER, 'CDF-001'],
+            ],
+            partialDocumentEvent: {
+              attachments: [
+                stubDocumentEventAttachment({ label: RECYCLING_MANIFEST }),
+              ],
+            },
+          }),
+        },
+      });
+
+      const [input] = crossValidateWithTextractMock.mock.lastCall ?? [];
+
+      expect(input?.recyclingManifests?.attachmentInfos ?? []).toHaveLength(
+        expectedAttachments,
+      );
+      expect(
+        input?.recyclingManifests?.documentManifestEvents.map(
+          ({ documentType }) => documentType,
+        ),
+      ).toEqual(expectedAttachments > 0 ? ['CDF'] : undefined);
+    },
+  );
 
   it('should return the extraction failure finding when the document extraction fails', async () => {
     const { ruleOutput } = await processTestCase(
