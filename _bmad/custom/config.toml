@@ -13,8 +13,7 @@
 # accident). Under _bmad-output/, the knowledge docs (project_knowledge)
 # are tracked for the team, while the builder (skills/) and test-architect
 # (test-artifacts/) outputs are gitignored as ephemeral — see .gitignore.
-# methodology-rules' real knowledge lives in .ai/ (synced via
-# `pnpm ai:sync`) and is still read during the repo scan.
+# The repo scan reads the repository guidance in AGENTS.md.
 # ─────────────────────────────────────────────────────────────────
 
 [modules.bmm]

@@ -1,26 +1,25 @@
 ---
-name: 'Quality Check'
-description: 'Run lint, typecheck, and test checks on affected projects to verify code quality.'
+name: check
+description: Use when validating affected Methodology Rules projects or checking a tooling-only change before a pull request.
 ---
 
-Run the three quality gates in order on affected projects:
+# Check Methodology Rules
 
-1. **Lint**: `pnpm lint:affected`
-2. **Typecheck**: `pnpm ts:affected`
-3. **Test**: `pnpm test:affected`
+Use the proposed PR base, normally `origin/main`, as the Nx base. For a refactor on a
+committed branch, pass `--base=origin/main --head=HEAD` to the affected commands.
 
-If any step fails, diagnose and fix the issue, then re-run that step before proceeding.
-
-To target a single project instead of all affected projects:
-
-```bash
-pnpm nx lint <project-name>
-pnpm nx ts <project-name>
-pnpm nx test <project-name>
+```sh
+pnpm lint:affected --base=origin/main --head=HEAD
+pnpm ts:affected --base=origin/main --head=HEAD
+pnpm test:affected --base=origin/main --head=HEAD
 ```
 
-The gate is read-only: `pnpm lint:affected` reports problems and never rewrites files. To apply
-auto-fixes, run `pnpm lint:affected:fix` (or `pnpm nx lint <project-name> --fix`) as a separate
-step that modifies the working tree, review the diff, then re-run the read-only gate.
+During editing, omit `--head` to include worktree changes. For a known project missing from the
+affected selection, use `pnpm lint <project>`, `pnpm ts <project>` and `pnpm test <project>`.
 
-All three checks must pass before the work is considered complete.
+For changes confined to repository documentation, agent configuration, scripts outside Nx
+projects, or workflow wiring, check the existing validators for the touched inputs. Run
+Prettier in check mode on changed supported files. Run `pnpm pkgJsonLint` for package manifest
+edits and `pnpm test:pnpm-lockfile` for root manifest or lockfile changes. Check affected shell
+scripts with `sh -n` when they use POSIX shell and validate the agent configuration with the same
+repository audit that CI runs. Changes to Nx project inputs still need the affected gate.

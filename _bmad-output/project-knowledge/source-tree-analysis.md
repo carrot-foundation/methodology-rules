@@ -53,19 +53,16 @@ methodology-rules/
 │       └── types/                             # Cross-cutting branded types (DocumentId, NonEmptyString)
 │
 ├── tools/
-│   ├── create-rule.js                        # Scaffolds a new rule processor (pnpm create-rule)
-│   ├── apply-methodology-rule.js             # Wires a rule into a methodology
+│   ├── create-rule.js                        # Legacy processor scaffold
+│   ├── apply-methodology-rule.js             # Legacy methodology application scaffold
 │   ├── update-waste-classification.js
 │   ├── rule-runner-cli/                       # Run a rule locally (pnpm run-rule)
 │   ├── document-extractor-cli/               # Extract document data (pnpm extract-document)
 │   └── versioning/                           # bump:applications / bump:rules
 │
-├── .ai/                                       # CANONICAL AI/engineering rules (source of truth)
-│   ├── rules/*.md                             # 15 rules (intent / requirements / anti_patterns)
-│   ├── STANDARDS.md DEFINITIONS.md PARITY_MATRIX.md PROJECT_CONTEXT.md
-│   ├── schemas/ capabilities/
-├── .cursor/rules/*.mdc                        # Generated mirror of .ai/rules (Cursor)
-├── .claude/skills/rule-*                      # Generated mirror of .ai/rules (Claude)
+├── AGENTS.md                                 # Repository guidance
+├── .agents/skills/                           # Authored repository skills
+├── .claude/skills/                           # Symlinks to the authored skills
 │
 ├── .github/workflows/                         # CI: backend-check, check-and-deploy, deploy, generate-readmes, version-and-sync
 ├── nx.json tsconfig.base.json tsconfig.paths.json
@@ -77,20 +74,19 @@ methodology-rules/
 
 - **Per rule:** `{rule}.lambda.ts` → `wrapRuleIntoLambdaHandler(new {Rule}Processor())`. This is the deployable Lambda handler.
 - **Local execution:** `tools/rule-runner-cli` (`pnpm run-rule -- <args>`).
-- **Scaffolding:** `tools/create-rule.js` (`pnpm create-rule <name> <scope> <description>`).
+- **Processor development:** [current processor layout and registration](../../.agents/skills/create-rule/SKILL.md).
 
 ## Critical Directories
 
-| Directory                               | Why it matters                                                         |
-| --------------------------------------- | ---------------------------------------------------------------------- |
-| `libs/methodologies/*/rule-processors/` | All validation logic. One Nx project per rule.                         |
-| `libs/shared/rule/`                     | The rule contract (input/output) + result reporting to Smaug.          |
-| `libs/shared/lambda/wrapper/`           | The single Lambda boilerplate all rules share.                         |
-| `libs/shared/methodologies/bold/`       | Document graph types, matchers, processor base classes.                |
-| `libs/shared/document/`                 | S3 document-graph traversal (DocumentQueryService).                    |
-| `libs/shared/testing/`                  | Reuse stubs here before writing new ones.                              |
-| `tools/`                                | Scaffolding + codegen; never hand-create processor files.              |
-| `.ai/`                                  | Source of truth for engineering rules; edit here, then `pnpm ai:sync`. |
+| Directory                               | Why it matters                                                |
+| --------------------------------------- | ------------------------------------------------------------- |
+| `libs/methodologies/*/rule-processors/` | All validation logic. One Nx project per rule.                |
+| `libs/shared/rule/`                     | The rule contract (input/output) + result reporting to Smaug. |
+| `libs/shared/lambda/wrapper/`           | The single Lambda boilerplate all rules share.                |
+| `libs/shared/methodologies/bold/`       | Document graph types, matchers, processor base classes.       |
+| `libs/shared/document/`                 | S3 document-graph traversal (DocumentQueryService).           |
+| `libs/shared/testing/`                  | Reuse stubs here before writing new ones.                     |
+| `tools/`                                | Local rule tooling and code generation.                       |
 
 ## Module-Boundary Rule
 

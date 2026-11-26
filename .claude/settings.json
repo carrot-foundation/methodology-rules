@@ -1,23 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "Bash(ls:*)",
-      "Bash(find:*)",
-      "Bash(rg:*)",
-      "Bash(cat:*)",
-      "Bash(sed:*)",
-      "Bash(git status:*)",
-      "Bash(git diff:*)",
-      "Bash(git log:*)",
-      "Bash(pnpm test:*)",
-      "Bash(pnpm lint:*)",
-      "Bash(pnpm ts:*)",
-      "Bash(pnpm build-lambda:*)",
-      "Bash(pnpm nx:*)",
-      "Bash(pnpm ai\\:check:*)",
-      "Bash(pnpm ai\\:sync:*)",
-      "Bash(npx prettier:*)",
-      "Bash(npx eslint:*)"
+      "Bash(git status --short)",
+      "Bash(git diff --stat)",
+      "Bash(git log --oneline -10)",
+      "Bash(rg --files)"
     ]
   }
 }

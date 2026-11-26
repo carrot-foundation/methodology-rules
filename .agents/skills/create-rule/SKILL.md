@@ -1,49 +1,67 @@
 ---
-name: 'Create Rule Processor'
-description: 'Scaffold a new rule processor, implement the evaluation logic, and write tests.'
+name: create-rule
+description: Use when adding or changing a BOLD rule processor, applying one to a methodology, or editing its findings or Lambda handler.
 ---
 
-1. **Scaffold the rule** using the built-in script:
+# Develop BOLD rule processors
 
-   ```bash
-   pnpm create-rule <name> <scope> <description>
-   ```
+Use a current sibling such as the `weighing` library and its BOLD Carbon application as a model.
+The commands `pnpm create-rule <name> <scope> <description>` and
+`pnpm apply-methodology-rule <methodology> <rule> <scope>` use the legacy `<scope>/src/<name>`
+layout. The current library projects use `<scope>/<name>/src`. Build the library and applications
+on the current layout, and use the CLI templates only as examples.
 
-   - `<name>`: kebab-case rule name (e.g., `vehicle-validation`)
-   - `<scope>`: processor group (`mass-id` is the only one that exists today)
-   - `<description>`: short description of what the rule validates
+## Layout
 
-   This creates the standard file structure:
+```text
+libs/methodologies/bold/rule-processors/<scope>/<name>/
+  project.json                    Nx library and its targets
+  package.json                    Workspace package metadata
+  vitest.config.ts                Unit tests
+  vitest.e2e.config.ts            Lambda tests, when the project has test-e2e
+  src/
+    index.ts                     Public exports
+    <name>.lambda.ts              Thin wrapper around the processor
+    <name>.processor.ts           Document loading and evaluation
+    <name>.rule-definition.ts     Rule metadata, events and version
+    <name>.rule-subject.ts        Rule-subject schema, as needed
+    <name>.findings.ts            Published finding codes and categories
+    <name>.constants.ts           Thresholds and message templates, as needed
+    <name>.helpers.ts             Stateless functions, as needed
+    <name>.processor.spec.ts      Evaluation tests
+    <name>.lambda.e2e.spec.ts      Lambda entry-point tests
+    <name>.test-cases.ts           Fixtures shared by processor and Lambda tests
 
-   ```
-   {rule-name}/
-   ├── {rule-name}.processor.ts
-   ├── {rule-name}.lambda.ts
-   ├── {rule-name}.processor.spec.ts
-   ├── {rule-name}.lambda.e2e.spec.ts
-   ├── {rule-name}.test-cases.ts
-   ├── {rule-name}.rule-subject.ts
-   ├── index.ts
-   ├── project.json
-   └── vitest.config.ts
-   ```
+apps/methodologies/bold-<methodology>/rule-processors/<scope>/<application>/
+  project.json                    Build, package and upload targets
+  src/
+    lambda.ts                     Exports the library Lambda as handler
+    rule-definition.ts            Methodology application metadata
+```
 
-2. **Define the rule subject schema**: In `{rule-name}.rule-subject.ts`, define a `*RuleSubjectSchema` using `z.object()` with the exact fields the rule needs. Export both the schema and the inferred type. Use `validateRuleSubjectOrThrow` as the standard validation entry point in the processor.
+The application slug can differ from the library slug. Use `mass-id` for MassID processors and
+verify registration in the intended methodology's `rules.config.ts`. Read the [rule registry
+skill](../methodology-registry/SKILL.md) when wiring or updating a registry entry.
 
-3. **Implement the processor**: In `{rule-name}.processor.ts`, implement the `evaluateResult()` method. The processor extends `ParentDocumentRuleProcessor<RuleSubject>`.
+## Evaluation and findings
 
-4. **Write test cases**: In `{rule-name}.test-cases.ts`, define shared test data using `@faker-js/faker` and `zocker`. Never use real data (no real company names, tax IDs, addresses, etc.).
-
-5. **Write unit tests**: In `{rule-name}.processor.spec.ts`, test the core evaluation logic using the shared test cases.
-
-6. **Write e2e tests**: In `{rule-name}.lambda.e2e.spec.ts`, test the Lambda handler end-to-end.
-
-7. **Apply to a methodology** (if needed):
-
-   ```bash
-   pnpm apply-methodology-rule <methodology> <rule> <scope>
-   ```
-
-   Example: `pnpm apply-methodology-rule carbon-organic vehicle-validation mass-id`
-
-8. **Verify**: Run `pnpm lint:affected && pnpm ts:affected && pnpm test:affected` to confirm everything passes.
+- Keep the Lambda entry point thin. Construct the processor once and wrap it with
+  `wrapRuleIntoLambdaHandler` from `@carrot-fndn/shared/lambda/wrapper`. Select the shared processor
+  base that matches the rule's subject. Some processors use `ParentDocumentRuleProcessor`, while
+  custom document-loading flows can use `RuleDataProcessor`.
+- Put evaluation in the processor and validate its subject before evaluation. Put stateless
+  helpers in the helper module, and keep thresholds and result message templates in the constants
+  module when shared across methods.
+- Render every non-passing result through the finding declarations so `resultContent.findings`
+  reaches Smaug. Use `<RULE>_FINDINGS.result(...)` for a single message, `joinRenderedFindings` for
+  several, and `getKnownError(<RULE>_FINDINGS.render(...))` for a known thrown failure. Findings on
+  `PASSED` carry category `OBSERVATION`. Published finding codes have the form
+  `<slug>.<GROUP>.<KEY>` and are consumer identifiers.
+- Set `dependsOnAccreditation` only if a synthetic accreditation in Smaug's TEST dataset can
+  cause the check to fail because it fabricates or omits the evaluated value. Examples include
+  recycler GHG type, baseline, sorting factor, scale type, accredited address, the Container
+  Quantity waiver or the accreditation document itself. Checks against a value copied from the
+  MassID keep the flag unset. The flag suppresses evaluation of the finding on every TEST run.
+- Exercise both the processor and Lambda entry point. Share synthetic cases via the test-cases
+  module and reuse workspace stubs, including `stubRuleInput`, `createStubFromSchema` and
+  `BoldStubsBuilder`. Use `aws-sdk-client-mock` for AWS SDK clients.

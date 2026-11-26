@@ -6,10 +6,10 @@ There is **no database**. Persistent state lives in **S3** as methodology execut
 
 ## Storage
 
-| Store | Env var | Contents |
-|---|---|---|
-| Document bucket | `DOCUMENT_BUCKET_NAME` | Methodology execution documents (the document graph) |
-| Attachment bucket | `DOCUMENT_ATTACHMENT_BUCKET_NAME` | Scale tickets, transport/recycling manifests, etc. |
+| Store             | Env var                           | Contents                                             |
+| ----------------- | --------------------------------- | ---------------------------------------------------- |
+| Document bucket   | `DOCUMENT_BUCKET_NAME`            | Methodology execution documents (the document graph) |
+| Attachment bucket | `DOCUMENT_ATTACHMENT_BUCKET_NAME` | Scale tickets, transport/recycling manifests, etc.   |
 
 Documents reference each other, forming a graph that `DocumentQueryService` traverses (cached per invocation by `CachedDocumentLoaderService`).
 
@@ -47,10 +47,10 @@ The extraction framework is **field-neutral**:
 
 Specialized extractors:
 
-| Library | Document | Tech |
-|---|---|---|
-| `document-extractor-scale-ticket` | Scale tickets | Textract OCR |
-| `document-extractor-transport-manifest` | Transport manifests | Textract OCR |
+| Library                                 | Document            | Tech                   |
+| --------------------------------------- | ------------------- | ---------------------- |
+| `document-extractor-scale-ticket`       | Scale tickets       | Textract OCR           |
+| `document-extractor-transport-manifest` | Transport manifests | Textract OCR           |
 | `document-extractor-recycling-manifest` | Recycling manifests | Textract OCR + pdf-lib |
 
 ## Methodology rule-set config (`rules.config.ts`)
@@ -60,7 +60,7 @@ Each methodology framework defines its rule set in a `rules.config.ts`:
 - `libs/methodologies/bold-carbon/rules/src/rules.config.ts`
 - `libs/methodologies/bold-recycling/rules/src/rules.config.ts`
 
-> **Generated-artifact rule:** after editing any `rules.config.ts`, regenerate manifests/READMEs/codecov flags via `pnpm generate:readmes`, `generate:manifest`, `generate:methodology-readmes`, `generate:methodology-framework-rules`. Never hand-edit `codecov.yml` or generated READMEs.
+> See the [rule registry guide](../../.agents/skills/methodology-registry/SKILL.md) for generated artifacts.
 
 ## Numeric representation
 

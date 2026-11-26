@@ -32,23 +32,18 @@ Rule processors are the core units of the MvA. Each one evaluates [MassID](https
 
 ```text
 methodology-rules/
-├── apps/methodologies/          # Methodology applications (Lambda deployments)
-│   ├── bold-carbon/             #   BOLD Carbon CH₄
-│   └── bold-recycling/          #   BOLD Recycling
+├── apps/methodologies/          # Lambda applications for BOLD Carbon and BOLD Recycling
 ├── libs/
 │   ├── methodologies/bold/
 │   │   └── rule-processors/     # Shared BOLD rule processors
 │   │       └── mass-id/         #   MassID verification rules
 │   └── shared/                  # Shared libraries across methodologies
 ├── tools/                       # CLI tooling
-│   ├── create-rule.js           #   Scaffold new rule processors
 │   ├── rule-runner-cli/         #   Run rules locally against test data
 │   ├── document-extractor-cli/  #   Extract data from documents
 │   ├── mass-id-generator-cli/   #   Emit the MassID event data the docs site syncs
-│   ├── apply-methodology-rule.js #  Apply rules to a methodology
 │   └── versioning/              #   Rule version management
-├── scripts/                     # Build & generation scripts
-└── docs/                        # Internal documentation
+└── scripts/                     # Build & generation scripts
 ```
 
 ## Getting Started
@@ -61,8 +56,15 @@ methodology-rules/
 ### Installation
 
 ```bash
-pnpm install
+pnpm install --frozen-lockfile
 ```
+
+In a new Git worktree, select the repository's pinned tools and run `/bin/sh scripts/setup-worktree.sh`.
+To delegate dependency and hook setup to a host tool, set `WORKTREE_SETUP_HELPER` to its executable
+name on `PATH` or an absolute path. The script calls `status --worktree <root> --json` first. A
+successful response with `{"state":"skipped"}` selects portable setup. Otherwise it runs
+`start --worktree <root> --wait` and returns the helper's result. An unset or unavailable helper
+selects portable setup.
 
 ### Common Commands
 
@@ -89,9 +91,7 @@ pnpm nx test <project-name> --testFile=<relative-path>
 ### Tooling
 
 ```bash
-pnpm create-rule                     # Scaffold a new rule processor
 pnpm run-rule <args>                 # Run a rule locally against test data
-pnpm apply-methodology-rule          # Apply a rule to a methodology
 pnpm generate:event-data             # Emit MassID event data to dist/methodology-event-data
 ```
 
@@ -177,8 +177,8 @@ Design principles:
 Contributions are welcome. Before starting work:
 
 1. Read the [MvA Developer Guide](https://docs.carrot.eco/docs/methodologies/guides/mva-developer-guide) to understand the verification model
-2. Use `pnpm create-rule` to scaffold new rule processors
-3. Ensure 100% test coverage — this is enforced by CI
+2. Follow the [processor development guide](.agents/skills/create-rule/SKILL.md) for the current layout and registration steps
+3. Run the [canonical quality gate](AGENTS.md#commands) and check the coverage results in CI
 4. Follow [Conventional Commits](https://www.conventionalcommits.org/) for all commit messages
 
 ## Documentation
