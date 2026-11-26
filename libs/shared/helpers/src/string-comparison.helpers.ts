@@ -168,18 +168,32 @@ const isWithinRange = (range: KilometerMarkers, marker: KilometerMarkers) => {
   );
 };
 
-// A whole marker ("km 42") is a less precise reading of the same km with decimals ("km 42,3").
+const sortedDistances = (markers: KilometerMarkers): string =>
+  markers.distances.toSorted().join(' ');
+
+// A whole marker ("km 42") is a less precise reading of the same km with decimals ("km 42,3"); a stretch has exact ends.
 const kilometerMarkersMatch = (
   a: KilometerMarkers,
   b: KilometerMarkers,
-): boolean =>
-  (a.isRange && isWithinRange(a, b)) ||
-  (b.isRange && isWithinRange(b, a)) ||
-  a.distances.length === 0 ||
-  b.distances.length === 0 ||
-  a.distances.join(' ') === b.distances.join(' ') ||
-  ((a.isWholeKilometer || b.isWholeKilometer) &&
-    a.kilometers.join(' ') === b.kilometers.join(' '));
+): boolean => {
+  if (a.distances.length === 0 || b.distances.length === 0) {
+    return true;
+  }
+
+  if (a.isRange || b.isRange) {
+    return (
+      sortedDistances(a) === sortedDistances(b) ||
+      (a.isRange && isWithinRange(a, b)) ||
+      (b.isRange && isWithinRange(b, a))
+    );
+  }
+
+  return (
+    a.distances.join(' ') === b.distances.join(' ') ||
+    ((a.isWholeKilometer || b.isWholeKilometer) &&
+      a.kilometers.join(' ') === b.kilometers.join(' '))
+  );
+};
 
 // "S/N", "S/Nº", "S/SN" and "SN" all say the address has no number, so they carry no address information.
 const NO_NUMBER_MARKER_PATTERN =
@@ -430,11 +444,12 @@ const BRAZILIAN_HIGHWAY_PREFIXES: ReadonlySet<string> = new Set([
 
 const HIGHWAY_CODE_PATTERN = /(?<![\p{L}\p{N}])(\p{L}{2})-(\d{2,3})(?!\p{N})/gu;
 
+const withoutKilometerDistances = (value: string): string =>
+  joinMeterOffsets(value).replaceAll(KILOMETER_MARKER_PATTERN, ' km ');
+
 const numbersOutsideKilometerMarkers = (value: string): string[] =>
   extractNumericTokens(
-    normalizeAddress(
-      joinMeterOffsets(value).replaceAll(KILOMETER_MARKER_PATTERN, ' km '),
-    ).split(' '),
+    normalizeAddress(withoutKilometerDistances(value)).split(' '),
   );
 
 const HIGHWAY_STREET_TYPES: ReadonlySet<string> = new Set([
@@ -522,8 +537,17 @@ export const isAddressMatch = (
   const kilometersB = normalizeKilometerMarkers(b);
   const hasKilometerMarker =
     kilometersA.distances.length > 0 || kilometersB.distances.length > 0;
-  const tokensA = normalizeAddress(a).split(' ');
-  const tokensB = normalizeAddress(b).split(' ');
+  // A stretch's distances are compared as markers, so its km numbers must not count as missing words.
+  const comparedKilometers =
+    kilometersA.distances.length > 0 && kilometersB.distances.length > 0;
+  const comparedStretch =
+    comparedKilometers && (kilometersA.isRange || kilometersB.isRange);
+  const tokensOf = (value: string): string[] =>
+    normalizeAddress(
+      comparedStretch ? withoutKilometerDistances(value) : value,
+    ).split(' ');
+  const tokensA = tokensOf(a);
+  const tokensB = tokensOf(b);
 
   if (hasKilometerMarker) {
     alignHighwayStreetTypes(tokensA, tokensB);
@@ -550,18 +574,11 @@ export const isAddressMatch = (
   }
 
   // Markers on both sides were compared above; their digits must not stand in for street numbers.
-  const comparedKilometers =
-    kilometersA.distances.length > 0 && kilometersB.distances.length > 0;
   // On a rodovia or estrada, a highway code ("SP-65") is not a street number when the other side has none besides its km marker.
   const numericTokensOf = (value: string, other: string): string[] => {
-    let numbersSource = joinMeterOffsets(value);
-
-    if (comparedKilometers) {
-      numbersSource = numbersSource.replaceAll(
-        KILOMETER_MARKER_PATTERN,
-        ' km ',
-      );
-    }
+    let numbersSource = comparedKilometers
+      ? withoutKilometerDistances(value)
+      : joinMeterOffsets(value);
 
     const [streetType] = normalizeAddress(value).split(' ');
 

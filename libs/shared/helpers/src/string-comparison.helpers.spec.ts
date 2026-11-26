@@ -636,6 +636,28 @@ describe('string-comparison.helpers', () => {
       },
       {
         expected: false,
+        first: 'Rodovia Inventada, Km 10 a Km 13, Cidade Inventada, SP',
+        second: 'Rodovia Inventada, Km 10,5 a Km 13,5, Cidade Inventada, SP',
+      },
+      {
+        expected: true,
+        first: 'Rodovia Inventada, Km 13 ao Km 10, Cidade Inventada, SP',
+        second: 'Rodovia Inventada, Km 10 ao Km 13, Cidade Inventada, SP',
+      },
+      {
+        expected: true,
+        first:
+          'BR-999 do km 10 ao km 13 (trecho anterior pertence a(o) Vila Vizinha), 1801 Bairro Norte, Cidade Inventada, PR',
+        second: 'BR-999 - do km 12, Cidade Inventada, PR',
+      },
+      {
+        expected: false,
+        first:
+          'BR-999 do km 10 ao km 13 (trecho anterior pertence a(o) Vila Vizinha), 1801 Bairro Norte, Cidade Inventada, PR',
+        second: 'BR-999 - do km 14, Cidade Inventada, PR',
+      },
+      {
+        expected: false,
         first: 'Rodovia Inventada, Km 10 Km 13, Cidade Inventada, SP',
         second: 'Rodovia Inventada, Km 12, Cidade Inventada, SP',
       },
