@@ -46,8 +46,10 @@ export interface EntityComparison extends ComparisonResult {
 
 export interface FieldComparison extends FieldComparisonBase {
   daysDiff?: null | number;
+  eventLocalDate?: null | string;
   observation?: string;
   similarity?: null | string;
+  timezone?: string;
 }
 
 export interface MtrCrossValidation {
