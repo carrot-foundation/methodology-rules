@@ -8,6 +8,7 @@ import type { DocumentAddress } from '@carrot-fndn/shared/types';
 
 import { isBrazilianStateCode } from '@carrot-fndn/shared/document-extractor';
 import {
+  aggressiveNormalize,
   dateDifferenceInDays,
   isAddressMatch,
   isNameMatch,
@@ -324,6 +325,20 @@ const buildAddressDebug = (
   };
 };
 
+// The whole-address score tolerates one missing word, which can be the city. A parsed city can
+// carry the UF or a district, so the event city's words appearing in it also count.
+const isSameCity = (extractedCity: string, eventCity: string): boolean => {
+  const extractedTokens = aggressiveNormalize(extractedCity).split(' ');
+
+  return (
+    extractedCity.trim() === '' ||
+    isNameMatch(extractedCity, eventCity).isMatch ||
+    aggressiveNormalize(eventCity)
+      .split(' ')
+      .every((token) => extractedTokens.includes(token))
+  );
+};
+
 const validateEntityAddress = (
   entityWithAddress: ExtractedEntityWithAddressInfo,
   eventAddress: DocumentAddress,
@@ -342,12 +357,10 @@ const validateEntityAddress = (
     extractedAddress,
     eventAddressString,
   );
-  // The whole-address score tolerates one missing word, which can be the city.
-  const isSameCity =
-    entityWithAddress.city.blank === true ||
-    isNameMatch(entityWithAddress.city.parsed, eventAddress.city).isMatch;
+  const extractedCity = entityWithAddress.city.parsed;
+  const sameCity = isSameCity(extractedCity, eventAddress.city);
 
-  if (isMatch && isSameCity) {
+  if (isMatch && sameCity) {
     return undefined;
   }
 
@@ -361,6 +374,15 @@ const validateEntityAddress = (
           field: 'address',
           similarity: formatScoreAsPercent(score),
         },
+        ...(sameCity
+          ? []
+          : [
+              {
+                event: eventAddress.city,
+                extracted: extractedCity,
+                field: 'city',
+              },
+            ]),
       ],
     },
   };

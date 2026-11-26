@@ -117,6 +117,25 @@ const stubEventAddress = (
   ...overrides,
 });
 
+const compareCityOfMatchingStreet = (city: string) =>
+  compareEntity(
+    stubMtrEntityWithHighAddress(
+      'Fictional Generator',
+      '11.111.111/0001-11',
+      'Rodovia Ficticia BR-999, Km 42',
+      city,
+      'SP',
+    ),
+    ['Fictional Generator'],
+    '11.111.111/0001-11',
+    entityReasonsWithAddress,
+    stubEventAddress({
+      city: 'Inventada',
+      number: '',
+      street: 'Rodovia Ficticia BR-999, Km 42',
+    }),
+  );
+
 describe('cross-validation field comparators', () => {
   describe('compareStringField', () => {
     it('should return match when values are equal', () => {
@@ -712,27 +731,25 @@ describe('cross-validation field comparators', () => {
       },
     );
 
-    it('should review a matching street in a different single-word city', () => {
-      const entity = stubMtrEntityWithHighAddress(
-        'Fictional Generator',
-        '11.111.111/0001-11',
-        'Rodovia Ficticia BR-999, Km 42',
-        'Outrolugar',
-        'SP',
-      );
-      const result = compareEntity(
-        entity,
-        ['Fictional Generator'],
-        '11.111.111/0001-11',
-        entityReasonsWithAddress,
-        stubEventAddress({
-          city: 'Inventada',
-          number: '',
-          street: 'Rodovia Ficticia BR-999, Km 42',
-        }),
-      );
+    it.each(['', 'Inventada - SP', 'Inventada UF: SP', 'Centro Inventada'])(
+      'should accept the city "%s" of a matching street',
+      (city) => {
+        expect(compareCityOfMatchingStreet(city).validation).toEqual([]);
+      },
+    );
 
-      expect(result.validation).toHaveLength(1);
+    it('should review a matching street in a different single-word city', () => {
+      expect(compareCityOfMatchingStreet('Outrolugar').validation).toEqual([
+        {
+          reviewReason: expect.objectContaining({
+            code: 'ADDRESS_MISMATCH',
+            comparedFields: [
+              expect.objectContaining({ field: 'address' }),
+              { event: 'Inventada', extracted: 'Outrolugar', field: 'city' },
+            ],
+          }),
+        },
+      ]);
     });
 
     it('should include address in debug for entity with address fields', () => {

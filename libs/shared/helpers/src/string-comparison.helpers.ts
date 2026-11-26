@@ -181,9 +181,9 @@ const kilometerMarkersMatch = (
   ((a.isWholeKilometer || b.isWholeKilometer) &&
     a.kilometers.join(' ') === b.kilometers.join(' '));
 
-// "S/N", "S/SN" and "SN" all say the address has no number, so they carry no address information.
+// "S/N", "S/Nº", "S/SN" and "SN" all say the address has no number, so they carry no address information.
 const NO_NUMBER_MARKER_PATTERN =
-  /(?<![\p{L}\p{N}])(?:s\s*\/\s*s?n|sn)(?![\p{L}\p{N}])/giu;
+  /(?<![\p{L}\p{N}])(?:s\s*\/\s*s?n|sn)[º°]?(?![\p{L}\p{N}])/giu;
 
 /**
  * Normalizes an address string for comparison.

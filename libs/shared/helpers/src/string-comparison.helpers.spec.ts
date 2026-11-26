@@ -304,12 +304,15 @@ describe('string-comparison.helpers', () => {
       expect(normalizeAddress('BR-116,2007 Bairro')).toBe('br 116 2007 bairro');
     });
 
-    it.each(['Rua Inventada, S/N', 'Rua Inventada, S/SN', 'Rua Inventada, SN'])(
-      'should drop the no-number marker in %s',
-      (address) => {
-        expect(normalizeAddress(address)).toBe('rua inventada');
-      },
-    );
+    it.each([
+      'Rua Inventada, S/N',
+      'Rua Inventada, S/Nº',
+      'Rua Inventada, s / n',
+      'Rua Inventada, S/SN',
+      'Rua Inventada, SN',
+    ])('should drop the no-number marker in %s', (address) => {
+      expect(normalizeAddress(address)).toBe('rua inventada');
+    });
 
     it('should keep words that only contain sn', () => {
       expect(normalizeAddress('Rua S/Nova, Snoopy, Sn2')).toBe(
@@ -601,9 +604,20 @@ describe('string-comparison.helpers', () => {
         second: 'RODOVIA PR 999KM,S/SN, KM 24, 3, Vila Nova, PR',
       },
       {
+        expected: true,
+        first:
+          'Rodovia Inventada, Km 10,000 ao Km 13,000, Cidade Inventada, SP',
+        second: 'Rodovia Inventada, Km 10 ate Km 13, Cidade Inventada, SP',
+      },
+      {
         expected: false,
         first: 'BR-999 do km 10,000 ao km 13,000, Cidade Inventada, PR',
         second: 'BR-999 - do km 20, Cidade Inventada, PR',
+      },
+      {
+        expected: false,
+        first: 'Rodovia Inventada, Km 10 a Km 13, Cidade Inventada, SP',
+        second: 'Rodovia Inventada, Km 9,5, Cidade Inventada, SP',
       },
       {
         expected: false,

@@ -86,6 +86,12 @@ describe('MTR shared helpers', () => {
       ).toBeUndefined();
     });
 
+    it('should not take the next line as the city when Municipio is blank', () => {
+      expect(
+        extractAddressFields('Endereco: Rua Test, 10\nMunicipio:\nUF: SP'),
+      ).toBeUndefined();
+    });
+
     it('should omit state when it is missing', () => {
       expect(
         extractAddressFields('Endereco: Rua Test\nMunicipio: City'),
