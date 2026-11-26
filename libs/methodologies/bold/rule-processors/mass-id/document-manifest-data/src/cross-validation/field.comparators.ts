@@ -328,14 +328,16 @@ const buildAddressDebug = (
 // The whole-address score tolerates one missing word, which can be the city. A parsed city can
 // carry the UF or a district, so the event city's words appearing in it also count.
 const isSameCity = (extractedCity: string, eventCity: string): boolean => {
-  const extractedTokens = aggressiveNormalize(extractedCity).split(' ');
+  const extractedTokens = new Set(
+    aggressiveNormalize(extractedCity).split(' '),
+  );
 
   return (
     extractedCity.trim() === '' ||
     isNameMatch(extractedCity, eventCity).isMatch ||
     aggressiveNormalize(eventCity)
       .split(' ')
-      .every((token) => extractedTokens.includes(token))
+      .every((token) => extractedTokens.has(token))
   );
 };
 
