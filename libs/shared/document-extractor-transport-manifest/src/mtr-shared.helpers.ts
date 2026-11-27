@@ -65,7 +65,7 @@ export const MTR_ADDRESS_PATTERNS = {
   // eslint-disable-next-line sonarjs/slow-regex
   address: /Endereco\s*:?\s*(.+)/i,
   // eslint-disable-next-line sonarjs/slow-regex
-  city: /Municipio\s*:?\s*(.+)/i,
+  city: /Municipio[^\S\n]*:?[^\S\n]*([^\s:].*)/i,
   // eslint-disable-next-line sonarjs/slow-regex
   state: /\b(?:UF|Estado)[^\S\n]*:?[^\S\n]*([A-Z]{2})\b/gi,
 } as const;

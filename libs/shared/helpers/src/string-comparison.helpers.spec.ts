@@ -304,6 +304,22 @@ describe('string-comparison.helpers', () => {
       expect(normalizeAddress('BR-116,2007 Bairro')).toBe('br 116 2007 bairro');
     });
 
+    it.each([
+      'Rua Inventada, S/N',
+      'Rua Inventada, S/Nº',
+      'Rua Inventada, s / n',
+      'Rua Inventada, S/SN',
+      'Rua Inventada, SN',
+    ])('should drop the no-number marker in %s', (address) => {
+      expect(normalizeAddress(address)).toBe('rua inventada');
+    });
+
+    it('should keep words that only contain sn', () => {
+      expect(normalizeAddress('Rua S/Nova, Snoopy, Sn2')).toBe(
+        'rua snova snoopy sn 2',
+      );
+    });
+
     it('should split route and street number joined by comma', () => {
       expect(normalizeAddress('BR-376,22591 Miringuava')).toBe(
         'br 376 22591 miringuava',
@@ -561,6 +577,95 @@ describe('string-comparison.helpers', () => {
       (first, second) => {
         expect(isAddressMatch(first, second).isMatch).toBe(false);
         expect(isAddressMatch(second, first).isMatch).toBe(false);
+      },
+    );
+
+    it.each([
+      {
+        expected: true,
+        first:
+          'BR-999 do km 10,000 ao km 13,000 (trecho anterior pertence a(o) Vila Vizinha), 1801 Bairro Norte, Cidade Inventada, PR',
+        second: 'BR-999 - do km 10, Cidade Inventada, PR',
+      },
+      {
+        expected: true,
+        first: 'Rodovia Inventada, Km 10 a Km 13, Cidade Inventada, SP',
+        second: 'Rodovia Inventada, Km 12,5, Cidade Inventada, SP',
+      },
+      {
+        expected: true,
+        first: 'Rodovia Inventada, Km 13 até Km 10, Cidade Inventada, SP',
+        second: 'Rodovia Inventada, Km 13, Cidade Inventada, SP',
+      },
+      {
+        expected: true,
+        first:
+          'RODOVIA PR 999KM,S/N SN, KM 24,3 KM 24,3 JARDIM DAS PALMAS, Vila Nova, PR',
+        second: 'RODOVIA PR 999KM,S/SN, KM 24, 3, Vila Nova, PR',
+      },
+      {
+        expected: true,
+        first:
+          'Rodovia Inventada, Km 10,000 ao Km 13,000, Cidade Inventada, SP',
+        second: 'Rodovia Inventada, Km 10 ate Km 13, Cidade Inventada, SP',
+      },
+      {
+        expected: false,
+        first: 'BR-999 do km 10,000 ao km 13,000, Cidade Inventada, PR',
+        second: 'BR-999 - do km 20, Cidade Inventada, PR',
+      },
+      {
+        expected: false,
+        first: 'Rodovia Inventada, Km 10 a Km 13, Cidade Inventada, SP',
+        second: 'Rodovia Inventada, Km 9,5, Cidade Inventada, SP',
+      },
+      {
+        expected: false,
+        first: 'Rodovia Inventada, Km 10 a Km 13, Cidade Inventada, SP',
+        second: 'Rodovia Inventada, Km 13,5, Cidade Inventada, SP',
+      },
+      {
+        expected: false,
+        first: 'BR-999 do km 10,000 ao km 13,000, Cidade Inventada, PR',
+        second: 'BR-998 - do km 10, Cidade Inventada, PR',
+      },
+      {
+        expected: false,
+        first: 'Rodovia Inventada, Km 10 a Km 13, Cidade Inventada, SP',
+        second: 'Rodovia Inventada, Km 10 a Km 14, Cidade Inventada, SP',
+      },
+      {
+        expected: false,
+        first: 'Rodovia Inventada, Km 10 a Km 13, Cidade Inventada, SP',
+        second: 'Rodovia Inventada, Km 10,5 a Km 13,5, Cidade Inventada, SP',
+      },
+      {
+        expected: true,
+        first: 'Rodovia Inventada, Km 13 ao Km 10, Cidade Inventada, SP',
+        second: 'Rodovia Inventada, Km 10 ao Km 13, Cidade Inventada, SP',
+      },
+      {
+        expected: true,
+        first:
+          'BR-999 do km 10 ao km 13 (trecho anterior pertence a(o) Vila Vizinha), 1801 Bairro Norte, Cidade Inventada, PR',
+        second: 'BR-999 - do km 12, Cidade Inventada, PR',
+      },
+      {
+        expected: false,
+        first:
+          'BR-999 do km 10 ao km 13 (trecho anterior pertence a(o) Vila Vizinha), 1801 Bairro Norte, Cidade Inventada, PR',
+        second: 'BR-999 - do km 14, Cidade Inventada, PR',
+      },
+      {
+        expected: false,
+        first: 'Rodovia Inventada, Km 10 Km 13, Cidade Inventada, SP',
+        second: 'Rodovia Inventada, Km 12, Cidade Inventada, SP',
+      },
+    ])(
+      'should compare a kilometer stretch $first and $second with match $expected',
+      ({ expected, first, second }) => {
+        expect(isAddressMatch(first, second).isMatch).toBe(expected);
+        expect(isAddressMatch(second, first).isMatch).toBe(expected);
       },
     );
 
